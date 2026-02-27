@@ -9,7 +9,8 @@
         "maia/core": "self.version",
         "maia/orm": "self.version",
         "maia/auth": "self.version",
-        "maia/cli": "self.version"
+        "maia/cli": "self.version",
+        "firebase/php-jwt": "^7.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.5"
