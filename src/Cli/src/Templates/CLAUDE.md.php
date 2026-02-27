@@ -17,7 +17,9 @@ return static function (array $vars): string {
 
 ## Development
 - Start dev server: `maia up`
-- Create components: `maia create:controller`, `maia create:model`, `maia create:service`, etc.
+- Create components: `maia create:controller`, `maia create:service`, `maia create:model`, `maia create:middleware`, `maia create:request`, `maia create:migration`, `maia create:test`
+- Run migrations: `maia migrate`, `maia migrate:rollback`, `maia migrate:status`
+- Inspect app state: `maia routes --json`, `maia describe --json`
 - Run tests: `vendor/bin/phpunit`
 
 ## Configuration
