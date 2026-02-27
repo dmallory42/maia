@@ -1,0 +1,40 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/../vendor/autoload.php';
+
+use Maia\Cli\CommandRunner;
+use Maia\Cli\Commands\CreateControllerCommand;
+use Maia\Cli\Commands\CreateMiddlewareCommand;
+use Maia\Cli\Commands\CreateMigrationCommand;
+use Maia\Cli\Commands\CreateModelCommand;
+use Maia\Cli\Commands\CreateRequestCommand;
+use Maia\Cli\Commands\CreateServiceCommand;
+use Maia\Cli\Commands\CreateTestCommand;
+use Maia\Cli\Commands\DescribeCommand;
+use Maia\Cli\Commands\MigrateCommand;
+use Maia\Cli\Commands\MigrateRollbackCommand;
+use Maia\Cli\Commands\MigrateStatusCommand;
+use Maia\Cli\Commands\NewCommand;
+use Maia\Cli\Commands\RoutesCommand;
+use Maia\Cli\Commands\UpCommand;
+
+$runner = new CommandRunner(true);
+$runner->register(new NewCommand());
+$runner->register(new UpCommand());
+$runner->register(new CreateControllerCommand());
+$runner->register(new CreateServiceCommand());
+$runner->register(new CreateModelCommand());
+$runner->register(new CreateMiddlewareCommand());
+$runner->register(new CreateRequestCommand());
+$runner->register(new CreateMigrationCommand());
+$runner->register(new CreateTestCommand());
+$runner->register(new MigrateCommand());
+$runner->register(new MigrateRollbackCommand());
+$runner->register(new MigrateStatusCommand());
+$runner->register(new RoutesCommand());
+$runner->register(new DescribeCommand());
+
+exit($runner->run($argv));

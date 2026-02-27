@@ -11,6 +11,10 @@ class CommandRunner
 
     private ?Output $lastOutput = null;
 
+    public function __construct(private bool $emitOutput = false)
+    {
+    }
+
     public function register(Command $command): void
     {
         $this->commands[$command->name()] = $command;
@@ -26,7 +30,7 @@ class CommandRunner
         $json = $this->extractFlag($tokens, '--json');
         $help = $this->extractFlag($tokens, '--help');
 
-        $output = new Output($json);
+        $output = new Output($json, $this->emitOutput);
         $this->lastOutput = $output;
 
         if ($tokens === []) {

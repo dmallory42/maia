@@ -8,7 +8,10 @@ class Output
 {
     private string $buffer = '';
 
-    public function __construct(private bool $json = false)
+    public function __construct(
+        private bool $json = false,
+        private bool $emit = false
+    )
     {
     }
 
@@ -55,5 +58,9 @@ class Output
     private function append(string $message): void
     {
         $this->buffer .= $message . PHP_EOL;
+
+        if ($this->emit) {
+            fwrite(STDOUT, $message . PHP_EOL);
+        }
     }
 }
