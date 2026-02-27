@@ -6,6 +6,7 @@ namespace Maia\Cli\Commands;
 
 use Maia\Cli\Command;
 use Maia\Cli\Output;
+use RuntimeException;
 
 class NewCommand extends Command
 {
@@ -122,9 +123,30 @@ class NewCommand extends Command
     /** @param array<string, string> $vars */
     private function renderTemplate(string $name, array $vars): string
     {
-        $templatePath = __DIR__ . '/../Templates/' . $name . '.php';
+        $basePath = __DIR__ . '/../Templates/' . $name;
 
-        $renderer = require $templatePath;
+        if (is_file($basePath)) {
+            $content = file_get_contents($basePath);
+            if (!is_string($content)) {
+                throw new RuntimeException(sprintf('Unable to read template [%s].', $basePath));
+            }
+
+            foreach ($vars as $key => $value) {
+                $content = str_replace('{{' . $key . '}}', $value, $content);
+            }
+
+            return $content;
+        }
+
+        $phpTemplatePath = $basePath . '.php';
+        if (!is_file($phpTemplatePath)) {
+            throw new RuntimeException(sprintf('Template [%s] not found.', $name));
+        }
+
+        $renderer = require $phpTemplatePath;
+        if (!is_callable($renderer)) {
+            throw new RuntimeException(sprintf('Template [%s] must return a callable.', $phpTemplatePath));
+        }
 
         return $renderer($vars);
     }

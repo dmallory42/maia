@@ -1,10 +1,4 @@
-<?php
-
-return static function (array $vars): string {
-    $project = $vars['project_name'] ?? 'my-app';
-
-    return <<<MD
-# {$project}
+# {{project_name}}
 
 ## Project Structure
 - `app/Controllers` handles HTTP orchestration.
@@ -25,5 +19,3 @@ return static function (array $vars): string {
 ## Configuration
 - Environment values are defined in `.env`.
 - Base config files live in `config/*.php`.
-MD;
-};

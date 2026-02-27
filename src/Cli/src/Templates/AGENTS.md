@@ -1,7 +1,3 @@
-<?php
-
-return static function (array $vars): string {
-    return <<<'MD'
 # AGENTS
 
 ## CLI Commands
@@ -25,5 +21,3 @@ return static function (array $vars): string {
 ## Discovery
 - Use `maia routes --json` to discover runtime endpoints.
 - Use `maia describe --json` to inspect routes, models, middleware, and config state.
-MD;
-};
