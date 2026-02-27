@@ -9,7 +9,15 @@ class QueryBuilder
     /** @var array<int, string> */
     private array $columns = ['*'];
 
-    /** @var array<int, array{column: string, operator: string, value: mixed}> */
+    /**
+     * @var array<int, array{
+     *     type: 'basic'|'in',
+     *     column: string,
+     *     operator?: string,
+     *     value?: mixed,
+     *     values?: array<int, mixed>
+     * }>
+     */
     private array $wheres = [];
 
     /** @var array<int, array{column: string, direction: string}> */
@@ -48,9 +56,34 @@ class QueryBuilder
     public function where(string $column, mixed $value, string $operator = '='): self
     {
         $this->wheres[] = [
+            'type' => 'basic',
             'column' => $column,
             'operator' => $operator,
             'value' => $value,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * @param array<int, mixed> $values
+     */
+    public function whereIn(string $column, array $values): self
+    {
+        if ($values === []) {
+            $this->wheres[] = [
+                'type' => 'in',
+                'column' => $column,
+                'values' => [],
+            ];
+
+            return $this;
+        }
+
+        $this->wheres[] = [
+            'type' => 'in',
+            'column' => $column,
+            'values' => array_values($values),
         ];
 
         return $this;
@@ -235,8 +268,21 @@ class QueryBuilder
         $params = [];
 
         foreach ($this->wheres as $where) {
-            $clauses[] = sprintf('%s %s ?', $where['column'], $where['operator']);
-            $params[] = $where['value'];
+            if ($where['type'] === 'in') {
+                $values = $where['values'] ?? [];
+                if ($values === []) {
+                    $clauses[] = '1 = 0';
+                    continue;
+                }
+
+                $placeholders = implode(', ', array_fill(0, count($values), '?'));
+                $clauses[] = sprintf('%s IN (%s)', $where['column'], $placeholders);
+                $params = array_merge($params, $values);
+                continue;
+            }
+
+            $clauses[] = sprintf('%s %s ?', $where['column'], $where['operator'] ?? '=');
+            $params[] = $where['value'] ?? null;
         }
 
         return ['WHERE ' . implode(' AND ', $clauses), $params];
