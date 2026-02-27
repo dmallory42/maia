@@ -30,10 +30,34 @@ vendor/bin/phpunit
 
 Current suite includes package-level tests plus integration tests under `tests/Integration`.
 
-Documentation coverage enforcement:
+Threshold-based unit test gate (default 95% pass rate):
+
+```bash
+composer test:threshold
+```
+
+Documentation coverage enforcement (minimum 95%):
 
 ```bash
 composer docs:coverage
+```
+
+PSR-12 linting:
+
+```bash
+composer lint
+```
+
+Enable the repository pre-commit hook to enforce the test pass-rate gate locally:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Optionally override the hook threshold:
+
+```bash
+MAIA_TEST_THRESHOLD=100 git commit -m "..."
 ```
 
 ## CLI

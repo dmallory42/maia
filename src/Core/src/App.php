@@ -197,7 +197,11 @@ class App
         /**
          * true defines a framework component for this package.
          */
-        if ($type instanceof ReflectionNamedType && !$type->isBuiltin() && is_a($type->getName(), Request::class, true)) {
+        if (
+            $type instanceof ReflectionNamedType
+            && !$type->isBuiltin()
+            && is_a($type->getName(), Request::class, true)
+        ) {
             return $request;
         }
 
@@ -256,10 +260,16 @@ class App
         $stack = array_merge($stack, $this->resolveMiddlewareEntries($this->globalMiddleware));
 
         $reflection = new ReflectionClass($match->controller);
-        $stack = array_merge($stack, $this->resolveAttributeMiddleware($reflection->getAttributes(MiddlewareAttribute::class)));
+        $stack = array_merge(
+            $stack,
+            $this->resolveAttributeMiddleware($reflection->getAttributes(MiddlewareAttribute::class))
+        );
 
         $method = $reflection->getMethod($match->method);
-        $stack = array_merge($stack, $this->resolveAttributeMiddleware($method->getAttributes(MiddlewareAttribute::class)));
+        $stack = array_merge(
+            $stack,
+            $this->resolveAttributeMiddleware($method->getAttributes(MiddlewareAttribute::class))
+        );
 
         $stack = array_merge($stack, $this->resolveMiddlewareEntries($match->middleware));
 

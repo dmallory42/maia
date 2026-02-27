@@ -20,8 +20,7 @@ class Output
     public function __construct(
         private bool $json = false,
         private bool $emit = false
-    )
-    {
+    ) {
     }
 
     /**

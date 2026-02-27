@@ -33,7 +33,8 @@ class Pipeline
         $pipeline = array_reduce(
             array_reverse($this->middleware),
             /** @param Closure(Request): Response $next */
-            fn (Closure $next, Middleware $middleware): Closure => fn (Request $req): Response => $middleware->handle($req, $next),
+            fn (Closure $next, Middleware $middleware): Closure => fn (Request $req): Response => $middleware
+                ->handle($req, $next),
             $handler
         );
 

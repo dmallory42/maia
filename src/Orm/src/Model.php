@@ -385,7 +385,10 @@ abstract class Model
 
         foreach ($models as $model) {
             $foreignValue = $model->readValue($relation['foreignKey']);
-            $model->setRelation($relationName, $foreignValue === null ? null : ($indexed[(string) $foreignValue] ?? null));
+            $model->setRelation(
+                $relationName,
+                $foreignValue === null ? null : ($indexed[(string) $foreignValue] ?? null)
+            );
         }
     }
 

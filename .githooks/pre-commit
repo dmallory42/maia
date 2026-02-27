@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(git rev-parse --show-toplevel)"
+cd "$ROOT_DIR"
+
+THRESHOLD="${MAIA_TEST_THRESHOLD:-95}"
+
+echo "Running pre-commit test gate (threshold: ${THRESHOLD}% pass rate)..."
+php tools/check-test-threshold.php --min="${THRESHOLD}"

@@ -17,8 +17,12 @@ class ValidationException extends HttpException
      * @param \Throwable|null $previous Input value.
      * @return void Output value.
      */
-    public function __construct(private array $errors, string $message = 'Validation failed', int $code = 0, ?\Throwable $previous = null)
-    {
+    public function __construct(
+        private array $errors,
+        string $message = 'Validation failed',
+        int $code = 0,
+        ?\Throwable $previous = null
+    ) {
         parent::__construct(422, $message, $code, $previous);
     }
 
