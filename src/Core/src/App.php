@@ -66,6 +66,11 @@ class App
         $this->router->registerController($class);
     }
 
+    public function container(): Container
+    {
+        return $this->container;
+    }
+
     public function addMiddleware(MiddlewareContract|string $middleware): void
     {
         $this->globalMiddleware[] = $middleware;
