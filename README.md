@@ -22,6 +22,33 @@ Implementation plan in `docs/plans/2026-02-25-maia-framework-plan.md` is fully i
 composer install
 ```
 
+## Start From Scratch (New App)
+
+```bash
+# from this framework repo
+php bin/maia new my-app
+
+cd my-app
+cp .env.example .env
+touch database/database.sqlite
+```
+
+Create your first controller scaffold:
+
+```bash
+vendor/bin/maia create:controller UserController
+```
+
+Register controllers in `routes/api.php`, then load that file from `public/index.php`.
+See full code examples in [docs/EXAMPLES.md](docs/EXAMPLES.md).
+
+Run migrations and start the app:
+
+```bash
+vendor/bin/maia migrate
+vendor/bin/maia up --port 8000
+```
+
 ## Test
 
 ```bash
@@ -93,14 +120,17 @@ JSON output is supported where relevant with `--json`.
 # scaffold an app
 php bin/maia new my-app
 
+# inside the generated app
+cd my-app
+
 # inspect routes
-php bin/maia routes --json
+vendor/bin/maia routes --json
 
 # run migrations
-php bin/maia migrate
+vendor/bin/maia migrate
 
 # start local server inside app directory
-php bin/maia up --port 8000
+vendor/bin/maia up --port 8000
 ```
 
 ## Repository Layout
@@ -112,5 +142,6 @@ src/Orm/            # ORM package
 src/Auth/           # auth/security package
 src/Cli/            # CLI package
 docs/plans/         # original design and implementation plan
+docs/EXAMPLES.md    # practical app usage examples
 tests/Integration/  # full-stack integration tests
 ```
