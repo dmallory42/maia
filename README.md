@@ -24,30 +24,56 @@ composer install
 
 ## Start From Scratch (New App)
 
+This flow gets you from an empty directory to a running API with database-backed routes.
+
+1. Scaffold a project.
+
 ```bash
 # from this framework repo
 php bin/maia new my-app
+```
 
+Why: generates a ready-to-run app skeleton (`app/`, `config/`, `routes/`, `database/`, `public/`) with Maia wired as a dependency.
+
+2. Enter the app and initialize local environment values.
+
+```bash
 cd my-app
 cp .env.example .env
+```
+
+Why: the framework loads `.env` at runtime for config like DB DSN, JWT secret, and log level.
+
+3. Create the SQLite database file used by default config.
+
+```bash
 touch database/database.sqlite
 ```
 
-Create your first controller scaffold:
+Why: default `config/database.php` points to `sqlite:database/database.sqlite`.
+
+4. Scaffold your first controller.
 
 ```bash
 vendor/bin/maia create:controller UserController
 ```
 
-Register controllers in `routes/api.php`, then load that file from `public/index.php`.
-See full code examples in [docs/EXAMPLES.md](docs/EXAMPLES.md).
+Why: creates an attribute-based controller class so you can add routes immediately.
 
-Run migrations and start the app:
+5. Register controllers in `routes/api.php`, then load that file from `public/index.php`.
+
+Why: controller classes are not auto-discovered at runtime; explicit registration keeps startup predictable.
+
+Full wiring examples are in [docs/EXAMPLES.md](docs/EXAMPLES.md).
+
+6. Run migrations and start the app.
 
 ```bash
 vendor/bin/maia migrate
 vendor/bin/maia up --port 8000
 ```
+
+Why: migrations create schema state first; `up` runs PHP's built-in server with `public/index.php` as front controller.
 
 ## Test
 
@@ -63,11 +89,15 @@ Threshold-based unit test gate (default 95% pass rate):
 composer test:threshold
 ```
 
+Use this to enforce a minimum passing rate locally and in hooks without requiring 100% green during iterative work.
+
 Documentation coverage enforcement (minimum 95%):
 
 ```bash
 composer docs:coverage
 ```
+
+Use this to keep class/method docblocks from regressing below agreed coverage.
 
 PSR-12 linting:
 
@@ -75,17 +105,23 @@ PSR-12 linting:
 composer lint
 ```
 
+Use this for consistent style and CI parity before opening a PR.
+
 Enable the repository pre-commit hook to enforce the test pass-rate gate locally:
 
 ```bash
 git config core.hooksPath .githooks
 ```
 
+This ensures `git commit` runs the threshold gate automatically.
+
 Optionally override the hook threshold:
 
 ```bash
 MAIA_TEST_THRESHOLD=100 git commit -m "..."
 ```
+
+Use this when you want stricter local enforcement for a specific change.
 
 ## CLI
 
