@@ -16,6 +16,9 @@
         <testsuite name="Cli">
             <directory>src/Cli/tests</directory>
         </testsuite>
+        <testsuite name="Integration">
+            <directory>tests/Integration</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>
