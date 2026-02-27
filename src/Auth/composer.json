@@ -1,0 +1,14 @@
+{
+    "name": "maia/auth",
+    "description": "Maia framework auth package",
+    "type": "library",
+    "require": {
+        "php": "^8.2",
+        "maia/core": "self.version"
+    },
+    "autoload": {
+        "psr-4": {
+            "Maia\\Auth\\": "src/"
+        }
+    }
+}

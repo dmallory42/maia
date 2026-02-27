@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true">
+    <testsuites>
+        <testsuite name="Core">
+            <directory>src/Core/tests</directory>
+        </testsuite>
+        <testsuite name="Orm">
+            <directory>src/Orm/tests</directory>
+        </testsuite>
+        <testsuite name="Auth">
+            <directory>src/Auth/tests</directory>
+        </testsuite>
+        <testsuite name="Cli">
+            <directory>src/Cli/tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>src/Core/src</directory>
+            <directory>src/Orm/src</directory>
+            <directory>src/Auth/src</directory>
+            <directory>src/Cli/src</directory>
+        </include>
+    </source>
+</phpunit>

@@ -1,0 +1,13 @@
+{
+    "name": "maia/core",
+    "description": "Maia framework core: router, DI container, middleware, request/response",
+    "type": "library",
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Maia\\Core\\": "src/"
+        }
+    }
+}

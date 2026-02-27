@@ -1,0 +1,39 @@
+{
+    "name": "maia/framework",
+    "description": "An opinionated, API-first PHP framework",
+    "type": "library",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^8.2",
+        "maia/core": "self.version",
+        "maia/orm": "self.version",
+        "maia/auth": "self.version",
+        "maia/cli": "self.version"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
+    },
+    "repositories": [
+        {"type": "path", "url": "src/Core"},
+        {"type": "path", "url": "src/Orm"},
+        {"type": "path", "url": "src/Auth"},
+        {"type": "path", "url": "src/Cli"}
+    ],
+    "autoload": {
+        "psr-4": {
+            "Maia\\Core\\": "src/Core/src/",
+            "Maia\\Orm\\": "src/Orm/src/",
+            "Maia\\Auth\\": "src/Auth/src/",
+            "Maia\\Cli\\": "src/Cli/src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Maia\\Core\\Tests\\": "src/Core/tests/",
+            "Maia\\Orm\\Tests\\": "src/Orm/tests/",
+            "Maia\\Auth\\Tests\\": "src/Auth/tests/",
+            "Maia\\Cli\\Tests\\": "src/Cli/tests/"
+        }
+    }
+}

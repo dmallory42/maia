@@ -1,0 +1,16 @@
+{
+    "name": "maia/cli",
+    "description": "Maia framework CLI package",
+    "type": "library",
+    "require": {
+        "php": "^8.2",
+        "maia/core": "self.version",
+        "maia/orm": "self.version",
+        "maia/auth": "self.version"
+    },
+    "autoload": {
+        "psr-4": {
+            "Maia\\Cli\\": "src/"
+        }
+    }
+}
