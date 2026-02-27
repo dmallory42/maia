@@ -9,6 +9,9 @@ use Maia\Core\Http\Request;
 use Maia\Core\Http\Response;
 use Maia\Core\Middleware\Middleware;
 
+/**
+ * RateLimit defines a framework component for this package.
+ */
 class RateLimit implements Middleware
 {
     /**
@@ -16,22 +19,43 @@ class RateLimit implements Middleware
      */
     private static array $store = [];
 
+    /**
+     * Create an instance with configured dependencies and defaults.
+     * @param int $maxRequests Input value.
+     * @param int $windowSeconds Input value.
+     * @return void Output value.
+     */
     public function __construct(
         private int $maxRequests,
         private int $windowSeconds
     ) {
     }
 
+    /**
+     * Per minute and return self.
+     * @param int $maxRequests Input value.
+     * @return self Output value.
+     */
     public static function perMinute(int $maxRequests): self
     {
         return new self($maxRequests, 60);
     }
 
+    /**
+     * Reset and return void.
+     * @return void Output value.
+     */
     public static function reset(): void
     {
         self::$store = [];
     }
 
+    /**
+     * Handle and return Response.
+     * @param Request $request Input value.
+     * @param Closure $next Input value.
+     * @return Response Output value.
+     */
     public function handle(Request $request, Closure $next): Response
     {
         $key = $this->resolveClientKey($request);
@@ -69,6 +93,11 @@ class RateLimit implements Middleware
             ->withHeader('X-RateLimit-Remaining', (string) $remaining);
     }
 
+    /**
+     * Resolve client key and return string.
+     * @param Request $request Input value.
+     * @return string Output value.
+     */
     private function resolveClientKey(Request $request): string
     {
         $forwardedFor = $request->header('X-Forwarded-For');

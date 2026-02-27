@@ -6,18 +6,35 @@ namespace Maia\Cli\Commands;
 
 use Maia\Cli\Output;
 
+/**
+ * CreateServiceCommand defines a framework component for this package.
+ */
 class CreateServiceCommand extends BaseCreateCommand
 {
+    /**
+     * Name and return string.
+     * @return string Output value.
+     */
     public function name(): string
     {
         return 'create:service';
     }
 
+    /**
+     * Description and return string.
+     * @return string Output value.
+     */
     public function description(): string
     {
         return 'Create a service class';
     }
 
+    /**
+     * Execute and return int.
+     * @param array $args Input value.
+     * @param Output $output Input value.
+     * @return int Output value.
+     */
     public function execute(array $args, Output $output): int
     {
         $name = $this->requireName($args, $output, 'service name');

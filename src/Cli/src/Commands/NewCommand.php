@@ -8,26 +8,46 @@ use Maia\Cli\Command;
 use Maia\Cli\Output;
 use RuntimeException;
 
+/**
+ * NewCommand defines a framework component for this package.
+ */
 class NewCommand extends Command
 {
+    /**
+     * Create an instance with configured dependencies and defaults.
+     * @param string|null $workspace Input value.
+     * @param bool $autoInstall Input value.
+     * @return void Output value.
+     */
     public function __construct(
         private ?string $workspace = null,
         private bool $autoInstall = true
     ) {
     }
 
+    /**
+     * Name and return string.
+     * @return string Output value.
+     */
     public function name(): string
     {
         return 'new';
     }
 
+    /**
+     * Description and return string.
+     * @return string Output value.
+     */
     public function description(): string
     {
         return 'Create a new Maia project';
     }
 
     /**
-     * @param array<int, string> $args
+     * Execute and return int.
+     * @param array $args Input value.
+     * @param Output $output Input value.
+     * @return int Output value.
      */
     public function execute(array $args, Output $output): int
     {
@@ -57,7 +77,11 @@ class NewCommand extends Command
         return 0;
     }
 
-    /** @param array<int, string> $args */
+    /**
+     * Extract project name and return string|null.
+     * @param array $args Input value.
+     * @return string|null Output value.
+     */
     private function extractProjectName(array $args): ?string
     {
         foreach ($args as $arg) {
@@ -69,6 +93,11 @@ class NewCommand extends Command
         return null;
     }
 
+    /**
+     * Target path and return string.
+     * @param string $projectName Input value.
+     * @return string Output value.
+     */
     private function targetPath(string $projectName): string
     {
         $base = $this->workspace ?? getcwd();
@@ -76,6 +105,11 @@ class NewCommand extends Command
         return rtrim((string) $base, '/') . '/' . $projectName;
     }
 
+    /**
+     * Create directories and return void.
+     * @param string $target Input value.
+     * @return void Output value.
+     */
     private function createDirectories(string $target): void
     {
         $directories = [
@@ -97,6 +131,12 @@ class NewCommand extends Command
         }
     }
 
+    /**
+     * Write files and return void.
+     * @param string $target Input value.
+     * @param string $projectName Input value.
+     * @return void Output value.
+     */
     private function writeFiles(string $target, string $projectName): void
     {
         $files = [
@@ -120,7 +160,12 @@ class NewCommand extends Command
         }
     }
 
-    /** @param array<string, string> $vars */
+    /**
+     * Render template and return string.
+     * @param string $name Input value.
+     * @param array $vars Input value.
+     * @return string Output value.
+     */
     private function renderTemplate(string $name, array $vars): string
     {
         $basePath = __DIR__ . '/../Templates/' . $name;
@@ -151,7 +196,11 @@ class NewCommand extends Command
         return $renderer($vars);
     }
 
-    /** @param array<int, string> $args */
+    /**
+     * Should run composer install and return bool.
+     * @param array $args Input value.
+     * @return bool Output value.
+     */
     private function shouldRunComposerInstall(array $args): bool
     {
         if (!$this->autoInstall) {
@@ -161,6 +210,10 @@ class NewCommand extends Command
         return !in_array('--no-install', $args, true);
     }
 
+    /**
+     * Composer available and return bool.
+     * @return bool Output value.
+     */
     private function composerAvailable(): bool
     {
         $result = shell_exec('command -v composer');
@@ -168,6 +221,12 @@ class NewCommand extends Command
         return is_string($result) && trim($result) !== '';
     }
 
+    /**
+     * Run composer install and return void.
+     * @param string $path Input value.
+     * @param Output $output Input value.
+     * @return void Output value.
+     */
     private function runComposerInstall(string $path, Output $output): void
     {
         $command = sprintf('cd %s && composer install', escapeshellarg($path));
@@ -179,6 +238,11 @@ class NewCommand extends Command
         }
     }
 
+    /**
+     * Config app and return string.
+     * @param string $projectName Input value.
+     * @return string Output value.
+     */
     private function configApp(string $projectName): string
     {
         return <<<PHP
@@ -194,6 +258,10 @@ return [
 PHP;
     }
 
+    /**
+     * Config database and return string.
+     * @return string Output value.
+     */
     private function configDatabase(): string
     {
         return <<<'PHP'
@@ -207,6 +275,10 @@ return [
 PHP;
     }
 
+    /**
+     * Config auth and return string.
+     * @return string Output value.
+     */
     private function configAuth(): string
     {
         return <<<'PHP'
@@ -219,6 +291,10 @@ return [
 PHP;
     }
 
+    /**
+     * Config cors and return string.
+     * @return string Output value.
+     */
     private function configCors(): string
     {
         return <<<'PHP'
@@ -232,6 +308,10 @@ return [
 PHP;
     }
 
+    /**
+     * Config logging and return string.
+     * @return string Output value.
+     */
     private function configLogging(): string
     {
         return <<<'PHP'
@@ -244,6 +324,10 @@ return [
 PHP;
     }
 
+    /**
+     * Config middleware and return string.
+     * @return string Output value.
+     */
     private function configMiddleware(): string
     {
         return <<<'PHP'
@@ -255,6 +339,10 @@ return [
 PHP;
     }
 
+    /**
+     * Routes api and return string.
+     * @return string Output value.
+     */
     private function routesApi(): string
     {
         return <<<'PHP'
@@ -266,6 +354,10 @@ PHP;
 PHP;
     }
 
+    /**
+     * Maia manifest and return string.
+     * @return string Output value.
+     */
     private function maiaManifest(): string
     {
         $manifest = [

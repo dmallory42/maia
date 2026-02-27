@@ -30,6 +30,12 @@ vendor/bin/phpunit
 
 Current suite includes package-level tests plus integration tests under `tests/Integration`.
 
+Documentation coverage enforcement:
+
+```bash
+composer docs:coverage
+```
+
 ## CLI
 
 The repo ships a binary entrypoint:

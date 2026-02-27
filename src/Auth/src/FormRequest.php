@@ -7,15 +7,24 @@ namespace Maia\Auth;
 use Maia\Core\Exceptions\ValidationException;
 use Maia\Core\Http\Request;
 
+/**
+ * FormRequest defines a framework component for this package.
+ */
 abstract class FormRequest extends Request
 {
     /** @var array<string, mixed> */
     private array $validatedData = [];
 
     /**
-     * @param array<string, mixed> $query
-     * @param array<string, string> $headers
-     * @param array<string, string> $routeParams
+     * Create an instance with configured dependencies and defaults.
+     * @param string $method Input value.
+     * @param string $path Input value.
+     * @param array $query Input value.
+     * @param array $headers Input value.
+     * @param string|null $body Input value.
+     * @param array $routeParams Input value.
+     * @param Validator|null $validator Input value.
+     * @return void Output value.
      */
     public function __construct(
         string $method,
@@ -31,15 +40,26 @@ abstract class FormRequest extends Request
         $this->validateResolved($validator ?? new Validator());
     }
 
-    /** @return array<string, string|array<int, string>> */
+    /**
+     * Rules and return array.
+     * @return array Output value.
+     */
     abstract protected function rules(): array;
 
-    /** @return array<string, mixed> */
+    /**
+     * Validated and return array.
+     * @return array Output value.
+     */
     public function validated(): array
     {
         return $this->validatedData;
     }
 
+    /**
+     * Validate resolved and return void.
+     * @param Validator $validator Input value.
+     * @return void Output value.
+     */
     private function validateResolved(Validator $validator): void
     {
         $payload = $this->body();

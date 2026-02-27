@@ -7,8 +7,17 @@ namespace Maia\Orm\Attributes;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
+/**
+ * HasMany defines a framework component for this package.
+ */
 class HasMany
 {
+    /**
+     * Create an instance with configured dependencies and defaults.
+     * @param string $relatedClass Input value.
+     * @param string|null $foreignKey Input value.
+     * @return void Output value.
+     */
     public function __construct(
         public string $relatedClass,
         public ?string $foreignKey = null

@@ -7,19 +7,37 @@ namespace Maia\Core\Testing;
 use Maia\Core\Http\Response;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
+/**
+ * TestResponse defines a framework component for this package.
+ */
 class TestResponse
 {
+    /**
+     * Create an instance with configured dependencies and defaults.
+     * @param Response $response Input value.
+     * @param PHPUnitTestCase $testCase Input value.
+     * @return void Output value.
+     */
     public function __construct(
         private Response $response,
         private PHPUnitTestCase $testCase
     ) {
     }
 
+    /**
+     * Response and return Response.
+     * @return Response Output value.
+     */
     public function response(): Response
     {
         return $this->response;
     }
 
+    /**
+     * Assert status and return self.
+     * @param int $status Input value.
+     * @return self Output value.
+     */
     public function assertStatus(int $status): self
     {
         $this->testCase->assertSame($status, $this->response->status());
@@ -27,7 +45,11 @@ class TestResponse
         return $this;
     }
 
-    /** @param array<int|string, mixed> $structure */
+    /**
+     * Assert json structure and return self.
+     * @param array $structure Input value.
+     * @return self Output value.
+     */
     public function assertJsonStructure(array $structure): self
     {
         $decoded = $this->json();
@@ -36,7 +58,10 @@ class TestResponse
         return $this;
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * Json and return array.
+     * @return array Output value.
+     */
     public function json(): array
     {
         $decoded = json_decode($this->response->body(), true);
@@ -45,8 +70,10 @@ class TestResponse
     }
 
     /**
-     * @param mixed $payload
-     * @param array<int|string, mixed> $structure
+     * Assert structure and return void.
+     * @param mixed $payload Input value.
+     * @param array $structure Input value.
+     * @return void Output value.
      */
     private function assertStructure(mixed $payload, array $structure): void
     {

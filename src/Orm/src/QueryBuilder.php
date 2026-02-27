@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Maia\Orm;
 
+/**
+ * QueryBuilder defines a framework component for this package.
+ */
 class QueryBuilder
 {
     /** @var array<int, string> */
@@ -31,17 +34,34 @@ class QueryBuilder
 
     private ?string $modelClass = null;
 
+    /**
+     * Create an instance with configured dependencies and defaults.
+     * @param string $table Input value.
+     * @param Connection $connection Input value.
+     * @return void Output value.
+     */
     private function __construct(
         private string $table,
         private Connection $connection
     ) {
     }
 
+    /**
+     * Table and return self.
+     * @param string $table Input value.
+     * @param Connection $connection Input value.
+     * @return self Output value.
+     */
     public static function table(string $table, Connection $connection): self
     {
         return new self($table, $connection);
     }
 
+    /**
+     * Select and return self.
+     * @param string... $columns Input value.
+     * @return self Output value.
+     */
     public function select(string ...$columns): self
     {
         if ($columns === []) {
@@ -53,6 +73,13 @@ class QueryBuilder
         return $this;
     }
 
+    /**
+     * Where and return self.
+     * @param string $column Input value.
+     * @param mixed $value Input value.
+     * @param string $operator Input value.
+     * @return self Output value.
+     */
     public function where(string $column, mixed $value, string $operator = '='): self
     {
         $this->wheres[] = [
@@ -66,7 +93,10 @@ class QueryBuilder
     }
 
     /**
-     * @param array<int, mixed> $values
+     * Where in and return self.
+     * @param string $column Input value.
+     * @param array $values Input value.
+     * @return self Output value.
      */
     public function whereIn(string $column, array $values): self
     {
@@ -89,6 +119,12 @@ class QueryBuilder
         return $this;
     }
 
+    /**
+     * Order by and return self.
+     * @param string $column Input value.
+     * @param string $direction Input value.
+     * @return self Output value.
+     */
     public function orderBy(string $column, string $direction = 'asc'): self
     {
         $direction = strtoupper($direction);
@@ -100,6 +136,11 @@ class QueryBuilder
         return $this;
     }
 
+    /**
+     * Limit and return self.
+     * @param int $limit Input value.
+     * @return self Output value.
+     */
     public function limit(int $limit): self
     {
         $this->limitValue = max(0, $limit);
@@ -107,6 +148,11 @@ class QueryBuilder
         return $this;
     }
 
+    /**
+     * Offset and return self.
+     * @param int $offset Input value.
+     * @return self Output value.
+     */
     public function offset(int $offset): self
     {
         $this->offsetValue = max(0, $offset);
@@ -114,6 +160,11 @@ class QueryBuilder
         return $this;
     }
 
+    /**
+     * With and return self.
+     * @param string... $relations Input value.
+     * @return self Output value.
+     */
     public function with(string ...$relations): self
     {
         $this->relations = array_values(array_unique(array_merge($this->relations, $relations)));
@@ -121,6 +172,11 @@ class QueryBuilder
         return $this;
     }
 
+    /**
+     * For model and return self.
+     * @param string $modelClass Input value.
+     * @return self Output value.
+     */
     public function forModel(string $modelClass): self
     {
         $this->modelClass = $modelClass;
@@ -128,7 +184,10 @@ class QueryBuilder
         return $this;
     }
 
-    /** @return array<int, mixed> */
+    /**
+     * Get and return array.
+     * @return array Output value.
+     */
     public function get(): array
     {
         [$sql, $params] = $this->compileSelect();
@@ -141,6 +200,10 @@ class QueryBuilder
         return $this->hydrateModels($rows);
     }
 
+    /**
+     * First and return mixed.
+     * @return mixed Output value.
+     */
     public function first(): mixed
     {
         $clone = clone $this;
@@ -150,11 +213,20 @@ class QueryBuilder
         return $rows[0] ?? null;
     }
 
+    /**
+     * Find and return mixed.
+     * @param int|string $id Input value.
+     * @return mixed Output value.
+     */
     public function find(int|string $id): mixed
     {
         return $this->where('id', $id)->first();
     }
 
+    /**
+     * Count and return int.
+     * @return int Output value.
+     */
     public function count(): int
     {
         $clone = clone $this;
@@ -169,7 +241,11 @@ class QueryBuilder
         return (int) ($rows[0]['aggregate'] ?? 0);
     }
 
-    /** @param array<string, mixed> $data */
+    /**
+     * Insert and return int.
+     * @param array $data Input value.
+     * @return int Output value.
+     */
     public function insert(array $data): int
     {
         if ($data === []) {
@@ -186,7 +262,11 @@ class QueryBuilder
         return (int) $this->connection->lastInsertId();
     }
 
-    /** @param array<string, mixed> $data */
+    /**
+     * Update and return int.
+     * @param array $data Input value.
+     * @return int Output value.
+     */
     public function update(array $data): int
     {
         if ($data === []) {
@@ -212,6 +292,10 @@ class QueryBuilder
         return $this->connection->execute($sql, $params);
     }
 
+    /**
+     * Delete and return int.
+     * @return int Output value.
+     */
     public function delete(): int
     {
         $sql = sprintf('DELETE FROM %s', $this->table);
@@ -225,7 +309,8 @@ class QueryBuilder
     }
 
     /**
-     * @return array{0: string, 1: array<int, mixed>}
+     * Compile select and return array.
+     * @return array Output value.
      */
     private function compileSelect(): array
     {
@@ -256,7 +341,8 @@ class QueryBuilder
     }
 
     /**
-     * @return array{0: string, 1: array<int, mixed>}
+     * Compile where clause and return array.
+     * @return array Output value.
      */
     private function compileWhereClause(): array
     {
@@ -289,8 +375,9 @@ class QueryBuilder
     }
 
     /**
-     * @param array<int, array<string, mixed>> $rows
-     * @return array<int, mixed>
+     * Hydrate models and return array.
+     * @param array $rows Input value.
+     * @return array Output value.
      */
     private function hydrateModels(array $rows): array
     {

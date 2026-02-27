@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Maia\Orm\Schema;
 
+/**
+ * Table defines a framework component for this package.
+ */
 class Table
 {
     /**
@@ -24,6 +27,11 @@ class Table
 
     private ?int $lastColumnIndex = null;
 
+    /**
+     * Id and return self.
+     * @param string $name Input value.
+     * @return self Output value.
+     */
     public function id(string $name = 'id'): self
     {
         $this->columns[] = [
@@ -41,26 +49,51 @@ class Table
         return $this;
     }
 
+    /**
+     * String and return self.
+     * @param string $name Input value.
+     * @param int $length Input value.
+     * @return self Output value.
+     */
     public function string(string $name, int $length = 255): self
     {
         return $this->addColumn($name, sprintf('VARCHAR(%d)', $length));
     }
 
+    /**
+     * Integer and return self.
+     * @param string $name Input value.
+     * @return self Output value.
+     */
     public function integer(string $name): self
     {
         return $this->addColumn($name, 'INTEGER');
     }
 
+    /**
+     * Boolean and return self.
+     * @param string $name Input value.
+     * @return self Output value.
+     */
     public function boolean(string $name): self
     {
         return $this->addColumn($name, 'INTEGER');
     }
 
+    /**
+     * Text and return self.
+     * @param string $name Input value.
+     * @return self Output value.
+     */
     public function text(string $name): self
     {
         return $this->addColumn($name, 'TEXT');
     }
 
+    /**
+     * Timestamps and return self.
+     * @return self Output value.
+     */
     public function timestamps(): self
     {
         $this->addColumn('created_at', 'DATETIME');
@@ -69,6 +102,11 @@ class Table
         return $this;
     }
 
+    /**
+     * Unique and return self.
+     * @param string|null $column Input value.
+     * @return self Output value.
+     */
     public function unique(?string $column = null): self
     {
         if ($column !== null) {
@@ -93,6 +131,10 @@ class Table
         return $this;
     }
 
+    /**
+     * Nullable and return self.
+     * @return self Output value.
+     */
     public function nullable(): self
     {
         if ($this->lastColumnIndex !== null) {
@@ -102,6 +144,11 @@ class Table
         return $this;
     }
 
+    /**
+     * To create sql and return string.
+     * @param string $table Input value.
+     * @return string Output value.
+     */
     public function toCreateSql(string $table): string
     {
         $parts = [];
@@ -139,6 +186,12 @@ class Table
         return sprintf('CREATE TABLE IF NOT EXISTS `%s` (%s)', $table, implode(', ', $parts));
     }
 
+    /**
+     * Add column and return self.
+     * @param string $name Input value.
+     * @param string $type Input value.
+     * @return self Output value.
+     */
     private function addColumn(string $name, string $type): self
     {
         $this->columns[] = [
@@ -156,6 +209,11 @@ class Table
         return $this;
     }
 
+    /**
+     * Format default and return string.
+     * @param mixed $value Input value.
+     * @return string Output value.
+     */
     private function formatDefault(mixed $value): string
     {
         if (is_bool($value)) {

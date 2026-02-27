@@ -4,20 +4,29 @@ declare(strict_types=1);
 
 namespace Maia\Auth;
 
+/**
+ * Validator defines a framework component for this package.
+ */
 class Validator
 {
     /** @var callable(string, string, mixed): bool */
     private $uniqueChecker;
 
+    /**
+     * Create an instance with configured dependencies and defaults.
+     * @param callable|null $uniqueChecker Input value.
+     * @return void Output value.
+     */
     public function __construct(?callable $uniqueChecker = null)
     {
         $this->uniqueChecker = $uniqueChecker ?? static fn (string $table, string $field, mixed $value): bool => true;
     }
 
     /**
-     * @param array<string, mixed> $data
-     * @param array<string, string|array<int, string>> $rules
-     * @return array<string, array<int, string>>
+     * Validate and return array.
+     * @param array $data Input value.
+     * @param array $rules Input value.
+     * @return array Output value.
      */
     public function validate(array $data, array $rules): array
     {
@@ -57,8 +66,9 @@ class Validator
     }
 
     /**
-     * @param string|array<int, string> $ruleSet
-     * @return array<int, array{name: string, argument: string|null}>
+     * Parse rules and return array.
+     * @param string|array $ruleSet Input value.
+     * @return array Output value.
      */
     private function parseRules(string|array $ruleSet): array
     {
@@ -74,21 +84,44 @@ class Validator
         }, $rules);
     }
 
+    /**
+     * Has value and return bool.
+     * @param mixed $value Input value.
+     * @return bool Output value.
+     */
     private function hasValue(mixed $value): bool
     {
         return !($value === null || $value === '');
     }
 
+    /**
+     * Validate required and return string|null.
+     * @param string $field Input value.
+     * @param mixed $value Input value.
+     * @return string|null Output value.
+     */
     private function validateRequired(string $field, mixed $value): ?string
     {
         return $this->hasValue($value) ? null : sprintf('The %s field is required.', $field);
     }
 
+    /**
+     * Validate string and return string|null.
+     * @param string $field Input value.
+     * @param mixed $value Input value.
+     * @return string|null Output value.
+     */
     private function validateString(string $field, mixed $value): ?string
     {
         return is_string($value) ? null : sprintf('The %s field must be a string.', $field);
     }
 
+    /**
+     * Validate email and return string|null.
+     * @param string $field Input value.
+     * @param mixed $value Input value.
+     * @return string|null Output value.
+     */
     private function validateEmail(string $field, mixed $value): ?string
     {
         if (!is_string($value) || filter_var($value, FILTER_VALIDATE_EMAIL) === false) {
@@ -98,6 +131,12 @@ class Validator
         return null;
     }
 
+    /**
+     * Validate integer and return string|null.
+     * @param string $field Input value.
+     * @param mixed $value Input value.
+     * @return string|null Output value.
+     */
     private function validateInteger(string $field, mixed $value): ?string
     {
         if (is_int($value)) {
@@ -111,6 +150,12 @@ class Validator
         return sprintf('The %s field must be an integer.', $field);
     }
 
+    /**
+     * Validate boolean and return string|null.
+     * @param string $field Input value.
+     * @param mixed $value Input value.
+     * @return string|null Output value.
+     */
     private function validateBoolean(string $field, mixed $value): ?string
     {
         if (is_bool($value)) {
@@ -120,6 +165,13 @@ class Validator
         return sprintf('The %s field must be a boolean.', $field);
     }
 
+    /**
+     * Validate min and return string|null.
+     * @param string $field Input value.
+     * @param mixed $value Input value.
+     * @param string|null $argument Input value.
+     * @return string|null Output value.
+     */
     private function validateMin(string $field, mixed $value, ?string $argument): ?string
     {
         if ($argument === null || !is_numeric($argument)) {
@@ -139,6 +191,13 @@ class Validator
         return null;
     }
 
+    /**
+     * Validate max and return string|null.
+     * @param string $field Input value.
+     * @param mixed $value Input value.
+     * @param string|null $argument Input value.
+     * @return string|null Output value.
+     */
     private function validateMax(string $field, mixed $value, ?string $argument): ?string
     {
         if ($argument === null || !is_numeric($argument)) {
@@ -158,6 +217,13 @@ class Validator
         return null;
     }
 
+    /**
+     * Validate unique and return string|null.
+     * @param string $field Input value.
+     * @param mixed $value Input value.
+     * @param string|null $argument Input value.
+     * @return string|null Output value.
+     */
     private function validateUnique(string $field, mixed $value, ?string $argument): ?string
     {
         if ($argument === null) {

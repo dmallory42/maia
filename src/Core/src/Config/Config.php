@@ -4,10 +4,18 @@ declare(strict_types=1);
 
 namespace Maia\Core\Config;
 
+/**
+ * Config defines a framework component for this package.
+ */
 class Config
 {
     private array $data = [];
 
+    /**
+     * Create an instance with configured dependencies and defaults.
+     * @param string $configDir Input value.
+     * @return void Output value.
+     */
     public function __construct(string $configDir)
     {
         if (!is_dir($configDir)) {
@@ -25,6 +33,12 @@ class Config
         }
     }
 
+    /**
+     * Get and return mixed.
+     * @param string $key Input value.
+     * @param mixed $default Input value.
+     * @return mixed Output value.
+     */
     public function get(string $key, mixed $default = null): mixed
     {
         $parts = explode('.', $key);

@@ -24,11 +24,23 @@ use ReflectionParameter;
 use RuntimeException;
 use Throwable;
 
+/**
+ * App defines a framework component for this package.
+ */
 class App
 {
     /** @var array<int, MiddlewareContract|string> */
     private array $globalMiddleware = [];
 
+    /**
+     * Create an instance with configured dependencies and defaults.
+     * @param Container $container Input value.
+     * @param Router $router Input value.
+     * @param Config $config Input value.
+     * @param Logger $logger Input value.
+     * @param ExceptionHandler $exceptionHandler Input value.
+     * @return void Output value.
+     */
     private function __construct(
         private Container $container,
         private Router $router,
@@ -38,6 +50,12 @@ class App
     ) {
     }
 
+    /**
+     * Create and return self.
+     * @param string|null $configDir Input value.
+     * @param string|null $envFile Input value.
+     * @return self Output value.
+     */
     public static function create(?string $configDir = null, ?string $envFile = null): self
     {
         if ($envFile !== null) {
@@ -61,21 +79,40 @@ class App
         return new self($container, $router, $config, $logger, $exceptionHandler);
     }
 
+    /**
+     * Register controller and return void.
+     * @param string $class Input value.
+     * @return void Output value.
+     */
     public function registerController(string $class): void
     {
         $this->router->registerController($class);
     }
 
+    /**
+     * Container and return Container.
+     * @return Container Output value.
+     */
     public function container(): Container
     {
         return $this->container;
     }
 
+    /**
+     * Add middleware and return void.
+     * @param MiddlewareContract|string $middleware Input value.
+     * @return void Output value.
+     */
     public function addMiddleware(MiddlewareContract|string $middleware): void
     {
         $this->globalMiddleware[] = $middleware;
     }
 
+    /**
+     * Handle and return Response.
+     * @param Request $request Input value.
+     * @return Response Output value.
+     */
     public function handle(Request $request): Response
     {
         try {
@@ -102,6 +139,12 @@ class App
         }
     }
 
+    /**
+     * Dispatch and return Response.
+     * @param RouteMatch $match Input value.
+     * @param Request $request Input value.
+     * @return Response Output value.
+     */
     private function dispatch(RouteMatch $match, Request $request): Response
     {
         $controller = $this->container->resolve($match->controller);
@@ -118,8 +161,11 @@ class App
     }
 
     /**
-     * @param array<string, string> $routeParams
-     * @return array<int, mixed>
+     * Resolve method arguments and return array.
+     * @param ReflectionMethod $method Input value.
+     * @param Request $request Input value.
+     * @param array $routeParams Input value.
+     * @return array Output value.
      */
     private function resolveMethodArguments(ReflectionMethod $method, Request $request, array $routeParams): array
     {
@@ -133,7 +179,12 @@ class App
     }
 
     /**
-     * @param array<string, string> $routeParams
+     * Resolve method parameter and return mixed.
+     * @param ReflectionParameter $parameter Input value.
+     * @param Request $request Input value.
+     * @param array $routeParams Input value.
+     * @param ReflectionMethod $method Input value.
+     * @return mixed Output value.
      */
     private function resolveMethodParameter(
         ReflectionParameter $parameter,
@@ -143,6 +194,9 @@ class App
     ): mixed {
         $type = $parameter->getType();
 
+        /**
+         * true defines a framework component for this package.
+         */
         if ($type instanceof ReflectionNamedType && !$type->isBuiltin() && is_a($type->getName(), Request::class, true)) {
             return $request;
         }
@@ -170,6 +224,12 @@ class App
         );
     }
 
+    /**
+     * Cast route parameter and return mixed.
+     * @param string $value Input value.
+     * @param \ReflectionType|null $type Input value.
+     * @return mixed Output value.
+     */
     private function castRouteParameter(string $value, \ReflectionType|null $type): mixed
     {
         if (!$type instanceof ReflectionNamedType || !$type->isBuiltin()) {
@@ -185,7 +245,11 @@ class App
         };
     }
 
-    /** @return array<int, MiddlewareContract> */
+    /**
+     * Resolve middleware stack and return array.
+     * @param RouteMatch $match Input value.
+     * @return array Output value.
+     */
     private function resolveMiddlewareStack(RouteMatch $match): array
     {
         $stack = [];
@@ -203,8 +267,9 @@ class App
     }
 
     /**
-     * @param array<int, object> $attributes
-     * @return array<int, MiddlewareContract>
+     * Resolve attribute middleware and return array.
+     * @param array $attributes Input value.
+     * @return array Output value.
      */
     private function resolveAttributeMiddleware(array $attributes): array
     {
@@ -223,8 +288,9 @@ class App
     }
 
     /**
-     * @param array<int, MiddlewareContract|string> $entries
-     * @return array<int, MiddlewareContract>
+     * Resolve middleware entries and return array.
+     * @param array $entries Input value.
+     * @return array Output value.
      */
     private function resolveMiddlewareEntries(array $entries): array
     {
@@ -252,6 +318,11 @@ class App
         return $resolved;
     }
 
+    /**
+     * Resolve debug flag and return bool.
+     * @param Config $config Input value.
+     * @return bool Output value.
+     */
     private static function resolveDebugFlag(Config $config): bool
     {
         $fromEnv = self::boolFromString(Env::get('APP_DEBUG'));
@@ -262,6 +333,11 @@ class App
         return (bool) $config->get('app.debug', false);
     }
 
+    /**
+     * Build logger and return Logger.
+     * @param Config $config Input value.
+     * @return Logger Output value.
+     */
     private static function buildLogger(Config $config): Logger
     {
         $level = (string) $config->get('logging.level', 'info');
@@ -282,6 +358,11 @@ class App
         return Logger::null();
     }
 
+    /**
+     * Bool from string and return bool|null.
+     * @param string|null $value Input value.
+     * @return bool|null Output value.
+     */
     private static function boolFromString(?string $value): ?bool
     {
         if ($value === null) {

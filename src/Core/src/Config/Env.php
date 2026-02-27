@@ -4,10 +4,18 @@ declare(strict_types=1);
 
 namespace Maia\Core\Config;
 
+/**
+ * Env defines a framework component for this package.
+ */
 class Env
 {
     private static array $values = [];
 
+    /**
+     * Load and return void.
+     * @param string $path Input value.
+     * @return void Output value.
+     */
     public static function load(string $path): void
     {
         self::$values = [];
@@ -46,11 +54,21 @@ class Env
         }
     }
 
+    /**
+     * Get and return string|null.
+     * @param string $key Input value.
+     * @param string|null $default Input value.
+     * @return string|null Output value.
+     */
     public static function get(string $key, ?string $default = null): ?string
     {
         return self::$values[$key] ?? $default;
     }
 
+    /**
+     * Reset and return void.
+     * @return void Output value.
+     */
     public static function reset(): void
     {
         self::$values = [];

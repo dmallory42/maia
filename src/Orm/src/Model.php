@@ -12,6 +12,9 @@ use ReflectionNamedType;
 use ReflectionProperty;
 use RuntimeException;
 
+/**
+ * Model defines a framework component for this package.
+ */
 abstract class Model
 {
     protected static ?Connection $connection = null;
@@ -22,17 +25,31 @@ abstract class Model
     /** @var array<string, mixed> */
     protected array $relationCache = [];
 
+    /**
+     * Set connection and return void.
+     * @param Connection $connection Input value.
+     * @return void Output value.
+     */
     public static function setConnection(Connection $connection): void
     {
         static::$connection = $connection;
     }
 
+    /**
+     * Query and return QueryBuilder.
+     * @return QueryBuilder Output value.
+     */
     public static function query(): QueryBuilder
     {
         return QueryBuilder::table(static::tableName(), static::connection())
             ->forModel(static::class);
     }
 
+    /**
+     * Find and return static|null.
+     * @param int|string $id Input value.
+     * @return static|null Output value.
+     */
     public static function find(int|string $id): ?static
     {
         $result = static::query()->where(static::primaryKey(), $id)->first();
@@ -40,7 +57,11 @@ abstract class Model
         return $result instanceof static ? $result : null;
     }
 
-    /** @param array<string, mixed> $data */
+    /**
+     * Create and return static.
+     * @param array $data Input value.
+     * @return static Output value.
+     */
     public static function create(array $data): static
     {
         $id = static::query()->insert($data);
@@ -55,6 +76,10 @@ abstract class Model
         return static::hydrate($data);
     }
 
+    /**
+     * Save and return bool.
+     * @return bool Output value.
+     */
     public function save(): bool
     {
         $primaryKey = static::primaryKey();
@@ -81,7 +106,9 @@ abstract class Model
     }
 
     /**
-     * @param array<string, mixed> $row
+     * Hydrate and return static.
+     * @param array $row Input value.
+     * @return static Output value.
      */
     public static function hydrate(array $row): static
     {
@@ -103,8 +130,10 @@ abstract class Model
     }
 
     /**
-     * @param array<int, self> $models
-     * @param array<int, string> $relations
+     * Eager load and return void.
+     * @param array $models Input value.
+     * @param array $relations Input value.
+     * @return void Output value.
      */
     public static function eagerLoad(array $models, array $relations): void
     {
@@ -113,6 +142,10 @@ abstract class Model
         }
     }
 
+    /**
+     * Table name and return string.
+     * @return string Output value.
+     */
     public static function tableName(): string
     {
         $reflection = new ReflectionClass(static::class);
@@ -128,11 +161,20 @@ abstract class Model
         return strtolower($reflection->getShortName()) . 's';
     }
 
+    /**
+     * Primary key and return string.
+     * @return string Output value.
+     */
     public static function primaryKey(): string
     {
         return 'id';
     }
 
+    /**
+     * __get and return mixed.
+     * @param string $name Input value.
+     * @return mixed Output value.
+     */
     public function __get(string $name): mixed
     {
         if (array_key_exists($name, $this->relationCache)) {
@@ -151,11 +193,21 @@ abstract class Model
         return null;
     }
 
+    /**
+     * __set and return void.
+     * @param string $name Input value.
+     * @param mixed $value Input value.
+     * @return void Output value.
+     */
     public function __set(string $name, mixed $value): void
     {
         $this->attributes[$name] = $value;
     }
 
+    /**
+     * Connection and return Connection.
+     * @return Connection Output value.
+     */
     protected static function connection(): Connection
     {
         if (static::$connection === null) {
@@ -165,7 +217,10 @@ abstract class Model
         return static::$connection;
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * Extract persistable data and return array.
+     * @return array Output value.
+     */
     private function extractPersistableData(): array
     {
         $data = $this->attributes;
@@ -197,6 +252,11 @@ abstract class Model
         return $data;
     }
 
+    /**
+     * Read value and return mixed.
+     * @param string $name Input value.
+     * @return mixed Output value.
+     */
     private function readValue(string $name): mixed
     {
         if (array_key_exists($name, $this->attributes)) {
@@ -217,7 +277,10 @@ abstract class Model
     }
 
     /**
-     * @param array{type: 'hasMany'|'belongsTo', relatedClass: class-string<Model>, foreignKey: string} $relation
+     * Load relation and return mixed.
+     * @param string $name Input value.
+     * @param array $relation Input value.
+     * @return mixed Output value.
      */
     private function loadRelation(string $name, array $relation): mixed
     {
@@ -239,7 +302,10 @@ abstract class Model
     }
 
     /**
-     * @param array<int, self> $models
+     * Eager load relation and return void.
+     * @param array $models Input value.
+     * @param string $relationName Input value.
+     * @return void Output value.
      */
     private static function eagerLoadRelation(array $models, string $relationName): void
     {
@@ -324,7 +390,9 @@ abstract class Model
     }
 
     /**
-     * @return array{type: 'hasMany'|'belongsTo', relatedClass: class-string<Model>, foreignKey: string}|null
+     * Relation definition and return array|null.
+     * @param string $name Input value.
+     * @return array|null Output value.
      */
     private static function relationDefinition(string $name): ?array
     {
@@ -361,6 +429,12 @@ abstract class Model
         return null;
     }
 
+    /**
+     * Set relation and return void.
+     * @param string $name Input value.
+     * @param mixed $value Input value.
+     * @return void Output value.
+     */
     private function setRelation(string $name, mixed $value): void
     {
         $this->relationCache[$name] = $value;
@@ -403,12 +477,23 @@ abstract class Model
         $property->setValue($this, $value);
     }
 
+    /**
+     * Property has relationship attribute and return bool.
+     * @param ReflectionProperty $property Input value.
+     * @return bool Output value.
+     */
     private static function propertyHasRelationshipAttribute(ReflectionProperty $property): bool
     {
         return $property->getAttributes(HasMany::class) !== []
             || $property->getAttributes(BelongsTo::class) !== [];
     }
 
+    /**
+     * Cast value for property and return mixed.
+     * @param ReflectionProperty $property Input value.
+     * @param mixed $value Input value.
+     * @return mixed Output value.
+     */
     private static function castValueForProperty(ReflectionProperty $property, mixed $value): mixed
     {
         $type = $property->getType();
@@ -425,6 +510,11 @@ abstract class Model
         };
     }
 
+    /**
+     * Infer foreign key and return string.
+     * @param string $class Input value.
+     * @return string Output value.
+     */
     private static function inferForeignKey(string $class): string
     {
         $reflection = new ReflectionClass($class);

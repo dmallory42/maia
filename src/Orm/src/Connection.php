@@ -7,12 +7,20 @@ namespace Maia\Orm;
 use PDO;
 use PDOStatement;
 
+/**
+ * Connection defines a framework component for this package.
+ */
 class Connection
 {
     private PDO $pdo;
 
     /**
-     * @param array<int, mixed> $options
+     * Create an instance with configured dependencies and defaults.
+     * @param string $dsn Input value.
+     * @param string|null $username Input value.
+     * @param string|null $password Input value.
+     * @param array $options Input value.
+     * @return void Output value.
      */
     public function __construct(
         string $dsn,
@@ -30,8 +38,10 @@ class Connection
     }
 
     /**
-     * @param array<int|string, mixed> $params
-     * @return array<int, array<string, mixed>>
+     * Query and return array.
+     * @param string $sql Input value.
+     * @param array $params Input value.
+     * @return array Output value.
      */
     public function query(string $sql, array $params = []): array
     {
@@ -43,7 +53,10 @@ class Connection
     }
 
     /**
-     * @param array<int|string, mixed> $params
+     * Execute and return int.
+     * @param string $sql Input value.
+     * @param array $params Input value.
+     * @return int Output value.
      */
     public function execute(string $sql, array $params = []): int
     {
@@ -52,18 +65,29 @@ class Connection
         return $statement->rowCount();
     }
 
+    /**
+     * Last insert id and return string.
+     * @return string Output value.
+     */
     public function lastInsertId(): string
     {
         return $this->pdo->lastInsertId();
     }
 
+    /**
+     * Pdo and return PDO.
+     * @return PDO Output value.
+     */
     public function pdo(): PDO
     {
         return $this->pdo;
     }
 
     /**
-     * @param array<int|string, mixed> $params
+     * Prepare and execute and return PDOStatement.
+     * @param string $sql Input value.
+     * @param array $params Input value.
+     * @return PDOStatement Output value.
      */
     private function prepareAndExecute(string $sql, array $params): PDOStatement
     {

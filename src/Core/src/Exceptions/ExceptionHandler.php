@@ -7,12 +7,25 @@ namespace Maia\Core\Exceptions;
 use Maia\Core\Http\Response;
 use Throwable;
 
+/**
+ * ExceptionHandler defines a framework component for this package.
+ */
 class ExceptionHandler
 {
+    /**
+     * Create an instance with configured dependencies and defaults.
+     * @param bool $debug Input value.
+     * @return void Output value.
+     */
     public function __construct(private bool $debug)
     {
     }
 
+    /**
+     * Handle and return Response.
+     * @param Throwable $exception Input value.
+     * @return Response Output value.
+     */
     public function handle(Throwable $exception): Response
     {
         if ($exception instanceof ValidationException) {

@@ -6,18 +6,35 @@ namespace Maia\Cli\Commands;
 
 use Maia\Cli\Output;
 
+/**
+ * CreateModelCommand defines a framework component for this package.
+ */
 class CreateModelCommand extends BaseCreateCommand
 {
+    /**
+     * Name and return string.
+     * @return string Output value.
+     */
     public function name(): string
     {
         return 'create:model';
     }
 
+    /**
+     * Description and return string.
+     * @return string Output value.
+     */
     public function description(): string
     {
         return 'Create an ORM model';
     }
 
+    /**
+     * Execute and return int.
+     * @param array $args Input value.
+     * @param Output $output Input value.
+     * @return int Output value.
+     */
     public function execute(array $args, Output $output): int
     {
         $name = $this->requireName($args, $output, 'model name');

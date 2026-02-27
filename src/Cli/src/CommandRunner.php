@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Maia\Cli;
 
+/**
+ * CommandRunner defines a framework component for this package.
+ */
 class CommandRunner
 {
     /** @var array<string, Command> */
@@ -11,17 +14,29 @@ class CommandRunner
 
     private ?Output $lastOutput = null;
 
+    /**
+     * Create an instance with configured dependencies and defaults.
+     * @param bool $emitOutput Input value.
+     * @return void Output value.
+     */
     public function __construct(private bool $emitOutput = false)
     {
     }
 
+    /**
+     * Register and return void.
+     * @param Command $command Input value.
+     * @return void Output value.
+     */
     public function register(Command $command): void
     {
         $this->commands[$command->name()] = $command;
     }
 
     /**
-     * @param array<int, string> $argv
+     * Run and return int.
+     * @param array $argv Input value.
+     * @return int Output value.
      */
     public function run(array $argv): int
     {
@@ -63,13 +78,20 @@ class CommandRunner
         return $command->execute($tokens, $output);
     }
 
+    /**
+     * Last output and return Output|null.
+     * @return Output|null Output value.
+     */
     public function lastOutput(): ?Output
     {
         return $this->lastOutput;
     }
 
     /**
-     * @param array<int, string> $tokens
+     * Extract flag and return bool.
+     * @param array& $tokens Input value.
+     * @param string $flag Input value.
+     * @return bool Output value.
      */
     private function extractFlag(array &$tokens, string $flag): bool
     {
@@ -84,6 +106,11 @@ class CommandRunner
         return true;
     }
 
+    /**
+     * Write global help and return void.
+     * @param Output $output Input value.
+     * @return void Output value.
+     */
     private function writeGlobalHelp(Output $output): void
     {
         if ($this->commands === []) {

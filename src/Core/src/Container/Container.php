@@ -10,6 +10,9 @@ use ReflectionNamedType;
 use ReflectionParameter;
 use RuntimeException;
 
+/**
+ * Container defines a framework component for this package.
+ */
 class Container
 {
     /** @var array<string, Closure> */
@@ -21,11 +24,23 @@ class Container
     /** @var array<string, object> */
     private array $instances = [];
 
+    /**
+     * Factory and return void.
+     * @param string $class Input value.
+     * @param Closure $factory Input value.
+     * @return void Output value.
+     */
     public function factory(string $class, Closure $factory): void
     {
         $this->factories[$class] = $factory;
     }
 
+    /**
+     * Singleton and return void.
+     * @param string $class Input value.
+     * @param Closure|null $factory Input value.
+     * @return void Output value.
+     */
     public function singleton(string $class, ?Closure $factory = null): void
     {
         $this->singletons[$class] = true;
@@ -35,11 +50,22 @@ class Container
         }
     }
 
+    /**
+     * Instance and return void.
+     * @param string $class Input value.
+     * @param object $instance Input value.
+     * @return void Output value.
+     */
     public function instance(string $class, object $instance): void
     {
         $this->instances[$class] = $instance;
     }
 
+    /**
+     * Resolve and return object.
+     * @param string $class Input value.
+     * @return object Output value.
+     */
     public function resolve(string $class): object
     {
         if (isset($this->instances[$class])) {
@@ -59,6 +85,11 @@ class Container
         return $instance;
     }
 
+    /**
+     * Auto wire and return object.
+     * @param string $class Input value.
+     * @return object Output value.
+     */
     private function autoWire(string $class): object
     {
         $reflection = new ReflectionClass($class);
@@ -80,6 +111,12 @@ class Container
         return $reflection->newInstanceArgs($params);
     }
 
+    /**
+     * Resolve parameter and return mixed.
+     * @param ReflectionParameter $param Input value.
+     * @param string $forClass Input value.
+     * @return mixed Output value.
+     */
     private function resolveParameter(ReflectionParameter $param, string $forClass): mixed
     {
         $type = $param->getType();

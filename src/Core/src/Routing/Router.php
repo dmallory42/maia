@@ -7,6 +7,9 @@ namespace Maia\Core\Routing;
 use ReflectionClass;
 use ReflectionMethod;
 
+/**
+ * Router defines a framework component for this package.
+ */
 class Router
 {
     /**
@@ -21,6 +24,11 @@ class Router
      */
     private array $routes = [];
 
+    /**
+     * Register controller and return void.
+     * @param string $class Input value.
+     * @return void Output value.
+     */
     public function registerController(string $class): void
     {
         $reflection = new ReflectionClass($class);
@@ -81,20 +89,19 @@ class Router
     }
 
     /**
-     * @return array<int, array{
-     *     http_method: string,
-     *     path: string,
-     *     segments: array<int, string>,
-     *     controller: string,
-     *     method: string,
-     *     middleware: array<int, string>
-     * }>
+     * Routes and return array.
+     * @return array Output value.
      */
     public function routes(): array
     {
         return $this->routes;
     }
 
+    /**
+     * Normalize path and return string.
+     * @param string $path Input value.
+     * @return string Output value.
+     */
     private function normalizePath(string $path): string
     {
         $path = parse_url($path, PHP_URL_PATH) ?? '/';
@@ -106,6 +113,12 @@ class Router
         return $trimmed === '' ? '/' : '/' . $trimmed;
     }
 
+    /**
+     * Join paths and return string.
+     * @param string $prefix Input value.
+     * @param string $routePath Input value.
+     * @return string Output value.
+     */
     private function joinPaths(string $prefix, string $routePath): string
     {
         $prefix = trim($prefix);
@@ -129,7 +142,11 @@ class Router
         return $prefix . $routePath;
     }
 
-    /** @return array<int, string> */
+    /**
+     * Split path and return array.
+     * @param string $path Input value.
+     * @return array Output value.
+     */
     private function splitPath(string $path): array
     {
         $trimmed = trim($path, '/');
@@ -142,9 +159,10 @@ class Router
     }
 
     /**
-     * @param array<int, string> $routeSegments
-     * @param array<int, string> $pathSegments
-     * @return array<string, string>|null
+     * Match segments and return array|null.
+     * @param array $routeSegments Input value.
+     * @param array $pathSegments Input value.
+     * @return array|null Output value.
      */
     private function matchSegments(array $routeSegments, array $pathSegments): ?array
     {
@@ -170,6 +188,11 @@ class Router
         return $params;
     }
 
+    /**
+     * Is parameter segment and return bool.
+     * @param string $segment Input value.
+     * @return bool Output value.
+     */
     private function isParameterSegment(string $segment): bool
     {
         return str_starts_with($segment, '{')

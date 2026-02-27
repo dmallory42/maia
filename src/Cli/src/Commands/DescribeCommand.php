@@ -7,10 +7,16 @@ namespace Maia\Cli\Commands;
 use Maia\Cli\Command;
 use Maia\Cli\Output;
 
+/**
+ * DescribeCommand defines a framework component for this package.
+ */
 class DescribeCommand extends Command
 {
     /**
-     * @param array<int, class-string> $controllers
+     * Create an instance with configured dependencies and defaults.
+     * @param string|null $projectRoot Input value.
+     * @param array $controllers Input value.
+     * @return void Output value.
      */
     public function __construct(
         private ?string $projectRoot = null,
@@ -18,16 +24,30 @@ class DescribeCommand extends Command
     ) {
     }
 
+    /**
+     * Name and return string.
+     * @return string Output value.
+     */
     public function name(): string
     {
         return 'describe';
     }
 
+    /**
+     * Description and return string.
+     * @return string Output value.
+     */
     public function description(): string
     {
         return 'Describe project structure and metadata';
     }
 
+    /**
+     * Execute and return int.
+     * @param array $args Input value.
+     * @param Output $output Input value.
+     * @return int Output value.
+     */
     public function execute(array $args, Output $output): int
     {
         $root = $this->projectRoot ?? getcwd();
@@ -54,13 +74,8 @@ class DescribeCommand extends Command
     }
 
     /**
-     * @return array<int, array{
-     *     method: string,
-     *     path: string,
-     *     controller: string,
-     *     action: string,
-     *     middleware: array<int, string>
-     * }>
+     * Route manifest and return array.
+     * @return array Output value.
      */
     private function routeManifest(): array
     {
@@ -69,7 +84,11 @@ class DescribeCommand extends Command
         return $routes->collectRoutes();
     }
 
-    /** @return array<int, string> */
+    /**
+     * List php files and return array.
+     * @param string $directory Input value.
+     * @return array Output value.
+     */
     private function listPhpFiles(string $directory): array
     {
         if (!is_dir($directory)) {
@@ -87,7 +106,11 @@ class DescribeCommand extends Command
         return $names;
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * Read maia manifest and return array.
+     * @param string $path Input value.
+     * @return array Output value.
+     */
     private function readMaiaManifest(string $path): array
     {
         if (!file_exists($path)) {

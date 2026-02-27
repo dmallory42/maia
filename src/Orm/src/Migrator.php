@@ -7,10 +7,19 @@ namespace Maia\Orm;
 use Maia\Orm\Schema\Schema;
 use RuntimeException;
 
+/**
+ * Migrator defines a framework component for this package.
+ */
 class Migrator
 {
     private Schema $schema;
 
+    /**
+     * Create an instance with configured dependencies and defaults.
+     * @param Connection $connection Input value.
+     * @param string $migrationDir Input value.
+     * @return void Output value.
+     */
     public function __construct(
         private Connection $connection,
         private string $migrationDir
@@ -19,6 +28,10 @@ class Migrator
         $this->ensureRepository();
     }
 
+    /**
+     * Migrate and return int.
+     * @return int Output value.
+     */
     public function migrate(): int
     {
         $executed = array_column($this->connection->query('SELECT migration FROM migrations'), 'migration');
@@ -54,6 +67,10 @@ class Migrator
         return $count;
     }
 
+    /**
+     * Rollback and return int.
+     * @return int Output value.
+     */
     public function rollback(): int
     {
         $rows = $this->connection->query('SELECT MAX(batch) AS batch FROM migrations');
@@ -87,6 +104,10 @@ class Migrator
         return $count;
     }
 
+    /**
+     * Ensure repository and return void.
+     * @return void Output value.
+     */
     private function ensureRepository(): void
     {
         $this->connection->execute(
@@ -99,7 +120,10 @@ class Migrator
         );
     }
 
-    /** @return array<int, string> */
+    /**
+     * Migration files and return array.
+     * @return array Output value.
+     */
     private function migrationFiles(): array
     {
         if (!is_dir($this->migrationDir)) {
@@ -116,6 +140,11 @@ class Migrator
         return $files;
     }
 
+    /**
+     * Load migration and return Migration.
+     * @param string $file Input value.
+     * @return Migration Output value.
+     */
     private function loadMigration(string $file): Migration
     {
         $migration = require $file;
@@ -127,6 +156,10 @@ class Migrator
         return $migration;
     }
 
+    /**
+     * Next batch number and return int.
+     * @return int Output value.
+     */
     private function nextBatchNumber(): int
     {
         $rows = $this->connection->query('SELECT MAX(batch) AS batch FROM migrations');

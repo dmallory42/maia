@@ -7,11 +7,19 @@ namespace Maia\Cli\Commands;
 use Maia\Cli\Command;
 use Maia\Cli\Output;
 
+/**
+ * UpCommand defines a framework component for this package.
+ */
 class UpCommand extends Command
 {
     /** @var callable(string): int */
     private $runner;
 
+    /**
+     * Create an instance with configured dependencies and defaults.
+     * @param callable|null $runner Input value.
+     * @return void Output value.
+     */
     public function __construct(?callable $runner = null)
     {
         $this->runner = $runner ?? static function (string $command): int {
@@ -21,18 +29,29 @@ class UpCommand extends Command
         };
     }
 
+    /**
+     * Name and return string.
+     * @return string Output value.
+     */
     public function name(): string
     {
         return 'up';
     }
 
+    /**
+     * Description and return string.
+     * @return string Output value.
+     */
     public function description(): string
     {
         return 'Start the Maia development server';
     }
 
     /**
-     * @param array<int, string> $args
+     * Execute and return int.
+     * @param array $args Input value.
+     * @param Output $output Input value.
+     * @return int Output value.
      */
     public function execute(array $args, Output $output): int
     {
@@ -48,7 +67,11 @@ class UpCommand extends Command
         return (int) ($this->runner)($command);
     }
 
-    /** @param array<int, string> $args */
+    /**
+     * Resolve port and return int.
+     * @param array $args Input value.
+     * @return int Output value.
+     */
     private function resolvePort(array $args): int
     {
         $inline = array_values(array_filter($args, static fn (string $arg): bool => str_starts_with($arg, '--port=')));

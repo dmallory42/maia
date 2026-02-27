@@ -8,13 +8,26 @@ use Closure;
 use Maia\Core\Http\Request;
 use Maia\Core\Http\Response;
 
+/**
+ * Pipeline defines a framework component for this package.
+ */
 class Pipeline
 {
-    /** @param array<int, Middleware> $middleware */
+    /**
+     * Create an instance with configured dependencies and defaults.
+     * @param array $middleware Input value.
+     * @return void Output value.
+     */
     public function __construct(private array $middleware)
     {
     }
 
+    /**
+     * Run and return Response.
+     * @param Request $request Input value.
+     * @param Closure $handler Input value.
+     * @return Response Output value.
+     */
     public function run(Request $request, Closure $handler): Response
     {
         $pipeline = array_reduce(

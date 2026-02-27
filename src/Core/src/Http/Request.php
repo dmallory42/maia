@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Maia\Core\Http;
 
+/**
+ * Request defines a framework component for this package.
+ */
 class Request
 {
     /** @var array<string, mixed> */
@@ -23,10 +26,15 @@ class Request
     private bool $bodyDecoded = false;
 
     /**
-     * @param array<string, mixed> $query
-     * @param array<string, string> $headers
-     * @param array<string, string> $routeParams
-     * @param array<string, mixed> $attributes
+     * Create an instance with configured dependencies and defaults.
+     * @param string $method Input value.
+     * @param string $path Input value.
+     * @param array $query Input value.
+     * @param array $headers Input value.
+     * @param string|null $body Input value.
+     * @param array $routeParams Input value.
+     * @param array $attributes Input value.
+     * @return void Output value.
      */
     public function __construct(
         private string $method,
@@ -45,6 +53,10 @@ class Request
         $this->attributes = $attributes;
     }
 
+    /**
+     * Capture and return self.
+     * @return self Output value.
+     */
     public static function capture(): self
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -65,26 +77,50 @@ class Request
         );
     }
 
+    /**
+     * Method and return string.
+     * @return string Output value.
+     */
     public function method(): string
     {
         return $this->method;
     }
 
+    /**
+     * Path and return string.
+     * @return string Output value.
+     */
     public function path(): string
     {
         return $this->path;
     }
 
+    /**
+     * Query and return mixed.
+     * @param string $key Input value.
+     * @param mixed $default Input value.
+     * @return mixed Output value.
+     */
     public function query(string $key, mixed $default = null): mixed
     {
         return $this->query[$key] ?? $default;
     }
 
+    /**
+     * Param and return mixed.
+     * @param string $key Input value.
+     * @param mixed $default Input value.
+     * @return mixed Output value.
+     */
     public function param(string $key, mixed $default = null): mixed
     {
         return $this->routeParams[$key] ?? $default;
     }
 
+    /**
+     * Body and return mixed.
+     * @return mixed Output value.
+     */
     public function body(): mixed
     {
         if ($this->bodyDecoded) {
@@ -109,11 +145,21 @@ class Request
         return $this->decodedBody;
     }
 
+    /**
+     * Header and return mixed.
+     * @param string $key Input value.
+     * @param mixed $default Input value.
+     * @return mixed Output value.
+     */
     public function header(string $key, mixed $default = null): mixed
     {
         return $this->headers[strtolower($key)] ?? $default;
     }
 
+    /**
+     * Bearer token and return string|null.
+     * @return string|null Output value.
+     */
     public function bearerToken(): ?string
     {
         $authorization = $this->header('authorization');
@@ -128,6 +174,12 @@ class Request
         return null;
     }
 
+    /**
+     * With attribute and return self.
+     * @param string $key Input value.
+     * @param mixed $value Input value.
+     * @return self Output value.
+     */
     public function withAttribute(string $key, mixed $value): self
     {
         $clone = clone $this;
@@ -135,18 +187,30 @@ class Request
         return $clone;
     }
 
+    /**
+     * Attribute and return mixed.
+     * @param string $key Input value.
+     * @param mixed $default Input value.
+     * @return mixed Output value.
+     */
     public function attribute(string $key, mixed $default = null): mixed
     {
         return $this->attributes[$key] ?? $default;
     }
 
+    /**
+     * User and return mixed.
+     * @return mixed Output value.
+     */
     public function user(): mixed
     {
         return $this->attribute('user');
     }
 
     /**
-     * @param array<string, string> $routeParams
+     * With route params and return self.
+     * @param array $routeParams Input value.
+     * @return self Output value.
      */
     public function withRouteParams(array $routeParams): self
     {
@@ -156,8 +220,9 @@ class Request
     }
 
     /**
-     * @param array<string, string> $headers
-     * @return array<string, string>
+     * Normalize headers and return array.
+     * @param array $headers Input value.
+     * @return array Output value.
      */
     private function normalizeHeaders(array $headers): array
     {
@@ -169,7 +234,10 @@ class Request
         return $normalized;
     }
 
-    /** @return array<string, string> */
+    /**
+     * Read headers and return array.
+     * @return array Output value.
+     */
     private static function readHeaders(): array
     {
         if (function_exists('getallheaders')) {

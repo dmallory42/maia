@@ -9,12 +9,17 @@ use Maia\Core\Http\Request;
 use Maia\Core\Http\Response;
 use Maia\Core\Middleware\Middleware;
 
+/**
+ * CorsMiddleware defines a framework component for this package.
+ */
 class CorsMiddleware implements Middleware
 {
     /**
-     * @param array<int, string> $allowedOrigins
-     * @param array<int, string> $allowedMethods
-     * @param array<int, string> $allowedHeaders
+     * Create an instance with configured dependencies and defaults.
+     * @param array $allowedOrigins Input value.
+     * @param array $allowedMethods Input value.
+     * @param array $allowedHeaders Input value.
+     * @return void Output value.
      */
     public function __construct(
         private array $allowedOrigins = ['*'],
@@ -23,6 +28,12 @@ class CorsMiddleware implements Middleware
     ) {
     }
 
+    /**
+     * Handle and return Response.
+     * @param Request $request Input value.
+     * @param Closure $next Input value.
+     * @return Response Output value.
+     */
     public function handle(Request $request, Closure $next): Response
     {
         $origin = $request->header('Origin');
@@ -40,12 +51,23 @@ class CorsMiddleware implements Middleware
         return $this->applyHeaders($response, $origin);
     }
 
+    /**
+     * Is origin allowed and return bool.
+     * @param string $origin Input value.
+     * @return bool Output value.
+     */
     private function isOriginAllowed(string $origin): bool
     {
         return in_array('*', $this->allowedOrigins, true)
             || in_array($origin, $this->allowedOrigins, true);
     }
 
+    /**
+     * Apply headers and return Response.
+     * @param Response $response Input value.
+     * @param string|null $origin Input value.
+     * @return Response Output value.
+     */
     private function applyHeaders(Response $response, ?string $origin): Response
     {
         $allowedOrigin = in_array('*', $this->allowedOrigins, true) ? '*' : ($origin ?? '');
