@@ -1,24 +1,17 @@
-# Maia Framework Usage Examples
+# 📖 Maia Framework Usage Examples
 
-This document shows practical patterns for building a new app with Maia.
+Practical patterns for building apps with Maia.
 
-## 1) Bootstrap A New App
+## 1) 🏗️ Bootstrap A New App
 
 ```bash
-# Scaffold a new project from the framework workspace.
 php bin/maia new my-app
-
-# Enter the generated app directory.
 cd my-app
-
-# Create local environment config from template.
 cp .env.example .env
-
-# Create the default SQLite database file expected by config/database.php.
 touch database/database.sqlite
 ```
 
-## 2) Wire App Bootstrap And Route Registration
+## 2) 🔌 Wire App Bootstrap And Route Registration
 
 Use `routes/api.php` as your route registration entrypoint.
 
@@ -27,20 +20,17 @@ Use `routes/api.php` as your route registration entrypoint.
 ```php
 <?php
 
-// Load Composer autoloader for Maia and app classes.
 require __DIR__ . '/../vendor/autoload.php';
 
 use Maia\Core\App;
 use Maia\Core\Http\Request;
 
-// Build app with config and .env loaded.
 $app = App::create(__DIR__ . '/../config', __DIR__ . '/../.env');
 
-// Route registration is explicit: load and execute the closure.
+// Route registration is explicit — keeps startup behavior predictable.
 $registerRoutes = require __DIR__ . '/../routes/api.php';
 $registerRoutes($app);
 
-// Capture inbound HTTP request and send framework response.
 $request = Request::capture();
 $response = $app->handle($request);
 $response->send();
@@ -60,19 +50,18 @@ use Maia\Core\App;
 use Maia\Core\Config\Env;
 
 return static function (App $app): void {
-    // Register infra dependencies needed by middleware/controllers.
+    // Register infra dependencies needed by middleware and controllers.
     $app->container()->instance(
         JwtService::class,
         new JwtService((string) Env::get('JWT_SECRET', 'change-me-please-change-me-please!'))
     );
     $app->container()->instance(Validator::class, new Validator());
 
-    // Register controller classes so their route attributes are discoverable.
     $app->registerController(UserController::class);
 };
 ```
 
-## 3) Controller + Attribute Routes + DI
+## 3) 🎯 Controller + Attribute Routes + DI
 
 `app/Controllers/UserController.php`:
 
@@ -85,19 +74,18 @@ namespace App\Controllers;
 
 use App\Models\User;
 use Maia\Auth\JwtMiddleware;
+use Maia\Auth\Validator;
+use Maia\Core\Exceptions\ValidationException;
 use Maia\Core\Http\Request;
 use Maia\Core\Http\Response;
 use Maia\Core\Routing\Controller;
 use Maia\Core\Routing\MiddlewareAttribute as Middleware;
 use Maia\Core\Routing\Route;
 
-// Controller prefix applies to all route paths in this class.
 #[Controller('/users')]
-// Class-level middleware protects all endpoints in this controller.
 #[Middleware(JwtMiddleware::class)]
 class UserController
 {
-    // GET /users
     #[Route('/', method: 'GET')]
     public function index(): Response
     {
@@ -106,13 +94,11 @@ class UserController
         ]);
     }
 
-    // GET /users/{id} with typed route parameter casting.
     #[Route('/{id}', method: 'GET')]
     public function show(int $id): Response
     {
         $user = User::find($id);
         if ($user === null) {
-            // Consistent JSON error response shape.
             return Response::error('User not found', 404);
         }
 
@@ -122,18 +108,25 @@ class UserController
         ]);
     }
 
-    // POST /users with JSON payload.
     #[Route('/', method: 'POST')]
-    public function create(Request $request): Response
+    public function create(Request $request, Validator $validator): Response
     {
         $payload = $request->body();
         $data = is_array($payload) ? $payload : [];
 
-        $user = User::create([
-            'email' => (string) ($data['email'] ?? ''),
+        // Validate before persisting.
+        $errors = $validator->validate($data, [
+            'email' => 'required|email|max:255',
         ]);
 
-        // Return 201 for resource creation.
+        if ($errors !== []) {
+            throw new ValidationException($errors);
+        }
+
+        $user = User::create([
+            'email' => (string) $data['email'],
+        ]);
+
         return Response::json([
             'id' => $user->id,
             'email' => $user->email,
@@ -142,7 +135,7 @@ class UserController
 }
 ```
 
-## 4) Model + Migration
+## 4) 🗃️ Model + Migration
 
 `app/Models/User.php`:
 
@@ -156,24 +149,21 @@ namespace App\Models;
 use Maia\Orm\Attributes\Table;
 use Maia\Orm\Model;
 
-// Map this model to the "users" database table.
 #[Table('users')]
 class User extends Model
 {
-    // Public typed properties are hydrated from DB rows.
     public int $id;
     public string $email;
 }
 ```
 
-Create migration:
+Generate and edit a migration:
 
 ```bash
-# Generate a timestamped migration skeleton.
 vendor/bin/maia create:migration create_users_table
 ```
 
-Edit generated file in `database/migrations/*.php`:
+`database/migrations/*.php`:
 
 ```php
 <?php
@@ -188,46 +178,123 @@ return new class extends Migration
 {
     public function up(Schema $schema): void
     {
-        // Apply schema changes for this migration.
         $schema->create('users', function (Table $table): void {
-            // Auto-incrementing primary key.
             $table->id();
-            // Unique index prevents duplicate emails.
             $table->string('email')->unique();
         });
     }
 
     public function down(Schema $schema): void
     {
-        // Reverse the up() changes for rollback safety.
         $schema->drop('users');
     }
 };
 ```
 
-Run migrations:
-
 ```bash
-# Execute all pending migrations.
 vendor/bin/maia migrate
 ```
 
-## 5) Global Middleware
+## 5) 🔗 Relationships
 
-You can add global middleware in bootstrap:
+Models support `HasMany` and `BelongsTo` via attributes. Relationships are lazy-loaded on access and can be eager-loaded with `with()`.
+
+`app/Models/User.php` (with posts):
 
 ```php
-// CORS: limit browser origins allowed to call your API.
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use Maia\Orm\Attributes\HasMany;
+use Maia\Orm\Attributes\Table;
+use Maia\Orm\Model;
+
+#[Table('users')]
+class User extends Model
+{
+    public int $id;
+    public string $email;
+
+    // Infers foreign key "user_id" on the posts table.
+    #[HasMany(Post::class)]
+    public array $posts;
+}
+```
+
+`app/Models/Post.php`:
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use Maia\Orm\Attributes\BelongsTo;
+use Maia\Orm\Attributes\Table;
+use Maia\Orm\Model;
+
+#[Table('posts')]
+class Post extends Model
+{
+    public int $id;
+    public int $user_id;
+    public string $title;
+
+    // Infers foreign key "user_id" on this model.
+    #[BelongsTo(User::class)]
+    public ?User $user;
+}
+```
+
+Querying:
+
+```php
+// Lazy load — each access runs a query.
+$user = User::find(1);
+$posts = $user->posts;
+
+// Eager load — one query per relation, avoids N+1.
+$users = User::query()->with('posts')->get();
+```
+
+## 6) ✅ Validation
+
+The `Validator` validates arrays against pipe-delimited rules. Inject it via the container (registered in `routes/api.php` above).
+
+```php
+$errors = $validator->validate($data, [
+    'email'    => 'required|email|max:255',
+    'name'     => 'required|string|min:2|max:100',
+    'age'      => 'integer|min:0',
+    'agree'    => 'required|boolean',
+]);
+
+// $errors is [] on success, or keyed by field:
+// ['email' => ['The email field must be a valid email address.']]
+```
+
+Available rules: `required`, `string`, `email`, `integer`, `boolean`, `min:{n}`, `max:{n}`, `unique:{table}`.
+
+## 7) 🛡️ Global Middleware
+
+Add global middleware in your bootstrap:
+
+```php
+// CORS — limit which origins can call your API.
 $app->addMiddleware(new Maia\Auth\CorsMiddleware(['https://app.example.com']));
 
 // API key auth for service-to-service requests.
 $app->addMiddleware(new Maia\Auth\ApiKeyMiddleware(['local-dev-key']));
 
-// Basic in-memory rate limiting to reduce abuse in dev/small deployments.
+// Rate limiting to reduce abuse.
 $app->addMiddleware(Maia\Auth\RateLimit::perMinute(60));
 ```
 
-## 6) HTTP Testing
+## 8) 🧪 HTTP Testing
 
 `tests/UserControllerTest.php`:
 
@@ -245,21 +312,16 @@ class UserControllerTest extends TestCase
 {
     protected function controllers(): array
     {
-        // Register controllers under test for this test case.
         return [UserController::class];
     }
 
     public function testGetUsersReturns200(): void
     {
-        // High-level HTTP assertion using Maia test helpers.
         $this->get('/users')->assertStatus(200);
     }
 }
 ```
 
-Run tests:
-
 ```bash
-# Run unit/integration tests.
 vendor/bin/phpunit
 ```
