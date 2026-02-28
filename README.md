@@ -1,169 +1,118 @@
-# Maia Framework
+# ✨ Maia Framework
 
 Maia is an opinionated, API-first PHP framework built as a mono-repo with four packages:
 
-- `maia/core`: app kernel, DI container, HTTP layer, routing, middleware, exceptions, logging, testing helpers
-- `maia/orm`: PDO connection wrapper, query builder, models, relationships, schema builder, migrator
-- `maia/auth`: JWT auth, API key auth, CORS, rate limiting, security headers, validation
-- `maia/cli`: command framework and `maia` project/inspection/migration/scaffolding commands
+| Package | What's inside |
+|---------|---------------|
+| 📦 `maia/core` | App kernel, DI container, HTTP layer, routing, middleware, exceptions, logging, testing helpers |
+| 📦 `maia/orm` | PDO connection wrapper, query builder, models, relationships, schema builder, migrator |
+| 📦 `maia/auth` | JWT auth, API key auth, CORS, rate limiting, security headers, validation |
+| 📦 `maia/cli` | Command framework and scaffolding/inspection/migration commands |
 
-## Status
+👉 See [docs/EXAMPLES.md](docs/EXAMPLES.md) for full usage patterns — bootstrap, controllers, models, validation, relationships, testing, and more.
 
-Implementation plan in `docs/plans/2026-02-25-maia-framework-plan.md` is fully implemented through Task 29.
-
-## Requirements
+## 📋 Requirements
 
 - PHP `^8.2`
 - Composer
 
-## Install
+## 🚀 Getting Started
 
 ```bash
 composer install
 ```
 
-## Start From Scratch (New App)
+### Start a new app from scratch
 
 This flow gets you from an empty directory to a running API with database-backed routes.
 
-1. Scaffold a project.
-Creates a new Maia application skeleton with standard directories (`app/`, `config/`, `routes/`, `database/`, `public/`) and framework dependency wiring.
+**1. Scaffold a project**
+
+Creates a new Maia app skeleton with standard directories (`app/`, `config/`, `routes/`, `database/`, `public/`) and framework wiring.
 
 ```bash
-# from this framework repo
 php bin/maia new my-app
 ```
 
-2. Enter the app and initialize local environment values.
-Moves into the generated project and creates a local runtime config file from the template.
+**2. Set up local environment**
 
 ```bash
 cd my-app
 cp .env.example .env
-```
-
-3. Create the SQLite database file used by default config.
-The default database DSN points to `database/database.sqlite`, so this file should exist before migrations run.
-
-```bash
 touch database/database.sqlite
 ```
 
-4. Scaffold your first controller.
-Generates an attribute-based controller class in `app/Controllers` so you can add endpoints quickly.
+**3. Scaffold your first controller**
 
 ```bash
 vendor/bin/maia create:controller UserController
 ```
 
-5. Register controllers in `routes/api.php`, then load that file from `public/index.php`.
-Controllers are registered explicitly at bootstrap time; this keeps startup behavior predictable.
+**4. Register controllers and wire bootstrap**
 
-Full wiring examples are in [docs/EXAMPLES.md](docs/EXAMPLES.md).
+Controllers are registered explicitly at boot time — this keeps startup behavior predictable. Full wiring examples are in [docs/EXAMPLES.md](docs/EXAMPLES.md).
 
-6. Run migrations and start the app.
-Applies pending schema changes, then starts the local PHP dev server using `public/index.php` as the front controller.
+**5. Migrate and run**
 
 ```bash
 vendor/bin/maia migrate
 vendor/bin/maia up --port 8000
 ```
 
-## Test
+🎉 You've got a running API.
+
+## 🧪 Quality & Testing
 
 ```bash
-vendor/bin/phpunit
+vendor/bin/phpunit                # run full test suite
 ```
 
-Current suite includes package-level tests plus integration tests under `tests/Integration`.
+| Command | What it does |
+|---------|-------------|
+| `composer test:threshold` | Enforces minimum 95% test pass rate |
+| `composer docs:coverage` | Checks docblock coverage (minimum 95%) |
+| `composer lint` | PSR-12 style checks |
 
-Threshold-based unit test gate (default 95% pass rate):
+### 🪝 Pre-commit hook
 
-```bash
-composer test:threshold
-```
-
-Enforces a minimum passing-test threshold locally and in hooks.
-
-Documentation coverage enforcement (minimum 95%):
-
-```bash
-composer docs:coverage
-```
-
-Checks docblock coverage against the configured minimum.
-
-PSR-12 linting:
-
-```bash
-composer lint
-```
-
-Runs PSR-12 style checks for CI parity.
-
-Enable the repository pre-commit hook to enforce the test pass-rate gate locally:
+Enable the repo hook to enforce the test gate on every commit:
 
 ```bash
 git config core.hooksPath .githooks
 ```
 
-Configures local Git commits to run the threshold gate automatically.
-
-Optionally override the hook threshold:
+Override the threshold if you want stricter checks:
 
 ```bash
 MAIA_TEST_THRESHOLD=100 git commit -m "..."
 ```
 
-Overrides the default threshold when you want stricter commit-time checks.
-
-## CLI
-
-The repo ships a binary entrypoint:
+## 🔧 CLI
 
 ```bash
 php bin/maia --help
 ```
 
-Available commands:
+| Command | Description |
+|---------|-------------|
+| `new` | Scaffold a new Maia application |
+| `up` | Start the local PHP dev server |
+| `create:controller` | Generate a controller class |
+| `create:service` | Generate a service class |
+| `create:model` | Generate a model class |
+| `create:middleware` | Generate a middleware class |
+| `create:request` | Generate a form request class |
+| `create:migration` | Generate a migration file |
+| `create:test` | Generate a test class |
+| `migrate` | Run pending migrations |
+| `migrate:rollback` | Roll back the last migration batch |
+| `migrate:status` | Show migration status |
+| `routes` | List registered routes |
+| `describe` | Inspect a command's details |
 
-- `new`
-- `up`
-- `create:controller`
-- `create:service`
-- `create:model`
-- `create:middleware`
-- `create:request`
-- `create:migration`
-- `create:test`
-- `migrate`
-- `migrate:rollback`
-- `migrate:status`
-- `routes`
-- `describe`
+All commands support `--json` for machine-readable output where relevant.
 
-JSON output is supported where relevant with `--json`.
-
-## Typical Workflow
-
-```bash
-# scaffold an app
-php bin/maia new my-app
-
-# inside the generated app
-cd my-app
-
-# inspect routes
-vendor/bin/maia routes --json
-
-# run migrations
-vendor/bin/maia migrate
-
-# start local server inside app directory
-vendor/bin/maia up --port 8000
-```
-
-## Repository Layout
+## 📁 Repository Layout
 
 ```text
 bin/                # framework CLI entry point
