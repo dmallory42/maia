@@ -24,8 +24,18 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Maia\Core\App;
 use Maia\Core\Http\Request;
+use Maia\Orm\Connection;
 
 $app = App::create(__DIR__ . '/../config', __DIR__ . '/../.env');
+$app->container()->instance(
+    Connection::class,
+    Connection::sqlite(__DIR__ . '/../database/database.sqlite', [
+        'foreign_keys' => true,
+        'busy_timeout' => 5000,
+        'journal_mode' => 'WAL',
+        'synchronous' => 'NORMAL',
+    ])
+);
 
 // Route registration is explicit — keeps startup behavior predictable.
 $registerRoutes = require __DIR__ . '/../routes/api.php';
@@ -195,6 +205,23 @@ return new class extends Migration
 vendor/bin/maia migrate
 ```
 
+### Aggregate Queries And Upserts
+
+```php
+$rows = User::query()
+    ->select('users.id', 'users.email', 'COUNT(posts.id) AS post_count')
+    ->leftJoin('posts', 'posts.user_id', '=', 'users.id')
+    ->groupBy('users.id', 'users.email')
+    ->having('COUNT(posts.id)', 0, '>')
+    ->orderBy('post_count', 'desc')
+    ->get();
+
+QueryBuilder::table('users', $connection)->upsert([
+    'email' => 'mal@example.com',
+    'name' => 'Mal',
+], ['email']);
+```
+
 ## 5) 🔗 Relationships
 
 Models support `HasMany` and `BelongsTo` via attributes. Relationships are lazy-loaded on access and can be eager-loaded with `with()`.
@@ -292,6 +319,19 @@ $app->addMiddleware(new Maia\Auth\ApiKeyMiddleware(['local-dev-key']));
 
 // Rate limiting to reduce abuse.
 $app->addMiddleware(Maia\Auth\RateLimit::perMinute(60));
+```
+
+Response caching can be wired the same way:
+
+```php
+use Maia\Core\Cache\FilesystemResponseCacheStore;
+use Maia\Core\Middleware\ResponseCacheMiddleware;
+
+$app->addMiddleware(new ResponseCacheMiddleware(
+    new FilesystemResponseCacheStore(__DIR__ . '/../storage/cache/responses'),
+    ttlSeconds: 60,
+    namespace: 'api'
+));
 ```
 
 ## 8) 🧪 HTTP Testing

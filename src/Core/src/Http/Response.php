@@ -31,6 +31,18 @@ class Response
     }
 
     /**
+     * Make and return self.
+     * @param string $body Input value.
+     * @param int $status Input value.
+     * @param array<string, string> $headers Input value.
+     * @return self Output value.
+     */
+    public static function make(string $body = '', int $status = 200, array $headers = []): self
+    {
+        return new self($status, $body, $headers);
+    }
+
+    /**
      * Json and return self.
      * @param mixed $data Input value.
      * @param int $status Input value.

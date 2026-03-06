@@ -11,6 +11,8 @@ Maia is an opinionated, API-first PHP framework built as a mono-repo with four p
 
 👉 See [docs/EXAMPLES.md](docs/EXAMPLES.md) for full usage patterns — bootstrap, controllers, models, validation, relationships, testing, and more.
 
+Recent additions include query-builder `upsert()`, `join()` / `leftJoin()`, `groupBy()` / `having()`, SQLite pragma helpers via `Connection::sqlite()`, and generic response caching middleware in `maia/core`.
+
 ## 📋 Requirements
 
 - PHP `^8.2`

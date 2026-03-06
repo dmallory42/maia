@@ -60,4 +60,34 @@ class ConnectionTest extends TestCase
 
         $this->assertSame('1', $this->connection->lastInsertId());
     }
+
+    public function testSqliteFactoryAppliesConfiguredPragmas(): void
+    {
+        $connection = Connection::sqlite(':memory:', [
+            'foreign_keys' => true,
+            'busy_timeout' => 5000,
+            'journal_mode' => 'WAL',
+            'synchronous' => 'NORMAL',
+        ]);
+
+        $foreignKeys = $connection->query('PRAGMA foreign_keys');
+        $busyTimeout = $connection->query('PRAGMA busy_timeout');
+
+        $this->assertSame(1, (int) $foreignKeys[0]['foreign_keys']);
+        $this->assertSame(5000, (int) $busyTimeout[0]['timeout']);
+    }
+
+    public function testConfigureSqliteCanBeAppliedAfterConstruction(): void
+    {
+        $this->connection->configureSqlite([
+            'foreign_keys' => true,
+            'busy_timeout' => 2500,
+        ]);
+
+        $foreignKeys = $this->connection->query('PRAGMA foreign_keys');
+        $busyTimeout = $this->connection->query('PRAGMA busy_timeout');
+
+        $this->assertSame(1, (int) $foreignKeys[0]['foreign_keys']);
+        $this->assertSame(2500, (int) $busyTimeout[0]['timeout']);
+    }
 }

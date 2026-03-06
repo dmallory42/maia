@@ -51,4 +51,13 @@ class ResponseTest extends TestCase
 
         $this->assertEquals(200, $response->status());
     }
+
+    public function testMakeBuildsResponseWithHeaders(): void
+    {
+        $response = Response::make('cached-body', 202, ['X-Test' => 'cached']);
+
+        $this->assertSame(202, $response->status());
+        $this->assertSame('cached-body', $response->body());
+        $this->assertSame('cached', $response->header('x-test'));
+    }
 }

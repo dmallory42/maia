@@ -94,4 +94,14 @@ class RequestTest extends TestCase
         $this->assertEquals('application/json', $request->header('content-type'));
         $this->assertEquals('application/json', $request->header('CONTENT-TYPE'));
     }
+
+    public function testQueryParamsReturnsAllParameters(): void
+    {
+        $request = new Request('GET', '/users', ['page' => '2', 'filter' => 'active'], [], null, []);
+
+        $this->assertSame([
+            'page' => '2',
+            'filter' => 'active',
+        ], $request->queryParams());
+    }
 }

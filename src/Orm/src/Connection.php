@@ -38,6 +38,25 @@ class Connection
     }
 
     /**
+     * Sqlite and return self.
+     * @param string $path Input value.
+     * @param array<string, bool|int|float|string|null> $pragmas Input value.
+     * @param array $options Input value.
+     * @return self Output value.
+     */
+    public static function sqlite(string $path = ':memory:', array $pragmas = [], array $options = []): self
+    {
+        $dsn = $path === ':memory:' ? 'sqlite::memory:' : 'sqlite:' . $path;
+        $connection = new self($dsn, null, null, $options);
+
+        if ($pragmas !== []) {
+            $connection->configureSqlite($pragmas);
+        }
+
+        return $connection;
+    }
+
+    /**
      * Query and return array.
      * @param string $sql Input value.
      * @param array $params Input value.
@@ -84,6 +103,28 @@ class Connection
     }
 
     /**
+     * Configure sqlite and return void.
+     * @param array<string, bool|int|float|string|null> $pragmas Input value.
+     * @return void Output value.
+     */
+    public function configureSqlite(array $pragmas): void
+    {
+        $driver = (string) $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver !== 'sqlite') {
+            return;
+        }
+
+        foreach ($pragmas as $name => $value) {
+            $pragma = trim($name);
+            if ($pragma === '') {
+                continue;
+            }
+
+            $this->pdo->exec(sprintf('PRAGMA %s = %s', $pragma, $this->quotePragmaValue($value)));
+        }
+    }
+
+    /**
      * Prepare and execute and return PDOStatement.
      * @param string $sql Input value.
      * @param array $params Input value.
@@ -92,8 +133,40 @@ class Connection
     private function prepareAndExecute(string $sql, array $params): PDOStatement
     {
         $statement = $this->pdo->prepare($sql);
-        $statement->execute($params);
+        foreach ($params as $key => $value) {
+            $parameter = is_int($key) ? $key + 1 : (string) $key;
+            $type = match (true) {
+                is_int($value) => PDO::PARAM_INT,
+                is_bool($value) => PDO::PARAM_BOOL,
+                $value === null => PDO::PARAM_NULL,
+                default => PDO::PARAM_STR,
+            };
+            $statement->bindValue($parameter, $value, $type);
+        }
+        $statement->execute();
 
         return $statement;
+    }
+
+    /**
+     * Quote pragma value and return string.
+     * @param bool|int|float|string|null $value Input value.
+     * @return string Output value.
+     */
+    private function quotePragmaValue(bool|int|float|string|null $value): string
+    {
+        if (is_bool($value)) {
+            return $value ? 'ON' : 'OFF';
+        }
+
+        if ($value === null) {
+            return 'NULL';
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return (string) $value;
+        }
+
+        return $this->pdo->quote($value);
     }
 }

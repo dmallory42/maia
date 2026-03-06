@@ -23,6 +23,32 @@ class QueryBuilder
      */
     private array $wheres = [];
 
+    /**
+     * @var array<int, array{
+     *     type: 'INNER'|'LEFT',
+     *     table: string,
+     *     first: string,
+     *     operator: string,
+     *     second: string
+     * }>
+     */
+    private array $joins = [];
+
+    /** @var array<int, string> */
+    private array $groupBys = [];
+
+    /**
+     * @var array<int, array{
+     *     type: 'basic'|'raw',
+     *     column?: string,
+     *     operator?: string,
+     *     value?: mixed,
+     *     sql?: string,
+     *     params?: array<int, mixed>
+     * }>
+     */
+    private array $havings = [];
+
     /** @var array<int, array{column: string, direction: string}> */
     private array $orders = [];
 
@@ -114,6 +140,99 @@ class QueryBuilder
             'type' => 'in',
             'column' => $column,
             'values' => array_values($values),
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Join and return self.
+     * @param string $table Input value.
+     * @param string $first Input value.
+     * @param string $operator Input value.
+     * @param string $second Input value.
+     * @param string $type Input value.
+     * @return self Output value.
+     */
+    public function join(
+        string $table,
+        string $first,
+        string $operator,
+        string $second,
+        string $type = 'INNER'
+    ): self {
+        $normalizedType = strtoupper($type);
+        $this->joins[] = [
+            'type' => $normalizedType === 'LEFT' ? 'LEFT' : 'INNER',
+            'table' => $table,
+            'first' => $first,
+            'operator' => $operator,
+            'second' => $second,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Left join and return self.
+     * @param string $table Input value.
+     * @param string $first Input value.
+     * @param string $operator Input value.
+     * @param string $second Input value.
+     * @return self Output value.
+     */
+    public function leftJoin(string $table, string $first, string $operator, string $second): self
+    {
+        return $this->join($table, $first, $operator, $second, 'LEFT');
+    }
+
+    /**
+     * Group by and return self.
+     * @param string... $columns Input value.
+     * @return self Output value.
+     */
+    public function groupBy(string ...$columns): self
+    {
+        if ($columns === []) {
+            return $this;
+        }
+
+        $this->groupBys = array_values(array_unique(array_merge($this->groupBys, $columns)));
+
+        return $this;
+    }
+
+    /**
+     * Having and return self.
+     * @param string $column Input value.
+     * @param mixed $value Input value.
+     * @param string $operator Input value.
+     * @return self Output value.
+     */
+    public function having(string $column, mixed $value, string $operator = '='): self
+    {
+        $this->havings[] = [
+            'type' => 'basic',
+            'column' => $column,
+            'operator' => $operator,
+            'value' => $value,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Having raw and return self.
+     * @param string $sql Input value.
+     * @param array<int, mixed> $params Input value.
+     * @return self Output value.
+     */
+    public function havingRaw(string $sql, array $params = []): self
+    {
+        $this->havings[] = [
+            'type' => 'raw',
+            'sql' => $sql,
+            'params' => array_values($params),
         ];
 
         return $this;
@@ -263,6 +382,45 @@ class QueryBuilder
     }
 
     /**
+     * Upsert and return int.
+     * @param array $data Input value.
+     * @param array<int, string> $conflictKeys Input value.
+     * @return int Output value.
+     */
+    public function upsert(array $data, array $conflictKeys): int
+    {
+        if ($data === [] || $conflictKeys === []) {
+            return 0;
+        }
+
+        $columns = array_keys($data);
+        $placeholders = implode(', ', array_fill(0, count($columns), '?'));
+        $columnSql = implode(', ', $columns);
+        $conflictSql = implode(', ', $conflictKeys);
+
+        $updateColumns = array_values(array_diff($columns, $conflictKeys));
+        $sql = sprintf(
+            'INSERT INTO %s (%s) VALUES (%s) ON CONFLICT (%s)',
+            $this->table,
+            $columnSql,
+            $placeholders,
+            $conflictSql
+        );
+
+        if ($updateColumns === []) {
+            $sql .= ' DO NOTHING';
+        } else {
+            $assignments = array_map(
+                static fn (string $column): string => sprintf('%s = excluded.%s', $column, $column),
+                $updateColumns
+            );
+            $sql .= ' DO UPDATE SET ' . implode(', ', $assignments);
+        }
+
+        return $this->connection->execute($sql, array_values($data));
+    }
+
+    /**
      * Update and return int.
      * @param array $data Input value.
      * @return int Output value.
@@ -317,8 +475,33 @@ class QueryBuilder
         $sql = sprintf('SELECT %s FROM %s', implode(', ', $this->columns), $this->table);
         [$whereSql, $params] = $this->compileWhereClause();
 
+        if ($this->joins !== []) {
+            $joinSql = array_map(
+                static fn (array $join): string => sprintf(
+                    '%s JOIN %s ON %s %s %s',
+                    $join['type'],
+                    $join['table'],
+                    $join['first'],
+                    $join['operator'],
+                    $join['second']
+                ),
+                $this->joins
+            );
+            $sql .= ' ' . implode(' ', $joinSql);
+        }
+
         if ($whereSql !== '') {
             $sql .= ' ' . $whereSql;
+        }
+
+        if ($this->groupBys !== []) {
+            $sql .= ' GROUP BY ' . implode(', ', $this->groupBys);
+        }
+
+        [$havingSql, $havingParams] = $this->compileHavingClause();
+        if ($havingSql !== '') {
+            $sql .= ' ' . $havingSql;
+            $params = array_merge($params, $havingParams);
         }
 
         if ($this->orders !== []) {
@@ -338,6 +521,33 @@ class QueryBuilder
         }
 
         return [$sql, $params];
+    }
+
+    /**
+     * Compile having clause and return array.
+     * @return array Output value.
+     */
+    private function compileHavingClause(): array
+    {
+        if ($this->havings === []) {
+            return ['', []];
+        }
+
+        $clauses = [];
+        $params = [];
+
+        foreach ($this->havings as $having) {
+            if ($having['type'] === 'raw') {
+                $clauses[] = $having['sql'] ?? '';
+                $params = array_merge($params, $having['params'] ?? []);
+                continue;
+            }
+
+            $clauses[] = sprintf('%s %s ?', $having['column'], $having['operator'] ?? '=');
+            $params[] = $having['value'] ?? null;
+        }
+
+        return ['HAVING ' . implode(' AND ', $clauses), $params];
     }
 
     /**

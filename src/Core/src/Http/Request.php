@@ -107,6 +107,15 @@ class Request
     }
 
     /**
+     * Query params and return array.
+     * @return array<string, mixed> Output value.
+     */
+    public function queryParams(): array
+    {
+        return $this->query;
+    }
+
+    /**
      * Param and return mixed.
      * @param string $key Input value.
      * @param mixed $default Input value.
