@@ -22,7 +22,7 @@ Recent additions include query-builder `upsert()`, `join()` / `leftJoin()`, `gro
 
 ## 🚀 Install Maia
 
-To use Maia in an application:
+To add Maia to an existing application:
 
 ```bash
 composer require maia/framework:^0.1
@@ -32,15 +32,21 @@ composer require maia/framework:^0.1
 
 This flow gets you from an empty directory to a running API with database-backed routes.
 
-**1. Scaffold a project**
+**1. Install the Maia CLI**
+
+```bash
+composer global require maia/framework:^0.1
+```
+
+**2. Scaffold a project**
 
 Creates a new Maia app skeleton with standard directories (`app/`, `config/`, `routes/`, `database/`, `public/`) and framework wiring.
 
 ```bash
-php bin/maia new my-app
+maia new my-app
 ```
 
-**2. Set up local environment**
+**3. Set up local environment**
 
 ```bash
 cd my-app
@@ -48,17 +54,17 @@ cp .env.example .env
 touch database/database.sqlite
 ```
 
-**3. Scaffold your first controller**
+**4. Scaffold your first controller**
 
 ```bash
 vendor/bin/maia create:controller UserController
 ```
 
-**4. Register controllers and wire bootstrap**
+**5. Register controllers and wire bootstrap**
 
 Controllers are registered explicitly at boot time — this keeps startup behavior predictable. Full wiring examples are in [docs/EXAMPLES.md](docs/EXAMPLES.md).
 
-**5. Migrate and run**
+**6. Migrate and run**
 
 ```bash
 vendor/bin/maia migrate

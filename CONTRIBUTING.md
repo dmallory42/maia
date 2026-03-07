@@ -47,7 +47,6 @@ src/Core/           # core framework module
 src/Orm/            # ORM module
 src/Auth/           # auth/security module
 src/Cli/            # CLI module
-docs/plans/         # original design and implementation plan
 docs/EXAMPLES.md    # practical app usage examples
 tests/Integration/  # full-stack integration tests
 ```
