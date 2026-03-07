@@ -78,6 +78,29 @@ return static function (App $app): void {
 };
 ```
 
+`config/app.php` can provide container bindings that `App::create()` applies automatically:
+
+```php
+<?php
+
+use App\Services\Clock;
+use Maia\Auth\Validator;
+use Maia\Core\Container\Container;
+use Maia\Core\Config\Env;
+
+return [
+    'name' => Env::get('APP_NAME', 'my-app'),
+    'env' => Env::get('APP_ENV', 'local'),
+    'debug' => Env::get('APP_DEBUG', 'true') === 'true',
+    'factories' => [
+        Clock::class => static fn (Container $container): Clock => new Clock(),
+    ],
+    'singletons' => [
+        Validator::class => static fn (Container $container): Validator => new Validator(),
+    ],
+];
+```
+
 ## 3) 🎯 Controller + Attribute Routes + DI
 
 `app/Controllers/UserController.php`:
