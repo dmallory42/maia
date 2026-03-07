@@ -8,19 +8,19 @@ use PDO;
 use PDOStatement;
 
 /**
- * Connection defines a framework component for this package.
+ * PDO database connection wrapper with automatic error handling and parameter binding.
  */
 class Connection
 {
     private PDO $pdo;
 
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string $dsn Input value.
-     * @param string|null $username Input value.
-     * @param string|null $password Input value.
-     * @param array $options Input value.
-     * @return void Output value.
+     * Open a PDO connection with exception-mode and associative fetches enabled by default.
+     * @param string $dsn PDO data source name (e.g. "sqlite::memory:" or "mysql:host=...").
+     * @param string|null $username Database username, if required by the driver.
+     * @param string|null $password Database password, if required by the driver.
+     * @param array $options Additional PDO driver options merged over the defaults.
+     * @return void
      */
     public function __construct(
         string $dsn,
@@ -38,11 +38,11 @@ class Connection
     }
 
     /**
-     * Sqlite and return self.
-     * @param string $path Input value.
-     * @param array<string, bool|int|float|string|null> $pragmas Input value.
-     * @param array $options Input value.
-     * @return self Output value.
+     * Create a SQLite connection, optionally applying PRAGMA settings.
+     * @param string $path Filesystem path to the SQLite database or ":memory:" for in-memory.
+     * @param array<string, bool|int|float|string|null> $pragmas Map of PRAGMA names to values to execute on connect.
+     * @param array $options Additional PDO driver options.
+     * @return self The configured SQLite connection.
      */
     public static function sqlite(string $path = ':memory:', array $pragmas = [], array $options = []): self
     {
@@ -57,10 +57,10 @@ class Connection
     }
 
     /**
-     * Query and return array.
-     * @param string $sql Input value.
-     * @param array $params Input value.
-     * @return array Output value.
+     * Execute a SELECT query and return all matching rows as associative arrays.
+     * @param string $sql The SQL statement, optionally with parameter placeholders.
+     * @param array $params Positional or named parameter values to bind.
+     * @return array List of associative-array rows.
      */
     public function query(string $sql, array $params = []): array
     {
@@ -72,10 +72,10 @@ class Connection
     }
 
     /**
-     * Execute and return int.
-     * @param string $sql Input value.
-     * @param array $params Input value.
-     * @return int Output value.
+     * Execute a non-SELECT statement (INSERT, UPDATE, DELETE, DDL) and return the affected row count.
+     * @param string $sql The SQL statement, optionally with parameter placeholders.
+     * @param array $params Positional or named parameter values to bind.
+     * @return int Number of rows affected by the statement.
      */
     public function execute(string $sql, array $params = []): int
     {
@@ -85,8 +85,8 @@ class Connection
     }
 
     /**
-     * Last insert id and return string.
-     * @return string Output value.
+     * Return the ID of the last inserted row.
+     * @return string The last auto-generated insert ID as a string.
      */
     public function lastInsertId(): string
     {
@@ -94,8 +94,8 @@ class Connection
     }
 
     /**
-     * Pdo and return PDO.
-     * @return PDO Output value.
+     * Return the underlying PDO instance.
+     * @return PDO The raw PDO connection.
      */
     public function pdo(): PDO
     {
@@ -103,9 +103,9 @@ class Connection
     }
 
     /**
-     * Configure sqlite and return void.
-     * @param array<string, bool|int|float|string|null> $pragmas Input value.
-     * @return void Output value.
+     * Apply PRAGMA statements to a SQLite connection; no-op for other drivers.
+     * @param array<string, bool|int|float|string|null> $pragmas Map of PRAGMA names to their desired values.
+     * @return void
      */
     public function configureSqlite(array $pragmas): void
     {
@@ -125,10 +125,10 @@ class Connection
     }
 
     /**
-     * Prepare and execute and return PDOStatement.
-     * @param string $sql Input value.
-     * @param array $params Input value.
-     * @return PDOStatement Output value.
+     * Prepare a statement, bind parameters with automatic type detection, and execute it.
+     * @param string $sql The SQL statement with optional placeholders.
+     * @param array $params Positional or named parameter values to bind.
+     * @return PDOStatement The executed statement ready for fetching or row-count inspection.
      */
     private function prepareAndExecute(string $sql, array $params): PDOStatement
     {
@@ -149,9 +149,9 @@ class Connection
     }
 
     /**
-     * Quote pragma value and return string.
-     * @param bool|int|float|string|null $value Input value.
-     * @return string Output value.
+     * Convert a PHP value into a SQLite-safe PRAGMA literal (ON/OFF, numeric, quoted string, or NULL).
+     * @param bool|int|float|string|null $value The PHP value to convert.
+     * @return string The SQL-safe literal representation.
      */
     private function quotePragmaValue(bool|int|float|string|null $value): string
     {

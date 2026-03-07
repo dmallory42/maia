@@ -31,6 +31,12 @@ If you want a stricter commit threshold:
 MAIA_TEST_THRESHOLD=100 git commit -m "..."
 ```
 
+## Comments and docblocks
+
+- Prefer comments that explain intent, constraints, edge cases, or tradeoffs.
+- Avoid boilerplate docblocks that only restate the method signature or add placeholders like `Input value` / `Output value`.
+- If a method is straightforward, keep the docblock brief rather than padding it with low-signal prose.
+
 ## Smoke test
 
 Verify that a newly scaffolded app installs and boots:

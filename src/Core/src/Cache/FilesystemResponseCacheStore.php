@@ -5,22 +5,22 @@ declare(strict_types=1);
 namespace Maia\Core\Cache;
 
 /**
- * FilesystemResponseCacheStore defines a framework component for this package.
+ * Filesystem-backed cache store for serialized HTTP responses.
  */
 class FilesystemResponseCacheStore implements ResponseCacheStore
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string $directory Input value.
-     * @return void Output value.
+     * Use the given directory for storing cache files.
+     * @param string $directory Filesystem directory where cache entries are stored.
+     * @return void
      */
     public function __construct(private string $directory)
     {
     }
 
     /**
-     * Is available and return bool.
-     * @return bool Output value.
+     * Report whether the cache directory exists and is writable.
+     * @return bool True when cache files can be read and written.
      */
     public function isAvailable(): bool
     {
@@ -36,9 +36,9 @@ class FilesystemResponseCacheStore implements ResponseCacheStore
     }
 
     /**
-     * Get and return string|null.
-     * @param string $key Input value.
-     * @return string|null Output value.
+     * Read a cached response payload from disk if it exists and has not expired.
+     * @param string $key Cache key.
+     * @return string|null Serialized cached response payload, or null if unavailable.
      */
     public function get(string $key): ?string
     {
@@ -70,11 +70,11 @@ class FilesystemResponseCacheStore implements ResponseCacheStore
     }
 
     /**
-     * Set and return void.
-     * @param string $key Input value.
-     * @param int $ttlSeconds Input value.
-     * @param string $value Input value.
-     * @return void Output value.
+     * Persist a serialized response payload to disk with an expiration timestamp.
+     * @param string $key Cache key.
+     * @param int $ttlSeconds Time to live in seconds.
+     * @param string $value Serialized cached response payload.
+     * @return void
      */
     public function set(string $key, int $ttlSeconds, string $value): void
     {
@@ -95,9 +95,9 @@ class FilesystemResponseCacheStore implements ResponseCacheStore
     }
 
     /**
-     * Path for and return string.
-     * @param string $key Input value.
-     * @return string Output value.
+     * Convert a cache key into its on-disk file path.
+     * @param string $key Cache key.
+     * @return string Absolute cache file path.
      */
     private function pathFor(string $key): string
     {

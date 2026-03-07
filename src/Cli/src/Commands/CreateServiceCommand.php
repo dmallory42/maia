@@ -7,13 +7,13 @@ namespace Maia\Cli\Commands;
 use Maia\Cli\Output;
 
 /**
- * CreateServiceCommand defines a framework component for this package.
+ * CLI command that scaffolds an application service class.
  */
 class CreateServiceCommand extends BaseCreateCommand
 {
     /**
-     * Name and return string.
-     * @return string Output value.
+     * Return the CLI command name.
+     * @return string Command identifier.
      */
     public function name(): string
     {
@@ -21,8 +21,8 @@ class CreateServiceCommand extends BaseCreateCommand
     }
 
     /**
-     * Description and return string.
-     * @return string Output value.
+     * Return the help description.
+     * @return string Short summary for CLI help.
      */
     public function description(): string
     {
@@ -30,10 +30,10 @@ class CreateServiceCommand extends BaseCreateCommand
     }
 
     /**
-     * Execute and return int.
-     * @param array $args Input value.
-     * @param Output $output Input value.
-     * @return int Output value.
+     * Generate a service scaffold in app/Services.
+     * @param array $args CLI arguments containing the service class name.
+     * @param Output $output Output writer for status messages.
+     * @return int Exit code.
      */
     public function execute(array $args, Output $output): int
     {

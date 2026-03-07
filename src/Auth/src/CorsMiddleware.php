@@ -10,16 +10,16 @@ use Maia\Core\Http\Response;
 use Maia\Core\Middleware\Middleware;
 
 /**
- * CorsMiddleware defines a framework component for this package.
+ * Middleware that applies Cross-Origin Resource Sharing (CORS) headers and handles preflight requests.
  */
 class CorsMiddleware implements Middleware
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param array $allowedOrigins Input value.
-     * @param array $allowedMethods Input value.
-     * @param array $allowedHeaders Input value.
-     * @return void Output value.
+     * Configure the CORS policy with allowed origins, methods, and headers.
+     * @param array $allowedOrigins Origins permitted to make cross-origin requests (use ['*'] for any).
+     * @param array $allowedMethods HTTP methods allowed in cross-origin requests.
+     * @param array $allowedHeaders HTTP headers the client is allowed to send.
+     * @return void
      */
     public function __construct(
         private array $allowedOrigins = ['*'],
@@ -29,10 +29,10 @@ class CorsMiddleware implements Middleware
     }
 
     /**
-     * Handle and return Response.
-     * @param Request $request Input value.
-     * @param Closure $next Input value.
-     * @return Response Output value.
+     * Enforce the CORS policy: reject disallowed origins, respond to preflight, and add CORS headers.
+     * @param Request $request The incoming HTTP request.
+     * @param Closure $next The next middleware or route handler in the pipeline.
+     * @return Response A 403 for denied origins, a 204 for preflight, or the downstream response with CORS headers.
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -52,9 +52,9 @@ class CorsMiddleware implements Middleware
     }
 
     /**
-     * Is origin allowed and return bool.
-     * @param string $origin Input value.
-     * @return bool Output value.
+     * Check whether the given origin is in the allowed list or wildcarded.
+     * @param string $origin The Origin header value from the request.
+     * @return bool True if the origin is permitted.
      */
     private function isOriginAllowed(string $origin): bool
     {
@@ -63,10 +63,10 @@ class CorsMiddleware implements Middleware
     }
 
     /**
-     * Apply headers and return Response.
-     * @param Response $response Input value.
-     * @param string|null $origin Input value.
-     * @return Response Output value.
+     * Attach CORS response headers (Allow-Origin, Allow-Methods, Allow-Headers, Vary).
+     * @param Response $response The response to decorate with CORS headers.
+     * @param string|null $origin The request's Origin header, or null if absent.
+     * @return Response The response with CORS headers applied.
      */
     private function applyHeaders(Response $response, ?string $origin): Response
     {

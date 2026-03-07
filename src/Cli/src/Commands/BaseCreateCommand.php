@@ -8,22 +8,22 @@ use Maia\Cli\Command;
 use Maia\Cli\Output;
 
 /**
- * BaseCreateCommand defines a framework component for this package.
+ * Shared scaffolding logic for all create:* commands.
  */
 abstract class BaseCreateCommand extends Command
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string|null $workspace Input value.
-     * @return void Output value.
+     * Set up the scaffolding command with an optional workspace override.
+     * @param string|null $workspace Project root directory; defaults to the current working directory.
+     * @return void
      */
     public function __construct(protected ?string $workspace = null)
     {
     }
 
     /**
-     * Root path and return string.
-     * @return string Output value.
+     * Resolve the project root directory.
+     * @return string Absolute path to the project root.
      */
     protected function rootPath(): string
     {
@@ -31,10 +31,10 @@ abstract class BaseCreateCommand extends Command
     }
 
     /**
-     * Write file and return void.
-     * @param string $relativePath Input value.
-     * @param string $content Input value.
-     * @return void Output value.
+     * Write content to a file relative to the project root, creating directories as needed.
+     * @param string $relativePath File path relative to the project root.
+     * @param string $content The file contents to write.
+     * @return void
      */
     protected function writeFile(string $relativePath, string $content): void
     {
@@ -49,11 +49,11 @@ abstract class BaseCreateCommand extends Command
     }
 
     /**
-     * Require name and return string|null.
-     * @param array $args Input value.
-     * @param Output $output Input value.
-     * @param string $label Input value.
-     * @return string|null Output value.
+     * Extract the first positional argument as a required name, or emit an error.
+     * @param array $args CLI arguments passed to the command.
+     * @param Output $output Output writer for error reporting.
+     * @param string $label Human-readable label used in the error message (e.g. 'controller name').
+     * @return string|null The trimmed name, or null if missing.
      */
     protected function requireName(array $args, Output $output, string $label = 'name'): ?string
     {
@@ -68,9 +68,9 @@ abstract class BaseCreateCommand extends Command
     }
 
     /**
-     * Class basename and return string.
-     * @param string $name Input value.
-     * @return string Output value.
+     * Strip a trailing .php extension to produce a class name.
+     * @param string $name Raw input that may include a .php suffix.
+     * @return string The class name without a file extension.
      */
     protected function classBasename(string $name): string
     {
@@ -80,9 +80,9 @@ abstract class BaseCreateCommand extends Command
     }
 
     /**
-     * Snake case and return string.
-     * @param string $value Input value.
-     * @return string Output value.
+     * Convert a PascalCase or camelCase string to snake_case.
+     * @param string $value The string to convert.
+     * @return string The snake_cased result.
      */
     protected function snakeCase(string $value): string
     {

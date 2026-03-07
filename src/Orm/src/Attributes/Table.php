@@ -8,14 +8,14 @@ use Attribute;
 
 #[Attribute(Attribute::TARGET_CLASS)]
 /**
- * Table defines a framework component for this package.
+ * Attribute that overrides the database table name used by a model.
  */
 class Table
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string $name Input value.
-     * @return void Output value.
+     * Set the table name for the annotated model class.
+     * @param string $name Database table name.
+     * @return void
      */
     public function __construct(public string $name)
     {

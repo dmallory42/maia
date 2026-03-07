@@ -10,15 +10,15 @@ use Maia\Orm\Connection;
 use Maia\Orm\Migrator;
 
 /**
- * MigrateRollbackCommand defines a framework component for this package.
+ * CLI command that rolls back the most recent migration batch.
  */
 class MigrateRollbackCommand extends Command
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param Connection|null $connection Input value.
-     * @param string|null $migrationDir Input value.
-     * @return void Output value.
+     * Configure the command with optional connection and migration directory overrides.
+     * @param Connection|null $connection Database connection to use; defaults to the local SQLite database.
+     * @param string|null $migrationDir Directory containing migration files; defaults to database/migrations.
+     * @return void
      */
     public function __construct(
         private ?Connection $connection = null,
@@ -27,8 +27,8 @@ class MigrateRollbackCommand extends Command
     }
 
     /**
-     * Name and return string.
-     * @return string Output value.
+     * Return the CLI command name.
+     * @return string Command identifier.
      */
     public function name(): string
     {
@@ -36,8 +36,8 @@ class MigrateRollbackCommand extends Command
     }
 
     /**
-     * Description and return string.
-     * @return string Output value.
+     * Return the help description.
+     * @return string Short summary for CLI help.
      */
     public function description(): string
     {
@@ -45,10 +45,10 @@ class MigrateRollbackCommand extends Command
     }
 
     /**
-     * Execute and return int.
-     * @param array $args Input value.
-     * @param Output $output Input value.
-     * @return int Output value.
+     * Roll back the latest migration batch and report the number of files reverted.
+     * @param array $args CLI arguments (unused).
+     * @param Output $output Output writer for text or JSON status reporting.
+     * @return int Exit code.
      */
     public function execute(array $args, Output $output): int
     {
@@ -65,8 +65,8 @@ class MigrateRollbackCommand extends Command
     }
 
     /**
-     * Connection and return Connection.
-     * @return Connection Output value.
+     * Resolve the database connection used for migration bookkeeping.
+     * @return Connection Database connection.
      */
     private function connection(): Connection
     {
@@ -74,8 +74,8 @@ class MigrateRollbackCommand extends Command
     }
 
     /**
-     * Migration directory and return string.
-     * @return string Output value.
+     * Resolve the migration directory to read rollback files from.
+     * @return string Absolute migration directory path.
      */
     private function migrationDirectory(): string
     {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Maia\Orm;
 
 /**
- * QueryBuilder defines a framework component for this package.
+ * Fluent SQL query builder supporting SELECT, INSERT, UPDATE, DELETE, joins, and eager-loading.
  */
 class QueryBuilder
 {
@@ -61,10 +61,10 @@ class QueryBuilder
     private ?string $modelClass = null;
 
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string $table Input value.
-     * @param Connection $connection Input value.
-     * @return void Output value.
+     * Build a new query targeting the given table over the provided connection.
+     * @param string $table The database table to query against.
+     * @param Connection $connection The database connection to execute queries on.
+     * @return void
      */
     private function __construct(
         private string $table,
@@ -73,10 +73,10 @@ class QueryBuilder
     }
 
     /**
-     * Table and return self.
-     * @param string $table Input value.
-     * @param Connection $connection Input value.
-     * @return self Output value.
+     * Create a new query builder for the specified table.
+     * @param string $table The database table name.
+     * @param Connection $connection The database connection to use.
+     * @return self A fresh query builder instance.
      */
     public static function table(string $table, Connection $connection): self
     {
@@ -84,9 +84,9 @@ class QueryBuilder
     }
 
     /**
-     * Select and return self.
-     * @param string... $columns Input value.
-     * @return self Output value.
+     * Set the columns to retrieve in the SELECT clause.
+     * @param string... $columns Column names or expressions to select.
+     * @return self This builder for chaining.
      */
     public function select(string ...$columns): self
     {
@@ -100,11 +100,11 @@ class QueryBuilder
     }
 
     /**
-     * Where and return self.
-     * @param string $column Input value.
-     * @param mixed $value Input value.
-     * @param string $operator Input value.
-     * @return self Output value.
+     * Add a WHERE condition comparing a column to a value.
+     * @param string $column The column name to filter on.
+     * @param mixed $value The value to compare against.
+     * @param string $operator The comparison operator (defaults to "=").
+     * @return self This builder for chaining.
      */
     public function where(string $column, mixed $value, string $operator = '='): self
     {
@@ -119,10 +119,10 @@ class QueryBuilder
     }
 
     /**
-     * Where in and return self.
-     * @param string $column Input value.
-     * @param array $values Input value.
-     * @return self Output value.
+     * Add a WHERE IN condition; an empty values array produces a false condition.
+     * @param string $column The column name to filter on.
+     * @param array $values The list of values the column must match.
+     * @return self This builder for chaining.
      */
     public function whereIn(string $column, array $values): self
     {
@@ -146,13 +146,13 @@ class QueryBuilder
     }
 
     /**
-     * Join and return self.
-     * @param string $table Input value.
-     * @param string $first Input value.
-     * @param string $operator Input value.
-     * @param string $second Input value.
-     * @param string $type Input value.
-     * @return self Output value.
+     * Add a JOIN clause to the query.
+     * @param string $table The table to join.
+     * @param string $first The left-hand column of the ON condition.
+     * @param string $operator The comparison operator for the ON condition.
+     * @param string $second The right-hand column of the ON condition.
+     * @param string $type Join type: "INNER" or "LEFT" (defaults to "INNER").
+     * @return self This builder for chaining.
      */
     public function join(
         string $table,
@@ -174,12 +174,12 @@ class QueryBuilder
     }
 
     /**
-     * Left join and return self.
-     * @param string $table Input value.
-     * @param string $first Input value.
-     * @param string $operator Input value.
-     * @param string $second Input value.
-     * @return self Output value.
+     * Add a LEFT JOIN clause to the query.
+     * @param string $table The table to join.
+     * @param string $first The left-hand column of the ON condition.
+     * @param string $operator The comparison operator for the ON condition.
+     * @param string $second The right-hand column of the ON condition.
+     * @return self This builder for chaining.
      */
     public function leftJoin(string $table, string $first, string $operator, string $second): self
     {
@@ -187,9 +187,9 @@ class QueryBuilder
     }
 
     /**
-     * Group by and return self.
-     * @param string... $columns Input value.
-     * @return self Output value.
+     * Add one or more columns to the GROUP BY clause.
+     * @param string... $columns Column names to group by.
+     * @return self This builder for chaining.
      */
     public function groupBy(string ...$columns): self
     {
@@ -203,11 +203,11 @@ class QueryBuilder
     }
 
     /**
-     * Having and return self.
-     * @param string $column Input value.
-     * @param mixed $value Input value.
-     * @param string $operator Input value.
-     * @return self Output value.
+     * Add a HAVING condition comparing a column to a value.
+     * @param string $column The column or aggregate expression to filter on.
+     * @param mixed $value The value to compare against.
+     * @param string $operator The comparison operator (defaults to "=").
+     * @return self This builder for chaining.
      */
     public function having(string $column, mixed $value, string $operator = '='): self
     {
@@ -222,10 +222,10 @@ class QueryBuilder
     }
 
     /**
-     * Having raw and return self.
-     * @param string $sql Input value.
-     * @param array<int, mixed> $params Input value.
-     * @return self Output value.
+     * Add a raw HAVING expression with optional parameter bindings.
+     * @param string $sql Raw SQL expression for the HAVING clause.
+     * @param array<int, mixed> $params Positional parameter values to bind into the expression.
+     * @return self This builder for chaining.
      */
     public function havingRaw(string $sql, array $params = []): self
     {
@@ -239,10 +239,10 @@ class QueryBuilder
     }
 
     /**
-     * Order by and return self.
-     * @param string $column Input value.
-     * @param string $direction Input value.
-     * @return self Output value.
+     * Add an ORDER BY clause for the given column.
+     * @param string $column The column to sort by.
+     * @param string $direction Sort direction: "asc" or "desc" (defaults to "asc").
+     * @return self This builder for chaining.
      */
     public function orderBy(string $column, string $direction = 'asc'): self
     {
@@ -256,9 +256,9 @@ class QueryBuilder
     }
 
     /**
-     * Limit and return self.
-     * @param int $limit Input value.
-     * @return self Output value.
+     * Set the maximum number of rows to return.
+     * @param int $limit Maximum row count (clamped to 0 minimum).
+     * @return self This builder for chaining.
      */
     public function limit(int $limit): self
     {
@@ -268,9 +268,9 @@ class QueryBuilder
     }
 
     /**
-     * Offset and return self.
-     * @param int $offset Input value.
-     * @return self Output value.
+     * Set the number of rows to skip before returning results.
+     * @param int $offset Number of rows to skip (clamped to 0 minimum).
+     * @return self This builder for chaining.
      */
     public function offset(int $offset): self
     {
@@ -280,9 +280,9 @@ class QueryBuilder
     }
 
     /**
-     * With and return self.
-     * @param string... $relations Input value.
-     * @return self Output value.
+     * Register relation names to eager-load when hydrating models.
+     * @param string... $relations Relation names defined on the model class.
+     * @return self This builder for chaining.
      */
     public function with(string ...$relations): self
     {
@@ -292,9 +292,9 @@ class QueryBuilder
     }
 
     /**
-     * For model and return self.
-     * @param string $modelClass Input value.
-     * @return self Output value.
+     * Bind this query to a Model subclass so results are hydrated as model instances.
+     * @param string $modelClass Fully-qualified class name of the Model subclass.
+     * @return self This builder for chaining.
      */
     public function forModel(string $modelClass): self
     {
@@ -304,8 +304,8 @@ class QueryBuilder
     }
 
     /**
-     * Get and return array.
-     * @return array Output value.
+     * Execute the query and return all matching rows, hydrated as models if a model class is set.
+     * @return array List of associative arrays or model instances.
      */
     public function get(): array
     {
@@ -320,8 +320,8 @@ class QueryBuilder
     }
 
     /**
-     * First and return mixed.
-     * @return mixed Output value.
+     * Execute the query and return the first matching row, or null if none found.
+     * @return mixed A single row (array or model instance), or null.
      */
     public function first(): mixed
     {
@@ -333,9 +333,9 @@ class QueryBuilder
     }
 
     /**
-     * Find and return mixed.
-     * @param int|string $id Input value.
-     * @return mixed Output value.
+     * Find a single row by its "id" column value.
+     * @param int|string $id The primary key value to look up.
+     * @return mixed The matching row or model instance, or null if not found.
      */
     public function find(int|string $id): mixed
     {
@@ -343,8 +343,8 @@ class QueryBuilder
     }
 
     /**
-     * Count and return int.
-     * @return int Output value.
+     * Return the number of rows matching the current query conditions.
+     * @return int The row count.
      */
     public function count(): int
     {
@@ -361,9 +361,9 @@ class QueryBuilder
     }
 
     /**
-     * Insert and return int.
-     * @param array $data Input value.
-     * @return int Output value.
+     * Insert a row into the table and return the auto-generated ID.
+     * @param array $data Column-value pairs to insert; an empty array is a no-op.
+     * @return int The last insert ID, or 0 if data was empty.
      */
     public function insert(array $data): int
     {
@@ -382,10 +382,10 @@ class QueryBuilder
     }
 
     /**
-     * Upsert and return int.
-     * @param array $data Input value.
-     * @param array<int, string> $conflictKeys Input value.
-     * @return int Output value.
+     * Insert a row or update it on conflict using ON CONFLICT ... DO UPDATE.
+     * @param array $data Column-value pairs to insert or update.
+     * @param array<int, string> $conflictKeys Columns that form the unique constraint for conflict detection.
+     * @return int Number of rows affected.
      */
     public function upsert(array $data, array $conflictKeys): int
     {
@@ -421,9 +421,9 @@ class QueryBuilder
     }
 
     /**
-     * Update and return int.
-     * @param array $data Input value.
-     * @return int Output value.
+     * Update rows matching the current WHERE conditions with the given data.
+     * @param array $data Column-value pairs to set; an empty array is a no-op.
+     * @return int Number of rows affected.
      */
     public function update(array $data): int
     {
@@ -451,8 +451,8 @@ class QueryBuilder
     }
 
     /**
-     * Delete and return int.
-     * @return int Output value.
+     * Delete rows matching the current WHERE conditions.
+     * @return int Number of rows deleted.
      */
     public function delete(): int
     {
@@ -467,8 +467,8 @@ class QueryBuilder
     }
 
     /**
-     * Compile select and return array.
-     * @return array Output value.
+     * Compile the full SELECT SQL statement and its bound parameters from the builder state.
+     * @return array{0: string, 1: array} A tuple of [sql, params].
      */
     private function compileSelect(): array
     {
@@ -524,8 +524,8 @@ class QueryBuilder
     }
 
     /**
-     * Compile having clause and return array.
-     * @return array Output value.
+     * Compile all HAVING conditions into a SQL fragment and its bound parameters.
+     * @return array{0: string, 1: array} A tuple of [havingSql, params]; empty string if no conditions.
      */
     private function compileHavingClause(): array
     {
@@ -551,8 +551,8 @@ class QueryBuilder
     }
 
     /**
-     * Compile where clause and return array.
-     * @return array Output value.
+     * Compile all WHERE conditions into a SQL fragment and its bound parameters.
+     * @return array{0: string, 1: array} A tuple of [whereSql, params]; empty string if no conditions.
      */
     private function compileWhereClause(): array
     {
@@ -585,9 +585,9 @@ class QueryBuilder
     }
 
     /**
-     * Hydrate models and return array.
-     * @param array $rows Input value.
-     * @return array Output value.
+     * Convert raw database rows into model instances and eager-load any requested relations.
+     * @param array $rows Raw associative-array rows from the database.
+     * @return array List of hydrated model instances.
      */
     private function hydrateModels(array $rows): array
     {

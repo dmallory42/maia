@@ -10,7 +10,7 @@ use Maia\Core\Http\Request;
 use Maia\Core\Http\Response;
 
 /**
- * ResponseCacheMiddleware defines a framework component for this package.
+ * Middleware that caches eligible HTTP responses and serves cache hits on repeated requests.
  */
 class ResponseCacheMiddleware implements Middleware
 {
@@ -25,14 +25,14 @@ class ResponseCacheMiddleware implements Middleware
     private array $cacheableStatuses;
 
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param ResponseCacheStore $store Input value.
-     * @param int $ttlSeconds Input value.
-     * @param string $namespace Input value.
-     * @param callable|null $keyResolver Input value.
-     * @param array<int, string> $cacheableMethods Input value.
-     * @param array<int, int> $cacheableStatuses Input value.
-     * @return void Output value.
+     * Configure the response cache behavior and storage backend.
+     * @param ResponseCacheStore $store Cache backend used to store serialized responses.
+     * @param int $ttlSeconds Time to live for cache entries in seconds.
+     * @param string $namespace Namespace prefix applied to cache keys.
+     * @param callable|null $keyResolver Optional callback(request, namespace) that builds the cache key.
+     * @param array<int, string> $cacheableMethods HTTP methods eligible for caching.
+     * @param array<int, int> $cacheableStatuses Response status codes eligible for caching.
+     * @return void
      */
     public function __construct(
         private ResponseCacheStore $store,
@@ -47,10 +47,10 @@ class ResponseCacheMiddleware implements Middleware
     }
 
     /**
-     * Handle and return Response.
-     * @param Request $request Input value.
-     * @param Closure $next Input value.
-     * @return Response Output value.
+     * Serve a cached response when available, otherwise execute the request and cache the result.
+     * @param Request $request The incoming HTTP request.
+     * @param Closure $next The next middleware or route handler in the pipeline.
+     * @return Response Cached or freshly generated response with cache status header.
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -78,9 +78,9 @@ class ResponseCacheMiddleware implements Middleware
     }
 
     /**
-     * Should read cache and return bool.
-     * @param Request $request Input value.
-     * @return bool Output value.
+     * Check whether the request is eligible for cache lookup.
+     * @param Request $request The incoming HTTP request.
+     * @return bool True when the request method is cacheable and the store is available.
      */
     private function shouldReadCache(Request $request): bool
     {
@@ -88,9 +88,9 @@ class ResponseCacheMiddleware implements Middleware
     }
 
     /**
-     * Should store response and return bool.
-     * @param Response $response Input value.
-     * @return bool Output value.
+     * Check whether the response status is eligible for caching.
+     * @param Response $response The response produced by the downstream handler.
+     * @return bool True when the status code is cacheable.
      */
     private function shouldStoreResponse(Response $response): bool
     {
@@ -98,9 +98,9 @@ class ResponseCacheMiddleware implements Middleware
     }
 
     /**
-     * Cache key and return string.
-     * @param Request $request Input value.
-     * @return string Output value.
+     * Build the cache key for a request, using a custom resolver when configured.
+     * @param Request $request The incoming HTTP request.
+     * @return string Cache key string.
      */
     private function cacheKey(Request $request): string
     {
@@ -117,9 +117,9 @@ class ResponseCacheMiddleware implements Middleware
     }
 
     /**
-     * Encode response and return string.
-     * @param Response $response Input value.
-     * @return string Output value.
+     * Serialize a response into the payload stored in the cache backend.
+     * @param Response $response The response to serialize.
+     * @return string Serialized payload, or an empty string on encoding failure.
      */
     private function encodeResponse(Response $response): string
     {
@@ -133,9 +133,9 @@ class ResponseCacheMiddleware implements Middleware
     }
 
     /**
-     * Decode response and return Response|null.
-     * @param string $payload Input value.
-     * @return Response|null Output value.
+     * Reconstruct a Response object from a cached serialized payload.
+     * @param string $payload Serialized cache payload.
+     * @return Response|null Reconstructed response, or null if the payload is invalid.
      */
     private function decodeResponse(string $payload): ?Response
     {

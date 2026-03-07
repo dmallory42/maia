@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Maia\Core\Http;
 
 /**
- * Request defines a framework component for this package.
+ * Immutable-ish HTTP request value object with helpers for headers, query params, body decoding, and route attributes.
  */
 class Request
 {
@@ -26,15 +26,15 @@ class Request
     private bool $bodyDecoded = false;
 
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string $method Input value.
-     * @param string $path Input value.
-     * @param array $query Input value.
-     * @param array $headers Input value.
-     * @param string|null $body Input value.
-     * @param array $routeParams Input value.
-     * @param array $attributes Input value.
-     * @return void Output value.
+     * Build a request from explicit HTTP method, path, headers, body, and route metadata.
+     * @param string $method HTTP method (GET, POST, etc.).
+     * @param string $path Request path.
+     * @param array $query Query string parameters.
+     * @param array $headers Request headers.
+     * @param string|null $body Raw request body.
+     * @param array $routeParams Named route parameters extracted from the URL.
+     * @param array $attributes Additional per-request attributes.
+     * @return void
      */
     public function __construct(
         private string $method,
@@ -54,8 +54,8 @@ class Request
     }
 
     /**
-     * Capture and return self.
-     * @return self Output value.
+     * Capture a request from PHP superglobals.
+     * @return self Request instance populated from $_SERVER, $_GET, and php://input.
      */
     public static function capture(): self
     {
@@ -78,8 +78,8 @@ class Request
     }
 
     /**
-     * Method and return string.
-     * @return string Output value.
+     * Return the normalized HTTP method.
+     * @return string Uppercased HTTP method.
      */
     public function method(): string
     {
@@ -87,8 +87,8 @@ class Request
     }
 
     /**
-     * Path and return string.
-     * @return string Output value.
+     * Return the request path.
+     * @return string URL path without query string.
      */
     public function path(): string
     {
@@ -96,10 +96,10 @@ class Request
     }
 
     /**
-     * Query and return mixed.
-     * @param string $key Input value.
-     * @param mixed $default Input value.
-     * @return mixed Output value.
+     * Retrieve a query-string value with an optional default.
+     * @param string $key Query parameter name.
+     * @param mixed $default Default value when the key is absent.
+     * @return mixed Query parameter value or the provided default.
      */
     public function query(string $key, mixed $default = null): mixed
     {
@@ -107,8 +107,8 @@ class Request
     }
 
     /**
-     * Query params and return array.
-     * @return array<string, mixed> Output value.
+     * Return all query-string parameters.
+     * @return array<string, mixed> Query parameters.
      */
     public function queryParams(): array
     {
@@ -116,10 +116,10 @@ class Request
     }
 
     /**
-     * Param and return mixed.
-     * @param string $key Input value.
-     * @param mixed $default Input value.
-     * @return mixed Output value.
+     * Retrieve a named route parameter with an optional default.
+     * @param string $key Route parameter name.
+     * @param mixed $default Default value when the key is absent.
+     * @return mixed Route parameter value or the provided default.
      */
     public function param(string $key, mixed $default = null): mixed
     {
@@ -127,8 +127,8 @@ class Request
     }
 
     /**
-     * Body and return mixed.
-     * @return mixed Output value.
+     * Return the decoded request body, parsing JSON when the content type indicates it.
+     * @return mixed Decoded JSON payload, raw string body, or null when empty/invalid.
      */
     public function body(): mixed
     {
@@ -155,10 +155,10 @@ class Request
     }
 
     /**
-     * Header and return mixed.
-     * @param string $key Input value.
-     * @param mixed $default Input value.
-     * @return mixed Output value.
+     * Retrieve a request header case-insensitively.
+     * @param string $key Header name.
+     * @param mixed $default Default value when the header is absent.
+     * @return mixed Header value or the provided default.
      */
     public function header(string $key, mixed $default = null): mixed
     {
@@ -166,8 +166,8 @@ class Request
     }
 
     /**
-     * Bearer token and return string|null.
-     * @return string|null Output value.
+     * Extract the Bearer token from the Authorization header.
+     * @return string|null Bearer token, or null when missing/malformed.
      */
     public function bearerToken(): ?string
     {
@@ -184,10 +184,10 @@ class Request
     }
 
     /**
-     * With attribute and return self.
-     * @param string $key Input value.
-     * @param mixed $value Input value.
-     * @return self Output value.
+     * Return a cloned request with an additional attribute value.
+     * @param string $key Attribute name.
+     * @param mixed $value Attribute value.
+     * @return self Cloned request carrying the new attribute.
      */
     public function withAttribute(string $key, mixed $value): self
     {
@@ -197,10 +197,10 @@ class Request
     }
 
     /**
-     * Attribute and return mixed.
-     * @param string $key Input value.
-     * @param mixed $default Input value.
-     * @return mixed Output value.
+     * Retrieve a request attribute with an optional default.
+     * @param string $key Attribute name.
+     * @param mixed $default Default value when the attribute is absent.
+     * @return mixed Attribute value or the provided default.
      */
     public function attribute(string $key, mixed $default = null): mixed
     {
@@ -208,8 +208,8 @@ class Request
     }
 
     /**
-     * User and return mixed.
-     * @return mixed Output value.
+     * Convenience accessor for the authenticated user payload.
+     * @return mixed User attribute value, if set.
      */
     public function user(): mixed
     {
@@ -217,9 +217,9 @@ class Request
     }
 
     /**
-     * With route params and return self.
-     * @param array $routeParams Input value.
-     * @return self Output value.
+     * Return a cloned request with route parameters attached.
+     * @param array $routeParams Named route parameters.
+     * @return self Cloned request carrying the route params.
      */
     public function withRouteParams(array $routeParams): self
     {
@@ -229,9 +229,9 @@ class Request
     }
 
     /**
-     * Normalize headers and return array.
-     * @param array $headers Input value.
-     * @return array Output value.
+     * Normalize header names to lowercase for case-insensitive lookups.
+     * @param array $headers Raw header map.
+     * @return array Normalized header map.
      */
     private function normalizeHeaders(array $headers): array
     {
@@ -244,8 +244,8 @@ class Request
     }
 
     /**
-     * Read headers and return array.
-     * @return array Output value.
+     * Read request headers from PHP's runtime environment.
+     * @return array Header map from getallheaders() or $_SERVER.
      */
     private static function readHeaders(): array
     {

@@ -7,24 +7,24 @@ namespace Maia\Orm\Schema;
 use Maia\Orm\Connection;
 
 /**
- * Schema defines a framework component for this package.
+ * Small schema builder facade for creating and dropping tables through the connection layer.
  */
 class Schema
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param Connection $connection Input value.
-     * @return void Output value.
+     * Bind the schema builder to a database connection.
+     * @param Connection $connection Database connection used to execute schema SQL.
+     * @return void
      */
     public function __construct(private Connection $connection)
     {
     }
 
     /**
-     * Create and return void.
-     * @param string $table Input value.
-     * @param callable $callback Input value.
-     * @return void Output value.
+     * Create a table by passing a Table definition object to the callback.
+     * @param string $table Table name to create.
+     * @param callable $callback Callback that configures the Table definition.
+     * @return void
      */
     public function create(string $table, callable $callback): void
     {
@@ -35,9 +35,9 @@ class Schema
     }
 
     /**
-     * Drop and return void.
-     * @param string $table Input value.
-     * @return void Output value.
+     * Drop a table if it exists.
+     * @param string $table Table name to drop.
+     * @return void
      */
     public function drop(string $table): void
     {

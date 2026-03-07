@@ -7,17 +7,17 @@ namespace Maia\Core\Exceptions;
 use RuntimeException;
 
 /**
- * HttpException defines a framework component for this package.
+ * Base exception type for errors that map directly to an HTTP status code.
  */
 class HttpException extends RuntimeException
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param int $status Input value.
-     * @param string $message Input value.
-     * @param int $code Input value.
-     * @param \Throwable|null $previous Input value.
-     * @return void Output value.
+     * Build an HTTP exception with status code, message, and optional previous exception.
+     * @param int $status HTTP status code to return.
+     * @param string $message Error message exposed to the client.
+     * @param int $code Internal exception code.
+     * @param \Throwable|null $previous Previous exception in the chain.
+     * @return void
      */
     public function __construct(
         private int $status,
@@ -29,8 +29,8 @@ class HttpException extends RuntimeException
     }
 
     /**
-     * Status and return int.
-     * @return int Output value.
+     * Return the HTTP status code associated with this exception.
+     * @return int HTTP status code.
      */
     public function status(): int
     {

@@ -7,13 +7,13 @@ namespace Maia\Cli\Commands;
 use Maia\Cli\Output;
 
 /**
- * CreateRequestCommand defines a framework component for this package.
+ * CLI command that scaffolds a form request class.
  */
 class CreateRequestCommand extends BaseCreateCommand
 {
     /**
-     * Name and return string.
-     * @return string Output value.
+     * Return the CLI command name.
+     * @return string Command identifier.
      */
     public function name(): string
     {
@@ -21,8 +21,8 @@ class CreateRequestCommand extends BaseCreateCommand
     }
 
     /**
-     * Description and return string.
-     * @return string Output value.
+     * Return the help description.
+     * @return string Short summary for CLI help.
      */
     public function description(): string
     {
@@ -30,10 +30,10 @@ class CreateRequestCommand extends BaseCreateCommand
     }
 
     /**
-     * Execute and return int.
-     * @param array $args Input value.
-     * @param Output $output Input value.
-     * @return int Output value.
+     * Generate a form request scaffold in app/Requests.
+     * @param array $args CLI arguments containing the request class name.
+     * @param Output $output Output writer for status messages.
+     * @return int Exit code.
      */
     public function execute(array $args, Output $output): int
     {

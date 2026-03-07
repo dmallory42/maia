@@ -11,7 +11,7 @@ use ReflectionParameter;
 use RuntimeException;
 
 /**
- * Container defines a framework component for this package.
+ * Dependency injection container with auto-wiring, factory registration, and singleton support.
  */
 class Container
 {
@@ -25,10 +25,10 @@ class Container
     private array $instances = [];
 
     /**
-     * Factory and return void.
-     * @param string $class Input value.
-     * @param Closure $factory Input value.
-     * @return void Output value.
+     * Register a factory closure that produces a new instance each time the class is resolved.
+     * @param string $class Fully qualified class name or interface to bind.
+     * @param Closure $factory Callable that receives the container and returns the instance.
+     * @return void
      */
     public function factory(string $class, Closure $factory): void
     {
@@ -36,10 +36,10 @@ class Container
     }
 
     /**
-     * Singleton and return void.
-     * @param string $class Input value.
-     * @param Closure|null $factory Input value.
-     * @return void Output value.
+     * Mark a class as a singleton so only one instance is created and reused.
+     * @param string $class Fully qualified class name or interface to bind as a singleton.
+     * @param Closure|null $factory Optional factory closure; if null, the class is auto-wired.
+     * @return void
      */
     public function singleton(string $class, ?Closure $factory = null): void
     {
@@ -51,10 +51,10 @@ class Container
     }
 
     /**
-     * Instance and return void.
-     * @param string $class Input value.
-     * @param object $instance Input value.
-     * @return void Output value.
+     * Bind an existing object instance to a class name in the container.
+     * @param string $class Fully qualified class name or interface the instance satisfies.
+     * @param object $instance The pre-built object to return on every resolve call.
+     * @return void
      */
     public function instance(string $class, object $instance): void
     {
@@ -62,9 +62,9 @@ class Container
     }
 
     /**
-     * Resolve and return object.
-     * @param string $class Input value.
-     * @return object Output value.
+     * Resolve a class from the container using registered bindings or auto-wiring.
+     * @param string $class Fully qualified class name or interface to resolve.
+     * @return object The resolved instance.
      */
     public function resolve(string $class): object
     {
@@ -86,9 +86,9 @@ class Container
     }
 
     /**
-     * Auto wire and return object.
-     * @param string $class Input value.
-     * @return object Output value.
+     * Instantiate a class by recursively resolving its constructor dependencies.
+     * @param string $class Fully qualified class name to instantiate.
+     * @return object The newly created instance with all dependencies injected.
      */
     private function autoWire(string $class): object
     {
@@ -112,10 +112,10 @@ class Container
     }
 
     /**
-     * Resolve parameter and return mixed.
-     * @param ReflectionParameter $param Input value.
-     * @param string $forClass Input value.
-     * @return mixed Output value.
+     * Resolve a single constructor parameter by type hint, default value, or throw on failure.
+     * @param ReflectionParameter $param The constructor parameter to resolve.
+     * @param string $forClass The class being constructed, used in error messages.
+     * @return mixed The resolved value for the parameter.
      */
     private function resolveParameter(ReflectionParameter $param, string $forClass): mixed
     {

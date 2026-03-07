@@ -8,16 +8,16 @@ use Attribute;
 
 #[Attribute(Attribute::TARGET_METHOD)]
 /**
- * Route defines a framework component for this package.
+ * PHP attribute that maps an HTTP method and path to a controller method.
  */
 class Route
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string $path Input value.
-     * @param string $method Input value.
-     * @param array $middleware Input value.
-     * @return void Output value.
+     * Define a route for a controller method.
+     * @param string $path URL path pattern, may include {param} placeholders.
+     * @param string $method HTTP method (GET, POST, PUT, DELETE, etc.).
+     * @param array $middleware List of middleware class names to apply to this route.
+     * @return void
      */
     public function __construct(
         public string $path,

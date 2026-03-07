@@ -8,16 +8,16 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
 /**
- * JwtService defines a framework component for this package.
+ * Encodes and decodes JSON Web Tokens using the configured secret and algorithm.
  */
 class JwtService
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string $secret Input value.
-     * @param string $algorithm Input value.
-     * @param int $defaultTtlSeconds Input value.
-     * @return void Output value.
+     * Initialize the JWT service with a signing secret and optional algorithm/TTL.
+     * @param string $secret The secret used to sign and verify tokens.
+     * @param string $algorithm JWT signing algorithm.
+     * @param int $defaultTtlSeconds Default token lifetime in seconds when no exp claim is provided.
+     * @return void
      */
     public function __construct(
         private string $secret,
@@ -27,9 +27,9 @@ class JwtService
     }
 
     /**
-     * Encode and return string.
-     * @param array $payload Input value.
-     * @return string Output value.
+     * Encode a claims payload into a signed JWT string.
+     * @param array $payload JWT claims payload; iat and exp are set automatically if absent.
+     * @return string Encoded JWT token.
      */
     public function encode(array $payload): string
     {
@@ -47,9 +47,9 @@ class JwtService
     }
 
     /**
-     * Decode and return object.
-     * @param string $token Input value.
-     * @return object Output value.
+     * Decode and verify a JWT string, returning its claims payload.
+     * @param string $token Encoded JWT token.
+     * @return object Decoded claims payload.
      */
     public function decode(string $token): object
     {

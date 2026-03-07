@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Maia\Core\Logging;
 
 /**
- * Logger defines a framework component for this package.
+ * Minimal JSON logger with level filtering and filesystem/stderr targets.
  */
 class Logger
 {
@@ -18,11 +18,11 @@ class Logger
     ];
 
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string $path Input value.
-     * @param string $level Input value.
-     * @param bool $enabled Input value.
-     * @return void Output value.
+     * Configure the logger destination, minimum level, and enabled flag.
+     * @param string $path Output target path or stream wrapper.
+     * @param string $level Minimum log level to record.
+     * @param bool $enabled Whether logging is enabled at all.
+     * @return void
      */
     public function __construct(
         private string $path,
@@ -37,8 +37,8 @@ class Logger
     }
 
     /**
-     * Null and return self.
-     * @return self Output value.
+     * Create a disabled logger that drops all log entries.
+     * @return self Null logger instance.
      */
     public static function null(): self
     {
@@ -46,9 +46,9 @@ class Logger
     }
 
     /**
-     * Stderr and return self.
-     * @param string $level Input value.
-     * @return self Output value.
+     * Create a logger that writes JSON lines to stderr.
+     * @param string $level Minimum log level to record.
+     * @return self Stderr-backed logger.
      */
     public static function stderr(string $level = 'info'): self
     {
@@ -56,10 +56,10 @@ class Logger
     }
 
     /**
-     * Debug and return void.
-     * @param string $message Input value.
-     * @param array $context Input value.
-     * @return void Output value.
+     * Log a debug-level message.
+     * @param string $message Log message.
+     * @param array $context Structured context data.
+     * @return void
      */
     public function debug(string $message, array $context = []): void
     {
@@ -67,10 +67,10 @@ class Logger
     }
 
     /**
-     * Info and return void.
-     * @param string $message Input value.
-     * @param array $context Input value.
-     * @return void Output value.
+     * Log an info-level message.
+     * @param string $message Log message.
+     * @param array $context Structured context data.
+     * @return void
      */
     public function info(string $message, array $context = []): void
     {
@@ -78,10 +78,10 @@ class Logger
     }
 
     /**
-     * Warning and return void.
-     * @param string $message Input value.
-     * @param array $context Input value.
-     * @return void Output value.
+     * Log a warning-level message.
+     * @param string $message Log message.
+     * @param array $context Structured context data.
+     * @return void
      */
     public function warning(string $message, array $context = []): void
     {
@@ -89,10 +89,10 @@ class Logger
     }
 
     /**
-     * Error and return void.
-     * @param string $message Input value.
-     * @param array $context Input value.
-     * @return void Output value.
+     * Log an error-level message.
+     * @param string $message Log message.
+     * @param array $context Structured context data.
+     * @return void
      */
     public function error(string $message, array $context = []): void
     {
@@ -100,11 +100,11 @@ class Logger
     }
 
     /**
-     * Log and return void.
-     * @param string $level Input value.
-     * @param string $message Input value.
-     * @param array $context Input value.
-     * @return void Output value.
+     * Serialize and write a log entry if the logger is enabled for the given level.
+     * @param string $level Requested log level.
+     * @param string $message Log message.
+     * @param array $context Structured context data.
+     * @return void
      */
     private function log(string $level, string $message, array $context = []): void
     {
@@ -133,9 +133,9 @@ class Logger
     }
 
     /**
-     * Should log and return bool.
-     * @param string $level Input value.
-     * @return bool Output value.
+     * Check whether the requested level meets the configured threshold.
+     * @param string $level Requested log level.
+     * @return bool True when the entry should be recorded.
      */
     private function shouldLog(string $level): bool
     {
@@ -143,9 +143,9 @@ class Logger
     }
 
     /**
-     * Normalize level and return string.
-     * @param string $level Input value.
-     * @return string Output value.
+     * Normalize a level name and fall back to info for unknown values.
+     * @param string $level Raw level name.
+     * @return string Normalized level name.
      */
     private function normalizeLevel(string $level): string
     {
@@ -155,8 +155,8 @@ class Logger
     }
 
     /**
-     * Ensure directory exists and return void.
-     * @return void Output value.
+     * Create the parent directory for file-based log paths when needed.
+     * @return void
      */
     private function ensureDirectoryExists(): void
     {

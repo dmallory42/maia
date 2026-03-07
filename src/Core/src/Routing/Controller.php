@@ -8,14 +8,14 @@ use Attribute;
 
 #[Attribute(Attribute::TARGET_CLASS)]
 /**
- * Controller defines a framework component for this package.
+ * Attribute that marks a class as a route controller and optionally assigns a path prefix.
  */
 class Controller
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string $prefix Input value.
-     * @return void Output value.
+     * Set the route prefix applied to every Route attribute on the class.
+     * @param string $prefix Controller-level URL prefix.
+     * @return void
      */
     public function __construct(public string $prefix = '')
     {

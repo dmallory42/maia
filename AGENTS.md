@@ -25,3 +25,9 @@
 - User-facing usage examples live in `docs/EXAMPLES.md`.
 - Contributor workflow lives in `CONTRIBUTING.md`.
 - Release workflow lives in `docs/RELEASING.md`.
+
+## Comment Guidance
+
+- Prefer comments and docblocks that explain intent, constraints, behavior, or non-obvious tradeoffs.
+- Do not add low-value comments that merely restate the code, such as “Input value”, “Output value”, or “sets the property”.
+- For straightforward methods, a concise summary is enough; omit verbose param/return prose unless it adds real context.

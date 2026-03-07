@@ -8,7 +8,7 @@ use ReflectionClass;
 use ReflectionMethod;
 
 /**
- * Router defines a framework component for this package.
+ * Collects route definitions from controller attributes and matches incoming requests to routes.
  */
 class Router
 {
@@ -25,9 +25,9 @@ class Router
     private array $routes = [];
 
     /**
-     * Register controller and return void.
-     * @param string $class Input value.
-     * @return void Output value.
+     * Scan a controller class for Route attributes and add its methods to the route table.
+     * @param string $class Fully qualified class name of the controller to register.
+     * @return void
      */
     public function registerController(string $class): void
     {
@@ -89,8 +89,8 @@ class Router
     }
 
     /**
-     * Routes and return array.
-     * @return array Output value.
+     * Return all registered route definitions.
+     * @return array List of route definition arrays.
      */
     public function routes(): array
     {
@@ -98,9 +98,9 @@ class Router
     }
 
     /**
-     * Normalize path and return string.
-     * @param string $path Input value.
-     * @return string Output value.
+     * Strip query strings and normalize slashes so paths can be compared consistently.
+     * @param string $path The raw URL path to normalize.
+     * @return string The normalized path with a leading slash and no trailing slash.
      */
     private function normalizePath(string $path): string
     {
@@ -114,10 +114,10 @@ class Router
     }
 
     /**
-     * Join paths and return string.
-     * @param string $prefix Input value.
-     * @param string $routePath Input value.
-     * @return string Output value.
+     * Concatenate a controller prefix and a route path into a single normalized path.
+     * @param string $prefix The controller-level path prefix (may be empty).
+     * @param string $routePath The method-level route path (may be empty).
+     * @return string The combined path starting with a leading slash.
      */
     private function joinPaths(string $prefix, string $routePath): string
     {
@@ -143,9 +143,9 @@ class Router
     }
 
     /**
-     * Split path and return array.
-     * @param string $path Input value.
-     * @return array Output value.
+     * Split a normalized path into its individual segments for matching.
+     * @param string $path A normalized path starting with a leading slash.
+     * @return array List of path segments (empty array for the root path).
      */
     private function splitPath(string $path): array
     {
@@ -159,10 +159,10 @@ class Router
     }
 
     /**
-     * Match segments and return array|null.
-     * @param array $routeSegments Input value.
-     * @param array $pathSegments Input value.
-     * @return array|null Output value.
+     * Compare route segments against request path segments, extracting named parameters.
+     * @param array $routeSegments Segments from the route definition, including {param} placeholders.
+     * @param array $pathSegments Segments from the incoming request path.
+     * @return array|null Associative array of captured parameters, or null if segments do not match.
      */
     private function matchSegments(array $routeSegments, array $pathSegments): ?array
     {
@@ -189,9 +189,9 @@ class Router
     }
 
     /**
-     * Is parameter segment and return bool.
-     * @param string $segment Input value.
-     * @return bool Output value.
+     * Check whether a route segment is a {named} parameter placeholder.
+     * @param string $segment The route segment to test.
+     * @return bool True if the segment is wrapped in curly braces (e.g. "{id}").
      */
     private function isParameterSegment(string $segment): bool
     {

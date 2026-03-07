@@ -10,15 +10,15 @@ use Maia\Orm\Connection;
 use Maia\Orm\Migrator;
 
 /**
- * MigrateStatusCommand defines a framework component for this package.
+ * CLI command that reports which migrations have run and which are still pending.
  */
 class MigrateStatusCommand extends Command
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param Connection|null $connection Input value.
-     * @param string|null $migrationDir Input value.
-     * @return void Output value.
+     * Configure the command with optional connection and migration directory overrides.
+     * @param Connection|null $connection Database connection to use; defaults to the local SQLite database.
+     * @param string|null $migrationDir Directory containing migration files; defaults to database/migrations.
+     * @return void
      */
     public function __construct(
         private ?Connection $connection = null,
@@ -27,8 +27,8 @@ class MigrateStatusCommand extends Command
     }
 
     /**
-     * Name and return string.
-     * @return string Output value.
+     * Return the CLI command name.
+     * @return string Command identifier.
      */
     public function name(): string
     {
@@ -36,8 +36,8 @@ class MigrateStatusCommand extends Command
     }
 
     /**
-     * Description and return string.
-     * @return string Output value.
+     * Return the help description.
+     * @return string Short summary for CLI help.
      */
     public function description(): string
     {
@@ -45,10 +45,10 @@ class MigrateStatusCommand extends Command
     }
 
     /**
-     * Execute and return int.
-     * @param array $args Input value.
-     * @param Output $output Input value.
-     * @return int Output value.
+     * Show migration status for every migration file in the configured directory.
+     * @param array $args CLI arguments (unused).
+     * @param Output $output Output writer for text or JSON status reporting.
+     * @return int Exit code.
      */
     public function execute(array $args, Output $output): int
     {

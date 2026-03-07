@@ -25,7 +25,7 @@ use RuntimeException;
 use Throwable;
 
 /**
- * App defines a framework component for this package.
+ * Application kernel that boots the framework, dispatches HTTP requests through middleware, and returns responses.
  */
 class App
 {
@@ -33,13 +33,13 @@ class App
     private array $globalMiddleware = [];
 
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param Container $container Input value.
-     * @param Router $router Input value.
-     * @param Config $config Input value.
-     * @param Logger $logger Input value.
-     * @param ExceptionHandler $exceptionHandler Input value.
-     * @return void Output value.
+     * Initialize the application kernel with its core services.
+     * @param Container $container Dependency injection container for resolving services.
+     * @param Router $router Route registry used to match incoming requests.
+     * @param Config $config Application configuration loaded from PHP files.
+     * @param Logger $logger Logger instance for recording runtime events.
+     * @param ExceptionHandler $exceptionHandler Handler that converts exceptions to HTTP responses.
+     * @return void
      */
     private function __construct(
         private Container $container,
@@ -51,10 +51,10 @@ class App
     }
 
     /**
-     * Create and return self.
-     * @param string|null $configDir Input value.
-     * @param string|null $envFile Input value.
-     * @return self Output value.
+     * Bootstrap a new application instance, loading environment and config files.
+     * @param string|null $configDir Directory containing PHP configuration files, or null to skip.
+     * @param string|null $envFile Path to a .env file to load, or null to skip.
+     * @return self Fully initialized application ready to handle requests.
      */
     public static function create(?string $configDir = null, ?string $envFile = null): self
     {
@@ -80,9 +80,9 @@ class App
     }
 
     /**
-     * Register controller and return void.
-     * @param string $class Input value.
-     * @return void Output value.
+     * Register a controller class so its route attributes are discovered.
+     * @param string $class Fully qualified class name of the controller to register.
+     * @return void
      */
     public function registerController(string $class): void
     {
@@ -90,8 +90,8 @@ class App
     }
 
     /**
-     * Container and return Container.
-     * @return Container Output value.
+     * Return the dependency injection container.
+     * @return Container The application's DI container.
      */
     public function container(): Container
     {
@@ -99,9 +99,9 @@ class App
     }
 
     /**
-     * Add middleware and return void.
-     * @param MiddlewareContract|string $middleware Input value.
-     * @return void Output value.
+     * Append a middleware to the global stack applied to every request.
+     * @param MiddlewareContract|string $middleware Middleware instance or class name to resolve from the container.
+     * @return void
      */
     public function addMiddleware(MiddlewareContract|string $middleware): void
     {
@@ -109,9 +109,9 @@ class App
     }
 
     /**
-     * Handle and return Response.
-     * @param Request $request Input value.
-     * @return Response Output value.
+     * Process an HTTP request through the middleware pipeline and return a response.
+     * @param Request $request The incoming HTTP request to handle.
+     * @return Response The HTTP response produced by the matched route or exception handler.
      */
     public function handle(Request $request): Response
     {
@@ -140,10 +140,11 @@ class App
     }
 
     /**
-     * Dispatch and return Response.
-     * @param RouteMatch $match Input value.
-     * @param Request $request Input value.
-     * @return Response Output value.
+     * Invoke the matched controller action and return its response.
+     * @param RouteMatch $match The resolved route containing controller, method, and parameters.
+     * @param Request $request The current HTTP request with route params attached.
+     * @return Response The response returned by the controller,
+     *     or a JSON-encoded response if the action returns raw data.
      */
     private function dispatch(RouteMatch $match, Request $request): Response
     {
@@ -161,11 +162,11 @@ class App
     }
 
     /**
-     * Resolve method arguments and return array.
-     * @param ReflectionMethod $method Input value.
-     * @param Request $request Input value.
-     * @param array $routeParams Input value.
-     * @return array Output value.
+     * Build the argument list for a controller method using type hints, route params, and the container.
+     * @param ReflectionMethod $method Reflection of the controller method to invoke.
+     * @param Request $request The current HTTP request.
+     * @param array $routeParams Named parameters extracted from the URL path.
+     * @return array Ordered list of resolved arguments matching the method signature.
      */
     private function resolveMethodArguments(ReflectionMethod $method, Request $request, array $routeParams): array
     {
@@ -179,12 +180,12 @@ class App
     }
 
     /**
-     * Resolve method parameter and return mixed.
-     * @param ReflectionParameter $parameter Input value.
-     * @param Request $request Input value.
-     * @param array $routeParams Input value.
-     * @param ReflectionMethod $method Input value.
-     * @return mixed Output value.
+     * Resolve a single controller method parameter from the request, route params, or container.
+     * @param ReflectionParameter $parameter The parameter to resolve.
+     * @param Request $request The current HTTP request (injected when type-hinted).
+     * @param array $routeParams Named route parameters matched from the URL.
+     * @param ReflectionMethod $method The controller method, used for error messages.
+     * @return mixed The resolved value for the parameter.
      */
     private function resolveMethodParameter(
         ReflectionParameter $parameter,
@@ -194,9 +195,7 @@ class App
     ): mixed {
         $type = $parameter->getType();
 
-        /**
-         * true defines a framework component for this package.
-         */
+        /** Inject the Request object when the parameter type-hints it. */
         if (
             $type instanceof ReflectionNamedType
             && !$type->isBuiltin()
@@ -229,10 +228,10 @@ class App
     }
 
     /**
-     * Cast route parameter and return mixed.
-     * @param string $value Input value.
-     * @param \ReflectionType|null $type Input value.
-     * @return mixed Output value.
+     * Cast a route parameter string to the type declared by the controller method signature.
+     * @param string $value The raw string value captured from the URL segment.
+     * @param \ReflectionType|null $type The declared type of the controller parameter, or null if untyped.
+     * @return mixed The value cast to int, float, bool, or left as a string.
      */
     private function castRouteParameter(string $value, \ReflectionType|null $type): mixed
     {
@@ -250,9 +249,9 @@ class App
     }
 
     /**
-     * Resolve middleware stack and return array.
-     * @param RouteMatch $match Input value.
-     * @return array Output value.
+     * Merge global, controller-level, method-level, and route-level middleware into a single ordered stack.
+     * @param RouteMatch $match The matched route whose middleware definitions are included.
+     * @return array Ordered list of resolved Middleware instances.
      */
     private function resolveMiddlewareStack(RouteMatch $match): array
     {
@@ -277,9 +276,9 @@ class App
     }
 
     /**
-     * Resolve attribute middleware and return array.
-     * @param array $attributes Input value.
-     * @return array Output value.
+     * Extract and resolve middleware from MiddlewareAttribute PHP attributes.
+     * @param array $attributes ReflectionAttribute instances to inspect for middleware declarations.
+     * @return array Resolved Middleware instances declared via attributes.
      */
     private function resolveAttributeMiddleware(array $attributes): array
     {
@@ -298,9 +297,9 @@ class App
     }
 
     /**
-     * Resolve middleware entries and return array.
-     * @param array $entries Input value.
-     * @return array Output value.
+     * Convert an array of middleware instances or class names into resolved Middleware objects.
+     * @param array $entries Middleware instances or fully qualified class names to resolve.
+     * @return array Resolved Middleware instances ready for the pipeline.
      */
     private function resolveMiddlewareEntries(array $entries): array
     {
@@ -329,9 +328,9 @@ class App
     }
 
     /**
-     * Resolve debug flag and return bool.
-     * @param Config $config Input value.
-     * @return bool Output value.
+     * Determine the debug mode from the APP_DEBUG env var, falling back to the config file.
+     * @param Config $config Application configuration to check if the env var is not set.
+     * @return bool True when the application is running in debug mode.
      */
     private static function resolveDebugFlag(Config $config): bool
     {
@@ -344,9 +343,9 @@ class App
     }
 
     /**
-     * Build logger and return Logger.
-     * @param Config $config Input value.
-     * @return Logger Output value.
+     * Create a Logger instance based on the logging configuration (path and level).
+     * @param Config $config Application configuration containing logging.level and logging.path.
+     * @return Logger Configured logger, or a null logger if no valid path is set.
      */
     private static function buildLogger(Config $config): Logger
     {
@@ -369,9 +368,9 @@ class App
     }
 
     /**
-     * Bool from string and return bool|null.
-     * @param string|null $value Input value.
-     * @return bool|null Output value.
+     * Parse a string like "true", "1", "yes" into a boolean, or return null for unrecognized values.
+     * @param string|null $value The string to parse, or null.
+     * @return bool|null The parsed boolean, or null if the value is absent or unrecognized.
      */
     private static function boolFromString(?string $value): ?bool
     {

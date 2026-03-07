@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Maia\Core\Http;
 
 /**
- * Response defines a framework component for this package.
+ * HTTP response value object with helpers for JSON responses and immutable header updates.
  */
 class Response
 {
@@ -13,11 +13,11 @@ class Response
     private array $headers;
 
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param int $status Input value.
-     * @param string $body Input value.
-     * @param array $headers Input value.
-     * @return void Output value.
+     * Build a response with status code, body, and headers.
+     * @param int $status HTTP status code.
+     * @param string $body Response body string.
+     * @param array $headers Response headers.
+     * @return void
      */
     private function __construct(
         private int $status,
@@ -31,11 +31,11 @@ class Response
     }
 
     /**
-     * Make and return self.
-     * @param string $body Input value.
-     * @param int $status Input value.
-     * @param array<string, string> $headers Input value.
-     * @return self Output value.
+     * Create a plain response.
+     * @param string $body Response body string.
+     * @param int $status HTTP status code.
+     * @param array<string, string> $headers Response headers.
+     * @return self New response instance.
      */
     public static function make(string $body = '', int $status = 200, array $headers = []): self
     {
@@ -43,10 +43,10 @@ class Response
     }
 
     /**
-     * Json and return self.
-     * @param mixed $data Input value.
-     * @param int $status Input value.
-     * @return self Output value.
+     * Create a JSON response.
+     * @param mixed $data Value to encode as JSON.
+     * @param int $status HTTP status code.
+     * @return self New JSON response instance.
      */
     public static function json(mixed $data, int $status = 200): self
     {
@@ -59,10 +59,10 @@ class Response
     }
 
     /**
-     * Error and return self.
-     * @param string $message Input value.
-     * @param int $status Input value.
-     * @return self Output value.
+     * Create the framework's standard JSON error envelope.
+     * @param string $message Error message exposed to the client.
+     * @param int $status HTTP status code.
+     * @return self New JSON error response.
      */
     public static function error(string $message, int $status): self
     {
@@ -78,8 +78,8 @@ class Response
     }
 
     /**
-     * Status and return int.
-     * @return int Output value.
+     * Return the HTTP status code.
+     * @return int HTTP status code.
      */
     public function status(): int
     {
@@ -87,8 +87,8 @@ class Response
     }
 
     /**
-     * Body and return string.
-     * @return string Output value.
+     * Return the raw response body.
+     * @return string Response body string.
      */
     public function body(): string
     {
@@ -96,9 +96,9 @@ class Response
     }
 
     /**
-     * Header and return string|null.
-     * @param string $name Input value.
-     * @return string|null Output value.
+     * Retrieve a response header case-insensitively.
+     * @param string $name Header name.
+     * @return string|null Header value, or null if absent.
      */
     public function header(string $name): ?string
     {
@@ -106,8 +106,8 @@ class Response
     }
 
     /**
-     * Headers and return array.
-     * @return array Output value.
+     * Return the full response header map.
+     * @return array Response headers keyed by normalized header name.
      */
     public function headers(): array
     {
@@ -115,10 +115,10 @@ class Response
     }
 
     /**
-     * With header and return self.
-     * @param string $name Input value.
-     * @param string $value Input value.
-     * @return self Output value.
+     * Return a cloned response with an added or replaced header.
+     * @param string $name Header name.
+     * @param string $value Header value.
+     * @return self Cloned response carrying the header.
      */
     public function withHeader(string $name, string $value): self
     {
@@ -128,8 +128,8 @@ class Response
     }
 
     /**
-     * Send and return void.
-     * @return void Output value.
+     * Emit the status code, headers, and body to PHP's output buffer.
+     * @return void
      */
     public function send(): void
     {
@@ -143,9 +143,9 @@ class Response
     }
 
     /**
-     * Normalize header name and return string.
-     * @param string $name Input value.
-     * @return string Output value.
+     * Normalize a header name to canonical Title-Case.
+     * @param string $name Raw header name.
+     * @return string Normalized header name.
      */
     private function normalizeHeaderName(string $name): string
     {

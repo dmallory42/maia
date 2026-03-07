@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Maia\Orm\Schema;
 
 /**
- * Table defines a framework component for this package.
+ * Fluent table-definition builder used by migrations to generate CREATE TABLE SQL.
  */
 class Table
 {
@@ -28,9 +28,9 @@ class Table
     private ?int $lastColumnIndex = null;
 
     /**
-     * Id and return self.
-     * @param string $name Input value.
-     * @return self Output value.
+     * Add an auto-incrementing integer primary key column.
+     * @param string $name Column name.
+     * @return self Table builder for chaining.
      */
     public function id(string $name = 'id'): self
     {
@@ -50,10 +50,10 @@ class Table
     }
 
     /**
-     * String and return self.
-     * @param string $name Input value.
-     * @param int $length Input value.
-     * @return self Output value.
+     * Add a VARCHAR column.
+     * @param string $name Column name.
+     * @param int $length Maximum VARCHAR length.
+     * @return self Table builder for chaining.
      */
     public function string(string $name, int $length = 255): self
     {
@@ -61,9 +61,9 @@ class Table
     }
 
     /**
-     * Integer and return self.
-     * @param string $name Input value.
-     * @return self Output value.
+     * Add an INTEGER column.
+     * @param string $name Column name.
+     * @return self Table builder for chaining.
      */
     public function integer(string $name): self
     {
@@ -71,9 +71,9 @@ class Table
     }
 
     /**
-     * Boolean and return self.
-     * @param string $name Input value.
-     * @return self Output value.
+     * Add a boolean column stored as INTEGER.
+     * @param string $name Column name.
+     * @return self Table builder for chaining.
      */
     public function boolean(string $name): self
     {
@@ -81,9 +81,9 @@ class Table
     }
 
     /**
-     * Text and return self.
-     * @param string $name Input value.
-     * @return self Output value.
+     * Add a TEXT column.
+     * @param string $name Column name.
+     * @return self Table builder for chaining.
      */
     public function text(string $name): self
     {
@@ -91,8 +91,8 @@ class Table
     }
 
     /**
-     * Timestamps and return self.
-     * @return self Output value.
+     * Add created_at and updated_at DATETIME columns.
+     * @return self Table builder for chaining.
      */
     public function timestamps(): self
     {
@@ -103,9 +103,9 @@ class Table
     }
 
     /**
-     * Unique and return self.
-     * @param string|null $column Input value.
-     * @return self Output value.
+     * Mark a column as unique, or add an explicit table-level unique constraint.
+     * @param string|null $column Column name for a table-level unique constraint, or null for the last column.
+     * @return self Table builder for chaining.
      */
     public function unique(?string $column = null): self
     {
@@ -132,8 +132,8 @@ class Table
     }
 
     /**
-     * Nullable and return self.
-     * @return self Output value.
+     * Mark the most recently added column as nullable.
+     * @return self Table builder for chaining.
      */
     public function nullable(): self
     {
@@ -145,9 +145,9 @@ class Table
     }
 
     /**
-     * To create sql and return string.
-     * @param string $table Input value.
-     * @return string Output value.
+     * Compile the accumulated column definitions into a CREATE TABLE statement.
+     * @param string $table Table name.
+     * @return string CREATE TABLE SQL statement.
      */
     public function toCreateSql(string $table): string
     {
@@ -187,10 +187,10 @@ class Table
     }
 
     /**
-     * Add column and return self.
-     * @param string $name Input value.
-     * @param string $type Input value.
-     * @return self Output value.
+     * Add a generic column definition to the table.
+     * @param string $name Column name.
+     * @param string $type SQL column type.
+     * @return self Table builder for chaining.
      */
     private function addColumn(string $name, string $type): self
     {
@@ -210,9 +210,9 @@ class Table
     }
 
     /**
-     * Format default and return string.
-     * @param mixed $value Input value.
-     * @return string Output value.
+     * Format a PHP default value as a SQL literal.
+     * @param mixed $value PHP value to convert.
+     * @return string SQL literal representation.
      */
     private function formatDefault(mixed $value): string
     {

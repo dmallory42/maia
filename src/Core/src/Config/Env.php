@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Maia\Core\Config;
 
 /**
- * Env defines a framework component for this package.
+ * Parses .env files and provides static access to environment variables.
  */
 class Env
 {
     private static array $values = [];
 
     /**
-     * Load and return void.
-     * @param string $path Input value.
-     * @return void Output value.
+     * Parse a .env file and store its key-value pairs for later retrieval.
+     * @param string $path Absolute path to the .env file.
+     * @return void
      */
     public static function load(string $path): void
     {
@@ -55,10 +55,10 @@ class Env
     }
 
     /**
-     * Get and return string|null.
-     * @param string $key Input value.
-     * @param string|null $default Input value.
-     * @return string|null Output value.
+     * Retrieve an environment variable by name.
+     * @param string $key The environment variable name.
+     * @param string|null $default Value returned when the variable is not set.
+     * @return string|null The variable value, or the default if not found.
      */
     public static function get(string $key, ?string $default = null): ?string
     {
@@ -66,8 +66,8 @@ class Env
     }
 
     /**
-     * Reset and return void.
-     * @return void Output value.
+     * Clear all loaded environment variables.
+     * @return void
      */
     public static function reset(): void
     {
