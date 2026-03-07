@@ -19,6 +19,7 @@
     "scripts": {
         "lint": "phpcs --standard=phpcs.xml",
         "lint:fix": "phpcbf --standard=phpcs.xml",
+        "changelog:check": "php tools/check-changelog-entry.php",
         "docs:coverage": "php tools/check-doc-coverage.php --min=95",
         "docs:coverage:strict": "php tools/check-doc-coverage.php --min=100",
         "test:threshold": "php tools/check-test-threshold.php --min=95"
