@@ -1,0 +1,2 @@
+- Replaced low-signal generated docblocks with shorter API documentation that explains purpose and behavior.
+- Added repository guidance to discourage boilerplate comments that only restate code.
