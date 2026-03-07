@@ -111,7 +111,13 @@ class Response
      */
     public function headers(): array
     {
-        return $this->headers;
+        $headers = [];
+
+        foreach ($this->headers as $name => $value) {
+            $headers[$this->formatHeaderName($name)] = $value;
+        }
+
+        return $headers;
     }
 
     /**
@@ -136,20 +142,29 @@ class Response
         http_response_code($this->status);
 
         foreach ($this->headers as $name => $value) {
-            header("{$name}: {$value}");
+            header($this->formatHeaderName($name) . ": {$value}");
         }
 
         echo $this->body;
     }
 
     /**
-     * Normalize a header name to canonical Title-Case.
+     * Normalize a header name to lowercase for case-insensitive internal storage.
      * @param string $name Raw header name.
-     * @return string Normalized header name.
+     * @return string Lowercased header name.
      */
     private function normalizeHeaderName(string $name): string
     {
-        $name = strtolower(trim($name));
+        return strtolower(trim($name));
+    }
+
+    /**
+     * Convert a normalized lowercase header name to canonical Title-Case for output.
+     * @param string $name Normalized lowercase header name.
+     * @return string Canonical header name for emission or inspection.
+     */
+    private function formatHeaderName(string $name): string
+    {
         $parts = explode('-', $name);
         $parts = array_map(static fn (string $part): string => ucfirst($part), $parts);
 
