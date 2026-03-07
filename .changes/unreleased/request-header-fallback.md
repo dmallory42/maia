@@ -1,0 +1,2 @@
+- Captured standard CGI request headers such as `Content-Type` and `Content-Length` when `getallheaders()` is unavailable.
+- Added fallback-mode request tests to keep JSON body parsing consistent across SAPIs.
