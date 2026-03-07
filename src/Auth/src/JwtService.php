@@ -6,12 +6,16 @@ namespace Maia\Auth;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use InvalidArgumentException;
 
 /**
  * JwtService defines a framework component for this package.
  */
 class JwtService
 {
+    /** @var array<int, string> */
+    private const SUPPORTED_ALGORITHMS = ['HS256', 'HS384', 'HS512'];
+
     /**
      * Create an instance with configured dependencies and defaults.
      * @param string $secret Input value.
@@ -24,6 +28,7 @@ class JwtService
         private string $algorithm = 'HS256',
         private int $defaultTtlSeconds = 3600
     ) {
+        $this->algorithm = self::normalizeAlgorithm($this->algorithm);
     }
 
     /**
@@ -54,5 +59,27 @@ class JwtService
     public function decode(string $token): object
     {
         return JWT::decode($token, new Key($this->secret, $this->algorithm));
+    }
+
+    /**
+     * Normalize algorithm and return string.
+     * @param string $algorithm Input value.
+     * @return string Output value.
+     */
+    private static function normalizeAlgorithm(string $algorithm): string
+    {
+        $normalized = strtoupper($algorithm);
+
+        if (in_array($normalized, self::SUPPORTED_ALGORITHMS, true)) {
+            return $normalized;
+        }
+
+        throw new InvalidArgumentException(
+            sprintf(
+                'Unsupported JWT algorithm [%s]. Supported algorithms: %s.',
+                $algorithm,
+                implode(', ', self::SUPPORTED_ALGORITHMS)
+            )
+        );
     }
 }
