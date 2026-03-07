@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -25,6 +27,10 @@ jobs:
 
       - name: Validate composer metadata
         run: composer validate --strict
+
+      - name: Require changelog entry
+        if: github.event_name == 'pull_request'
+        run: php tools/check-changelog-entry.php --base=origin/${{ github.base_ref }}
 
       - name: Documentation coverage
         run: composer docs:coverage

@@ -13,6 +13,9 @@ composer test:threshold
 vendor/bin/phpunit
 ```
 
+Every merged PR should already have contributed a changelog fragment under `.changes/unreleased/`.
+Use those fragments as the source material for the next release notes and for the new release entry in `CHANGELOG.md`.
+
 ## Scaffold smoke test
 
 The smoke test proves that a newly generated Maia app can install dependencies, register a route, and serve a request.
@@ -29,12 +32,14 @@ tools/smoke-new-app.sh
 
 1. Confirm CI is green on PHP `8.2`, `8.3`, and `8.4`.
 2. Confirm the scaffold smoke test passes.
-3. Review `CHANGELOG.md` and update the release entry if needed.
-4. Create and push the tag:
+3. Review `.changes/unreleased/` and turn those fragments into the new release entry in `CHANGELOG.md`.
+4. Move the release-ready notes from `.changes/unreleased/` into the tagged `CHANGELOG.md` entry.
+5. Clear or archive the used fragments after the release notes are captured.
+6. Create and push the tag:
 
 ```bash
 git tag v0.1.0
 git push origin v0.1.0
 ```
 
-5. Publish the GitHub release notes for the tag.
+7. Publish the GitHub release notes for the tag using the same finalized notes.
