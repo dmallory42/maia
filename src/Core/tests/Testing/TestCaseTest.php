@@ -23,13 +23,43 @@ class TestingController
     #[Route('/echo', method: 'POST')]
     public function echo(Request $request): Response
     {
-        return Response::json(['body' => $request->body()]);
+        return Response::json([
+            'method' => $request->method(),
+            'body' => $request->body(),
+        ]);
     }
 
     #[Route('/auth', method: 'GET')]
     public function auth(Request $request): Response
     {
         return Response::json(['authorization' => $request->header('Authorization')]);
+    }
+
+    #[Route('/echo', method: 'PUT')]
+    public function put(Request $request): Response
+    {
+        return Response::json([
+            'method' => $request->method(),
+            'body' => $request->body(),
+        ]);
+    }
+
+    #[Route('/echo', method: 'PATCH')]
+    public function patch(Request $request): Response
+    {
+        return Response::json([
+            'method' => $request->method(),
+            'body' => $request->body(),
+        ]);
+    }
+
+    #[Route('/echo', method: 'DELETE')]
+    public function delete(Request $request): Response
+    {
+        return Response::json([
+            'method' => $request->method(),
+            'body' => $request->body(),
+        ]);
     }
 }
 
@@ -56,6 +86,34 @@ class TestCaseTest extends TestCaseHarness
         $response = $this->post('/testing/echo', ['name' => 'Mal']);
 
         $response->assertStatus(200);
+        $this->assertSame('POST', $response->json()['method']);
+        $this->assertSame(['name' => 'Mal'], $response->json()['body']);
+    }
+
+    public function testPutSendsJsonBody(): void
+    {
+        $response = $this->put('/testing/echo', ['name' => 'Mal']);
+
+        $response->assertStatus(200);
+        $this->assertSame('PUT', $response->json()['method']);
+        $this->assertSame(['name' => 'Mal'], $response->json()['body']);
+    }
+
+    public function testPatchSendsJsonBody(): void
+    {
+        $response = $this->patch('/testing/echo', ['name' => 'Mal']);
+
+        $response->assertStatus(200);
+        $this->assertSame('PATCH', $response->json()['method']);
+        $this->assertSame(['name' => 'Mal'], $response->json()['body']);
+    }
+
+    public function testDeleteSendsJsonBody(): void
+    {
+        $response = $this->delete('/testing/echo', ['name' => 'Mal']);
+
+        $response->assertStatus(200);
+        $this->assertSame('DELETE', $response->json()['method']);
         $this->assertSame(['name' => 'Mal'], $response->json()['body']);
     }
 
