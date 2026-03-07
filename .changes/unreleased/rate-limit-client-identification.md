@@ -1,0 +1,2 @@
+- Made rate limiting key clients by the server-reported remote address by default and trust `X-Forwarded-For` only for explicitly configured proxy IPs.
+- Prevented requests without a usable client identity from falling into one shared global rate-limit bucket.
