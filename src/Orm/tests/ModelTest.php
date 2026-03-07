@@ -9,6 +9,7 @@ use Maia\Orm\Connection;
 use Maia\Orm\Model;
 use Maia\Orm\QueryBuilder;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 
 #[Table('users')]
 class User extends Model
@@ -94,5 +95,16 @@ class ModelTest extends TestCase
 
         $this->assertNotEmpty($users);
         $this->assertContainsOnlyInstancesOf(User::class, $users);
+    }
+
+    public function testReflectionMetadataIsCachedPerModelClass(): void
+    {
+        $method = new ReflectionMethod(Model::class, 'reflectionFor');
+        $method->setAccessible(true);
+
+        $first = $method->invoke(null, User::class);
+        $second = $method->invoke(null, User::class);
+
+        $this->assertSame($first, $second);
     }
 }

@@ -1,0 +1,1 @@
+- Cached `ReflectionClass` metadata per model class so hydration, persistence, and relation loading do not recreate identical reflection objects on every call.

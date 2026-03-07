@@ -19,6 +19,9 @@ abstract class Model
 {
     protected static ?Connection $connection = null;
 
+    /** @var array<class-string, ReflectionClass<object>> */
+    private static array $reflectionCache = [];
+
     /** @var array<string, mixed> */
     protected array $attributes = [];
 
@@ -113,7 +116,7 @@ abstract class Model
     public static function hydrate(array $row): static
     {
         $model = new static();
-        $reflection = new ReflectionClass($model);
+        $reflection = static::reflectionFor($model::class);
 
         foreach ($row as $key => $value) {
             $model->attributes[$key] = $value;
@@ -148,7 +151,7 @@ abstract class Model
      */
     public static function tableName(): string
     {
-        $reflection = new ReflectionClass(static::class);
+        $reflection = static::reflectionFor(static::class);
         $attributes = $reflection->getAttributes(Table::class);
 
         if ($attributes !== []) {
@@ -224,7 +227,7 @@ abstract class Model
     private function extractPersistableData(): array
     {
         $data = $this->attributes;
-        $reflection = new ReflectionClass($this);
+        $reflection = static::reflectionFor($this::class);
 
         foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
             if ($property->isStatic()) {
@@ -263,7 +266,7 @@ abstract class Model
             return $this->attributes[$name];
         }
 
-        $reflection = new ReflectionClass($this);
+        $reflection = static::reflectionFor($this::class);
         if (!$reflection->hasProperty($name)) {
             return null;
         }
@@ -399,7 +402,7 @@ abstract class Model
      */
     private static function relationDefinition(string $name): ?array
     {
-        $reflection = new ReflectionClass(static::class);
+        $reflection = static::reflectionFor(static::class);
         if (!$reflection->hasProperty($name)) {
             return null;
         }
@@ -442,7 +445,7 @@ abstract class Model
     {
         $this->relationCache[$name] = $value;
 
-        $reflection = new ReflectionClass($this);
+        $reflection = static::reflectionFor($this::class);
         if (!$reflection->hasProperty($name)) {
             return;
         }
@@ -520,10 +523,21 @@ abstract class Model
      */
     private static function inferForeignKey(string $class): string
     {
-        $reflection = new ReflectionClass($class);
+        $reflection = static::reflectionFor($class);
         $shortName = $reflection->getShortName();
         $snake = (string) preg_replace('/(?<!^)[A-Z]/', '_$0', $shortName);
 
         return strtolower($snake) . '_id';
+    }
+
+    /**
+     * Return a cached ReflectionClass instance for the given model class.
+     * @param class-string $class Fully qualified model class name.
+     * @return ReflectionClass<object> Cached reflection metadata for the class.
+     */
+    private static function reflectionFor(string $class): ReflectionClass
+    {
+        /** @var ReflectionClass<object> */
+        return self::$reflectionCache[$class] ??= new ReflectionClass($class);
     }
 }
