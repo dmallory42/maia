@@ -381,6 +381,9 @@ $app->addMiddleware(new Maia\Auth\RateLimit(
     windowSeconds: 60,
     trustedProxies: ['127.0.0.1']
 ));
+
+// Security headers. The default CSP is API-safe: default-src 'none'.
+$app->addMiddleware(new Maia\Auth\SecurityHeadersMiddleware());
 ```
 
 Response caching can be wired the same way:
@@ -403,6 +406,7 @@ $app->addMiddleware(new ResponseCacheMiddleware(
 The CORS middleware is restrictive by default. Cross-origin access is only enabled for origins you list explicitly, or for all origins if you intentionally configure `['*']`.
 The rate limiter identifies clients by `REMOTE_ADDR` by default and only trusts `X-Forwarded-For` when the immediate peer IP is listed in `trustedProxies`.
 When a logger is provided, filesystem response cache failures are recorded instead of being suppressed silently.
+`SecurityHeadersMiddleware` emits `Content-Security-Policy: default-src 'none'` by default. Applications serving HTML can pass a custom CSP string when they need a broader policy.
 
 ## 8) 🧪 HTTP Testing
 
