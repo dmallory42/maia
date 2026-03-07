@@ -261,14 +261,33 @@ class Request
             }
         }
 
+        return self::readHeadersFromServer($_SERVER);
+    }
+
+    /**
+     * Read headers from server and return array.
+     * @param array $server Input value.
+     * @return array Output value.
+     */
+    private static function readHeadersFromServer(array $server): array
+    {
         $headers = [];
-        foreach ($_SERVER as $key => $value) {
+        foreach ($server as $key => $value) {
             if (!str_starts_with($key, 'HTTP_')) {
                 continue;
             }
 
             $name = str_replace('_', '-', strtolower(substr($key, 5)));
             $name = implode('-', array_map('ucfirst', explode('-', $name)));
+            $headers[$name] = is_string($value) ? $value : (string) $value;
+        }
+
+        foreach (['CONTENT_TYPE' => 'Content-Type', 'CONTENT_LENGTH' => 'Content-Length'] as $key => $name) {
+            if (!array_key_exists($key, $server)) {
+                continue;
+            }
+
+            $value = $server[$key];
             $headers[$name] = is_string($value) ? $value : (string) $value;
         }
 

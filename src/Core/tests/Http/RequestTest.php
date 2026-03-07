@@ -6,6 +6,7 @@ namespace Maia\Core\Tests\Http;
 
 use Maia\Core\Http\Request;
 use PHPUnit\Framework\TestCase;
+use ReflectionMethod;
 
 class RequestTest extends TestCase
 {
@@ -103,5 +104,35 @@ class RequestTest extends TestCase
             'page' => '2',
             'filter' => 'active',
         ], $request->queryParams());
+    }
+
+    public function testFallbackHeaderCaptureIncludesContentTypeAndLength(): void
+    {
+        $method = new ReflectionMethod(Request::class, 'readHeadersFromServer');
+        $method->setAccessible(true);
+
+        $headers = $method->invoke(null, [
+            'HTTP_X_TRACE_ID' => 'trace-123',
+            'CONTENT_TYPE' => 'application/json',
+            'CONTENT_LENGTH' => '27',
+        ]);
+
+        $this->assertSame('application/json', $headers['Content-Type']);
+        $this->assertSame('27', $headers['Content-Length']);
+        $this->assertSame('trace-123', $headers['X-Trace-Id']);
+    }
+
+    public function testFallbackCapturedHeadersStillEnableJsonBodyParsing(): void
+    {
+        $method = new ReflectionMethod(Request::class, 'readHeadersFromServer');
+        $method->setAccessible(true);
+
+        $headers = $method->invoke(null, [
+            'CONTENT_TYPE' => 'application/json',
+        ]);
+
+        $request = new Request('POST', '/users', [], $headers, '{"name":"Mal"}', []);
+
+        $this->assertSame(['name' => 'Mal'], $request->body());
     }
 }
