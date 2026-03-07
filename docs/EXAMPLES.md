@@ -352,11 +352,16 @@ $app->addMiddleware(new Maia\Auth\CorsMiddleware(['https://app.example.com']));
 // API key auth for service-to-service requests.
 $app->addMiddleware(new Maia\Auth\ApiKeyMiddleware(['local-dev-key']));
 
-// Rate limiting to reduce abuse. Trust forwarded client IPs only from known proxies.
+use Maia\Auth\FilesystemRateLimitStore;
+
+// Rate limiting to reduce abuse. Trust forwarded client IPs only from known proxies,
+// and persist counters across requests with a shared store.
 $app->addMiddleware(new Maia\Auth\RateLimit(
     maxRequests: 60,
     windowSeconds: 60,
-    trustedProxies: ['127.0.0.1']
+    trustedProxies: ['127.0.0.1'],
+    store: new FilesystemRateLimitStore(__DIR__ . '/../storage/rate-limit'),
+    namespace: 'api'
 ));
 ```
 
@@ -375,6 +380,7 @@ $app->addMiddleware(new ResponseCacheMiddleware(
 
 The CORS middleware is restrictive by default. Cross-origin access is only enabled for origins you list explicitly, or for all origins if you intentionally configure `['*']`.
 The rate limiter identifies clients by `REMOTE_ADDR` by default and only trusts `X-Forwarded-For` when the immediate peer IP is listed in `trustedProxies`.
+Use `FilesystemRateLimitStore` in real applications so counters persist across PHP requests; `InMemoryRateLimitStore` is intended for tests and ephemeral environments.
 
 ## 8) 🧪 HTTP Testing
 

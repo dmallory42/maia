@@ -15,44 +15,41 @@ use Maia\Core\Middleware\Middleware;
 class RateLimit implements Middleware
 {
     /**
-     * @var array<string, array{window_start: int, count: int}>
-     */
-    private static array $store = [];
-
-    /**
      * Configure rate limiting with a maximum request count and time window.
      * @param int $maxRequests The maximum number of requests allowed per window.
      * @param int $windowSeconds The duration of the rate-limit window in seconds.
      * @param array $trustedProxies Remote IPs whose forwarded-for header should be trusted.
      * @param string $forwardedForHeader Header name containing the original client IP chain.
+     * @param RateLimitStore|null $store Counter store; defaults to an in-memory store.
+     * @param string $namespace Logical namespace for this limiter when sharing one store.
      * @return void
      */
     public function __construct(
         private int $maxRequests,
         private int $windowSeconds,
         private array $trustedProxies = [],
-        private string $forwardedForHeader = 'X-Forwarded-For'
+        private string $forwardedForHeader = 'X-Forwarded-For',
+        private ?RateLimitStore $store = null,
+        private string $namespace = 'default'
     ) {
+        $this->store ??= new InMemoryRateLimitStore();
     }
 
     /**
      * Create a rate limiter that allows a fixed number of requests per minute.
      * @param int $maxRequests The maximum number of requests allowed per 60-second window.
      * @param array $trustedProxies Remote IPs whose forwarded-for header should be trusted.
+     * @param RateLimitStore|null $store Counter store; defaults to an in-memory store.
+     * @param string $namespace Logical namespace for this limiter when sharing one store.
      * @return self A new RateLimit instance with a 60-second window.
      */
-    public static function perMinute(int $maxRequests, array $trustedProxies = []): self
-    {
-        return new self($maxRequests, 60, $trustedProxies);
-    }
-
-    /**
-     * Clear all stored rate-limit counters (useful for testing).
-     * @return void
-     */
-    public static function reset(): void
-    {
-        self::$store = [];
+    public static function perMinute(
+        int $maxRequests,
+        array $trustedProxies = [],
+        ?RateLimitStore $store = null,
+        string $namespace = 'default'
+    ): self {
+        return new self($maxRequests, 60, $trustedProxies, 'X-Forwarded-For', $store, $namespace);
     }
 
     /**
@@ -72,7 +69,7 @@ class RateLimit implements Middleware
 
         $now = time();
 
-        $current = self::$store[$key] ?? [
+        $current = $this->store->get($this->namespace, $key) ?? [
             'window_start' => $now,
             'count' => 0,
         ];
@@ -94,7 +91,7 @@ class RateLimit implements Middleware
         }
 
         $current['count']++;
-        self::$store[$key] = $current;
+        $this->store->set($this->namespace, $key, $current);
 
         $response = $next($request);
         $remaining = max(0, $this->maxRequests - $current['count']);
@@ -107,7 +104,7 @@ class RateLimit implements Middleware
     /**
      * Determine the rate-limit bucket key from the client's IP or a global fallback.
      * @param Request $request The incoming HTTP request.
-     * @return string The identifier used to track this client's request count.
+     * @return string|null The identifier used to track this client's request count.
      */
     private function resolveClientKey(Request $request): ?string
     {
