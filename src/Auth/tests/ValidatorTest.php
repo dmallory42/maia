@@ -88,4 +88,54 @@ class ValidatorTest extends TestCase
             $errors
         );
     }
+
+    public function testCustomRuleCanBeRegisteredAndPass(): void
+    {
+        $validator = (new Validator())->extend(
+            'starts_with',
+            static function (string $field, mixed $value, ?string $argument): ?string {
+                if (!is_string($value) || $argument === null || str_starts_with($value, $argument)) {
+                    return null;
+                }
+
+                return sprintf('The %s field must start with %s.', $field, $argument);
+            }
+        );
+
+        $errors = $validator->validate(
+            ['username' => 'maia-bot'],
+            ['username' => 'required|starts_with:maia']
+        );
+
+        $this->assertSame([], $errors);
+    }
+
+    public function testCustomRuleReturnsErrorMessageWhenValidationFails(): void
+    {
+        $validator = (new Validator())->extend(
+            'starts_with',
+            static function (string $field, mixed $value, ?string $argument, array $data): ?string {
+                if (
+                    is_string($value)
+                    && $argument !== null
+                    && str_starts_with($value, $argument)
+                    && array_key_exists('username', $data)
+                ) {
+                    return null;
+                }
+
+                return sprintf('The %s field must start with %s.', $field, (string) $argument);
+            }
+        );
+
+        $errors = $validator->validate(
+            ['username' => 'bot-maia'],
+            ['username' => 'starts_with:maia']
+        );
+
+        $this->assertSame(
+            ['username' => ['The username field must start with maia.']],
+            $errors
+        );
+    }
 }
