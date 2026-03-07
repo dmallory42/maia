@@ -4,28 +4,14 @@ declare(strict_types=1);
 
 namespace Maia\Cli\Commands;
 
-use Maia\Cli\Command;
 use Maia\Cli\Output;
-use Maia\Orm\Connection;
 use Maia\Orm\Migrator;
 
 /**
  * Runs all pending database migrations in order.
  */
-class MigrateCommand extends Command
+class MigrateCommand extends BaseMigrateCommand
 {
-    /**
-     * Set up the migrate command with optional database connection and migration directory.
-     * @param Connection|null $connection Database connection; defaults to a local SQLite file.
-     * @param string|null $migrationDir Path to the migrations directory; defaults to database/migrations.
-     * @return void
-     */
-    public function __construct(
-        private ?Connection $connection = null,
-        private ?string $migrationDir = null
-    ) {
-    }
-
     /**
      * Return the command name.
      * @return string The command identifier.
@@ -62,23 +48,5 @@ class MigrateCommand extends Command
         }
 
         return 0;
-    }
-
-    /**
-     * Resolve the database connection, falling back to a local SQLite file.
-     * @return Connection The active database connection.
-     */
-    protected function connection(): Connection
-    {
-        return $this->connection ?? new Connection('sqlite:' . getcwd() . '/database/database.sqlite');
-    }
-
-    /**
-     * Resolve the migrations directory path.
-     * @return string Absolute path to the directory containing migration files.
-     */
-    protected function migrationDirectory(): string
-    {
-        return $this->migrationDir ?? (getcwd() . '/database/migrations');
     }
 }

@@ -4,28 +4,14 @@ declare(strict_types=1);
 
 namespace Maia\Cli\Commands;
 
-use Maia\Cli\Command;
 use Maia\Cli\Output;
-use Maia\Orm\Connection;
 use Maia\Orm\Migrator;
 
 /**
  * CLI command that reports which migrations have run and which are still pending.
  */
-class MigrateStatusCommand extends Command
+class MigrateStatusCommand extends BaseMigrateCommand
 {
-    /**
-     * Configure the command with optional connection and migration directory overrides.
-     * @param Connection|null $connection Database connection to use; defaults to the local SQLite database.
-     * @param string|null $migrationDir Directory containing migration files; defaults to database/migrations.
-     * @return void
-     */
-    public function __construct(
-        private ?Connection $connection = null,
-        private ?string $migrationDir = null
-    ) {
-    }
-
     /**
      * Return the CLI command name.
      * @return string Command identifier.
@@ -52,8 +38,8 @@ class MigrateStatusCommand extends Command
      */
     public function execute(array $args, Output $output): int
     {
-        $connection = $this->connection ?? new Connection('sqlite:' . getcwd() . '/database/database.sqlite');
-        $directory = $this->migrationDir ?? (getcwd() . '/database/migrations');
+        $connection = $this->connection();
+        $directory = $this->migrationDirectory();
 
         // Ensure migrations table exists before querying status.
         new Migrator($connection, $directory);
