@@ -1,0 +1,1 @@
+- Added `composer changelog:new -- <slug>` to create release-note fragments under `.changes/unreleased/` with the expected filename and starter content.

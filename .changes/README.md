@@ -9,6 +9,14 @@ These files serve two purposes:
 
 ## File naming
 
+Create a new fragment with:
+
+```bash
+composer changelog:new -- route-param-validation
+```
+
+That command creates `.changes/unreleased/route-param-validation.md` with a starter bullet.
+
 Use a short descriptive filename, for example:
 
 - `.changes/unreleased/restrictive-cors-default.md`
