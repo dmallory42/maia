@@ -1,0 +1,1 @@
+- ORM and migration domain failures now throw `Maia\\Orm\\OrmException` instead of generic runtime exceptions, making them easier to catch without masking unrelated errors.

@@ -7,6 +7,7 @@ namespace Maia\Orm\Tests;
 use Maia\Orm\Attributes\Table;
 use Maia\Orm\Connection;
 use Maia\Orm\Model;
+use Maia\Orm\OrmException;
 use Maia\Orm\QueryBuilder;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
@@ -18,6 +19,11 @@ class User extends Model
     public string $name;
     public string $email;
     public int $active;
+
+    public static function resetConnection(): void
+    {
+        static::$connection = null;
+    }
 }
 
 class ModelTest extends TestCase
@@ -32,6 +38,11 @@ class ModelTest extends TestCase
         );
         $this->connection->execute('INSERT INTO users (name, email, active) VALUES (?, ?, ?)', ['Mal', 'mal@example.com', 1]);
 
+        User::setConnection($this->connection);
+    }
+
+    protected function tearDown(): void
+    {
         User::setConnection($this->connection);
     }
 
@@ -106,5 +117,28 @@ class ModelTest extends TestCase
         $second = $method->invoke(null, User::class);
 
         $this->assertSame($first, $second);
+    }
+
+    public function testSaveWithoutPrimaryKeyThrowsOrmException(): void
+    {
+        $user = new User();
+        $user->name = 'No Id';
+        $user->email = 'no-id@example.com';
+        $user->active = 1;
+
+        $this->expectException(OrmException::class);
+        $this->expectExceptionMessage(sprintf('Cannot save %s without primary key.', User::class));
+
+        $user->save();
+    }
+
+    public function testQueryWithoutConfiguredConnectionThrowsOrmException(): void
+    {
+        User::resetConnection();
+
+        $this->expectException(OrmException::class);
+        $this->expectExceptionMessage(sprintf('No ORM connection configured for model %s.', User::class));
+
+        User::query();
     }
 }

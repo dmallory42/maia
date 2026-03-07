@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Maia\Orm;
 
 use Maia\Orm\Schema\Schema;
-use RuntimeException;
 
 /**
  * Applies and rolls back migration files while tracking execution history in the migrations table.
@@ -150,7 +149,7 @@ class Migrator
         $migration = require $file;
 
         if (!$migration instanceof Migration) {
-            throw new RuntimeException(sprintf('Migration file [%s] must return a Migration instance.', $file));
+            throw new OrmException(sprintf('Migration file [%s] must return a Migration instance.', $file));
         }
 
         return $migration;

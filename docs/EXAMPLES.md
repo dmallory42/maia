@@ -202,6 +202,8 @@ class User extends Model
 }
 ```
 
+ORM-specific failures now throw `Maia\\Orm\\OrmException`, so application-level error handling can catch database/model setup issues without also catching unrelated runtime failures.
+
 Generate and edit a migration:
 
 ```bash

@@ -10,7 +10,6 @@ use Maia\Orm\Attributes\Table;
 use ReflectionClass;
 use ReflectionNamedType;
 use ReflectionProperty;
-use RuntimeException;
 
 /**
  * Active-record base class providing CRUD operations, attribute access, and relationship loading.
@@ -89,7 +88,7 @@ abstract class Model
         $primaryValue = $this->readValue($primaryKey);
 
         if ($primaryValue === null) {
-            throw new RuntimeException(sprintf('Cannot save %s without primary key.', static::class));
+            throw new OrmException(sprintf('Cannot save %s without primary key.', static::class));
         }
 
         $data = $this->extractPersistableData();
@@ -214,7 +213,7 @@ abstract class Model
     protected static function connection(): Connection
     {
         if (static::$connection === null) {
-            throw new RuntimeException(sprintf('No ORM connection configured for model %s.', static::class));
+            throw new OrmException(sprintf('No ORM connection configured for model %s.', static::class));
         }
 
         return static::$connection;
