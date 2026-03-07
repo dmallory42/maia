@@ -1,0 +1,2 @@
+- Fixed the documented and scaffolded bootstrap flow to initialize the ORM model connection alongside the container connection binding.
+- Added regression coverage for the documented bootstrap path so ORM examples match runtime behavior.
