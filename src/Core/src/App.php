@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Maia\Core;
 
+use Closure;
 use Maia\Core\Config\Config;
 use Maia\Core\Config\Env;
 use Maia\Core\Container\Container;
@@ -73,6 +74,7 @@ class App
         $container->instance(Config::class, $config);
         $container->instance(Logger::class, $logger);
         $container->instance(Router::class, $router);
+        self::configureContainerBindings($container, $config);
 
         $exceptionHandler = new ExceptionHandler($debug);
 
@@ -391,6 +393,40 @@ class App
         }
 
         return Logger::null();
+    }
+
+    /**
+     * Apply container bindings from config and return void.
+     * @param Container $container Input value.
+     * @param Config $config Input value.
+     * @return void Output value.
+     */
+    private static function configureContainerBindings(Container $container, Config $config): void
+    {
+        $factories = $config->get('app.factories', []);
+        if (is_array($factories)) {
+            foreach ($factories as $class => $factory) {
+                if (is_string($class) && $factory instanceof Closure) {
+                    $container->factory($class, $factory);
+                }
+            }
+        }
+
+        $singletons = $config->get('app.singletons', []);
+        if (!is_array($singletons)) {
+            return;
+        }
+
+        foreach ($singletons as $class => $factory) {
+            if (is_int($class) && is_string($factory)) {
+                $container->singleton($factory);
+                continue;
+            }
+
+            if (is_string($class) && $factory instanceof Closure) {
+                $container->singleton($class, $factory);
+            }
+        }
     }
 
     /**

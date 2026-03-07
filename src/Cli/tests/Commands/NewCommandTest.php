@@ -70,6 +70,9 @@ class NewCommandTest extends TestCase
         $this->assertIsString($routes);
         $this->assertIsString($appConfig);
         $this->assertStringContainsString("require __DIR__ . '/../routes/api.php';", $publicIndex);
+        $this->assertStringContainsString("use Maia\\Orm\\Connection;", $publicIndex);
+        $this->assertStringContainsString("use Maia\\Orm\\Model;", $publicIndex);
+        $this->assertStringContainsString("Model::setConnection(\$connection);", $publicIndex);
         $this->assertStringContainsString('return static function (App $app): void {', $routes);
         $this->assertStringContainsString("use Maia\\Core\\Config\\Env;", $appConfig);
         $this->assertStringContainsString("Env::get('APP_ENV', 'local')", $appConfig);

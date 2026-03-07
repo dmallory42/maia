@@ -55,8 +55,36 @@ class TypedRouteController
     }
 }
 
+class ConfiguredFactoryService
+{
+    public function __construct(public string $source)
+    {
+    }
+}
+
+class ConfiguredSingletonService
+{
+}
 class AppTest extends TestCase
 {
+    private ?string $configDir = null;
+
+    protected function tearDown(): void
+    {
+        if ($this->configDir !== null && is_dir($this->configDir)) {
+            $files = glob($this->configDir . '/*.php');
+            if (is_array($files)) {
+                foreach ($files as $file) {
+                    unlink($file);
+                }
+            }
+
+            rmdir($this->configDir);
+        }
+
+        parent::tearDown();
+    }
+
     public function testHandlesMatchedRequest(): void
     {
         $app = App::create();
@@ -117,5 +145,40 @@ class AppTest extends TestCase
         $this->assertSame(404, $intResponse->status());
         $this->assertSame(404, $floatResponse->status());
         $this->assertSame(404, $boolResponse->status());
+    }
+
+    public function testAppliesConfiguredContainerBindings(): void
+    {
+        $this->configDir = sys_get_temp_dir() . '/maia_app_config_' . uniqid('', true);
+        mkdir($this->configDir);
+
+        file_put_contents(
+            $this->configDir . '/app.php',
+            <<<'PHP'
+<?php
+
+return [
+    'factories' => [
+        \Maia\Core\Tests\ConfiguredFactoryService::class => static fn (
+            \Maia\Core\Container\Container $container
+        ) => new \Maia\Core\Tests\ConfiguredFactoryService('config'),
+    ],
+    'singletons' => [
+        \Maia\Core\Tests\ConfiguredSingletonService::class,
+    ],
+];
+PHP
+        );
+
+        $app = App::create($this->configDir);
+
+        $factoryA = $app->container()->resolve(ConfiguredFactoryService::class);
+        $factoryB = $app->container()->resolve(ConfiguredFactoryService::class);
+        $singletonA = $app->container()->resolve(ConfiguredSingletonService::class);
+        $singletonB = $app->container()->resolve(ConfiguredSingletonService::class);
+
+        $this->assertSame('config', $factoryA->source);
+        $this->assertNotSame($factoryA, $factoryB);
+        $this->assertSame($singletonA, $singletonB);
     }
 }
