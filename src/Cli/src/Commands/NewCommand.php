@@ -271,8 +271,20 @@ PHP;
 
 use Maia\Core\Config\Env;
 
+$dsn = Env::get('DB_DSN');
+if ($dsn === null || $dsn === '') {
+    $dsn = 'sqlite:' . __DIR__ . '/../database/database.sqlite';
+} elseif (str_starts_with($dsn, 'sqlite:')) {
+    $path = substr($dsn, 7);
+    $isWindowsAbsolute = preg_match('/^[A-Za-z]:[\/\\\\]/', $path) === 1;
+
+    if ($path !== '' && $path !== ':memory:' && !str_starts_with($path, '/') && !$isWindowsAbsolute) {
+        $dsn = 'sqlite:' . __DIR__ . '/../' . ltrim($path, '/');
+    }
+}
+
 return [
-    'dsn' => Env::get('DB_DSN', 'sqlite:' . __DIR__ . '/../database/database.sqlite'),
+    'dsn' => $dsn,
     'username' => Env::get('DB_USERNAME'),
     'password' => Env::get('DB_PASSWORD'),
 ];

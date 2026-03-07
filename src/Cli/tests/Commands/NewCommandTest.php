@@ -6,6 +6,7 @@ namespace Maia\Cli\Tests\Commands;
 
 use Maia\Cli\Commands\NewCommand;
 use Maia\Cli\Output;
+use Maia\Core\Config\Env;
 use PHPUnit\Framework\TestCase;
 
 class NewCommandTest extends TestCase
@@ -74,11 +75,34 @@ class NewCommandTest extends TestCase
         $this->assertIsString($corsConfig);
         $this->assertIsString($envExample);
         $this->assertStringContainsString("require __DIR__ . '/../routes/api.php';", $publicIndex);
+        $this->assertStringContainsString("use Maia\\Orm\\Connection;", $publicIndex);
+        $this->assertStringContainsString("use Maia\\Orm\\Model;", $publicIndex);
+        $this->assertStringContainsString("Model::setConnection(\$connection);", $publicIndex);
         $this->assertStringContainsString('return static function (App $app): void {', $routes);
         $this->assertStringContainsString("use Maia\\Core\\Config\\Env;", $appConfig);
         $this->assertStringContainsString("Env::get('APP_ENV', 'local')", $appConfig);
         $this->assertStringContainsString("Env::get('CORS_ALLOWED_ORIGINS', '')", $corsConfig);
         $this->assertStringContainsString("CORS_ALLOWED_ORIGINS=", $envExample);
+    }
+
+    public function testScaffoldedDatabaseConfigNormalizesRelativeSqliteDsnFromEnv(): void
+    {
+        $command = new NewCommand($this->workspace, autoInstall: false);
+        $output = new Output();
+
+        $code = $command->execute(['my-app', '--no-install'], $output);
+
+        $this->assertSame(0, $code);
+
+        $base = $this->workspace . '/my-app';
+
+        Env::reset();
+        Env::load($base . '/.env.example');
+
+        $database = require $base . '/config/database.php';
+
+        $this->assertStringStartsWith('sqlite:', $database['dsn']);
+        $this->assertStringEndsWith('/database/database.sqlite', $database['dsn']);
     }
 
     private function deleteDirectory(string $path): void
