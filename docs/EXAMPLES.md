@@ -339,6 +339,25 @@ $errors = $validator->validate($data, [
 // ['email' => ['The email field must be a valid email address.']]
 ```
 
+Custom rules can be registered on a validator instance:
+
+```php
+$validator->extend(
+    'starts_with',
+    static function (string $field, mixed $value, ?string $argument, array $data): ?string {
+        if (is_string($value) && $argument !== null && str_starts_with($value, $argument)) {
+            return null;
+        }
+
+        return sprintf('The %s field must start with %s.', $field, (string) $argument);
+    }
+);
+
+$errors = $validator->validate($data, [
+    'username' => 'required|starts_with:maia',
+]);
+```
+
 Available rules: `required`, `string`, `email`, `integer`, `boolean`, `min:{n}`, `max:{n}`, `unique:{table}`.
 
 `unique:{table}` requires a configured uniqueness checker. If none is configured, validation returns an explicit configuration error instead of silently passing.

@@ -12,6 +12,9 @@ class Validator
     /** @var (callable(string, string, mixed): bool)|null */
     private $uniqueChecker;
 
+    /** @var array<string, callable(string, mixed, ?string, array): ?string> */
+    private array $customRules = [];
+
     /**
      * Initialize the validator with an optional callback for database uniqueness checks.
      * @param callable|null $uniqueChecker Callback(table, field, value) that returns true when the value is unique;
@@ -21,6 +24,19 @@ class Validator
     public function __construct(?callable $uniqueChecker = null)
     {
         $this->uniqueChecker = $uniqueChecker;
+    }
+
+    /**
+     * Register a custom validation rule.
+     * @param string $name Rule name used in validation strings.
+     * @param callable $rule Callback(field, value, argument, data) => error message or null.
+     * @return self The validator instance for chaining.
+     */
+    public function extend(string $name, callable $rule): self
+    {
+        $this->customRules[strtolower(trim($name))] = $rule;
+
+        return $this;
     }
 
     /**
@@ -45,17 +61,7 @@ class Validator
                     continue;
                 }
 
-                $message = match ($ruleName) {
-                    'required' => $this->validateRequired($field, $value),
-                    'string' => $this->validateString($field, $value),
-                    'email' => $this->validateEmail($field, $value),
-                    'integer' => $this->validateInteger($field, $value),
-                    'boolean' => $this->validateBoolean($field, $value),
-                    'min' => $this->validateMin($field, $value, $argument),
-                    'max' => $this->validateMax($field, $value, $argument),
-                    'unique' => $this->validateUnique($field, $value, $argument),
-                    default => null,
-                };
+                $message = $this->validateRule($ruleName, $field, $value, $argument, $data);
 
                 if ($message !== null) {
                     $errors[$field][] = $message;
@@ -83,6 +89,59 @@ class Validator
                 'argument' => isset($parts[1]) ? trim($parts[1]) : null,
             ];
         }, $rules);
+    }
+
+    /**
+     * Validate one parsed rule against the field value.
+     * @param string $ruleName Lowercased validation rule name.
+     * @param string $field The field name being validated.
+     * @param mixed $value The field value.
+     * @param string|null $argument Optional rule argument.
+     * @param array $data Full payload under validation.
+     * @return string|null Error message when invalid, otherwise null.
+     */
+    private function validateRule(
+        string $ruleName,
+        string $field,
+        mixed $value,
+        ?string $argument,
+        array $data
+    ): ?string {
+        return match ($ruleName) {
+            'required' => $this->validateRequired($field, $value),
+            'string' => $this->validateString($field, $value),
+            'email' => $this->validateEmail($field, $value),
+            'integer' => $this->validateInteger($field, $value),
+            'boolean' => $this->validateBoolean($field, $value),
+            'min' => $this->validateMin($field, $value, $argument),
+            'max' => $this->validateMax($field, $value, $argument),
+            'unique' => $this->validateUnique($field, $value, $argument),
+            default => $this->validateCustomRule($ruleName, $field, $value, $argument, $data),
+        };
+    }
+
+    /**
+     * Run a registered custom rule when one exists.
+     * @param string $ruleName Lowercased custom rule name.
+     * @param string $field The field name being validated.
+     * @param mixed $value The field value.
+     * @param string|null $argument Optional rule argument.
+     * @param array $data Full payload under validation.
+     * @return string|null Error message when invalid, otherwise null.
+     */
+    private function validateCustomRule(
+        string $ruleName,
+        string $field,
+        mixed $value,
+        ?string $argument,
+        array $data
+    ): ?string {
+        $rule = $this->customRules[$ruleName] ?? null;
+        if ($rule === null) {
+            return null;
+        }
+
+        return $rule($field, $value, $argument, $data);
     }
 
     /**
