@@ -1,0 +1,2 @@
+- Replaced the rate limiter's process-local static state with an injectable store interface, including in-memory and filesystem-backed implementations.
+- Added store namespaces so multiple limiters can share one backend without interfering, and documented the persistent filesystem store path for real applications.
