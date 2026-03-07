@@ -20,8 +20,6 @@ class RateLimit implements Middleware
      * @param int $windowSeconds The duration of the rate-limit window in seconds.
      * @param array $trustedProxies Remote IPs whose forwarded-for header should be trusted.
      * @param string $forwardedForHeader Header name containing the original client IP chain.
-     * @param RateLimitStore|null $store Counter store; defaults to an in-memory store.
-     * @param string $namespace Logical namespace for this limiter when sharing one store.
      * @return void
      */
     public function __construct(
@@ -39,8 +37,6 @@ class RateLimit implements Middleware
      * Create a rate limiter that allows a fixed number of requests per minute.
      * @param int $maxRequests The maximum number of requests allowed per 60-second window.
      * @param array $trustedProxies Remote IPs whose forwarded-for header should be trusted.
-     * @param RateLimitStore|null $store Counter store; defaults to an in-memory store.
-     * @param string $namespace Logical namespace for this limiter when sharing one store.
      * @return self A new RateLimit instance with a 60-second window.
      */
     public static function perMinute(
