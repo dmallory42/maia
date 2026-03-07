@@ -71,6 +71,8 @@ return static function (App $app): void {
 };
 ```
 
+`JwtService` accepts the HMAC algorithms `HS256`, `HS384`, and `HS512`. Unsupported algorithm values fail fast during construction.
+
 ## 3) 🎯 Controller + Attribute Routes + DI
 
 `app/Controllers/UserController.php`:
