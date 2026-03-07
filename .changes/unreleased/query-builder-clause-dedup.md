@@ -1,0 +1,1 @@
+- Query builder WHERE and HAVING clause compilation now share one internal compiler path, reducing duplication without changing the generated SQL or public API.
