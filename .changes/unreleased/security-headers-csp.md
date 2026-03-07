@@ -1,0 +1,1 @@
+- `SecurityHeadersMiddleware` now includes a default `Content-Security-Policy: default-src 'none'` header and allows applications to override the CSP value when serving HTML responses.

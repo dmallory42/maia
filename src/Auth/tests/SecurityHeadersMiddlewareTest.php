@@ -18,8 +18,22 @@ class SecurityHeadersMiddlewareTest extends TestCase
 
         $response = $middleware->handle($request, fn (Request $req): Response => Response::json(['ok' => true]));
 
+        $this->assertSame("default-src 'none'", $response->header('Content-Security-Policy'));
         $this->assertSame('nosniff', $response->header('X-Content-Type-Options'));
         $this->assertSame('DENY', $response->header('X-Frame-Options'));
         $this->assertSame('max-age=31536000; includeSubDomains', $response->header('Strict-Transport-Security'));
+    }
+
+    public function testAllowsCustomContentSecurityPolicy(): void
+    {
+        $middleware = new SecurityHeadersMiddleware("default-src 'self'; script-src 'self' https://cdn.example.com");
+        $request = new Request('GET', '/', [], [], null, []);
+
+        $response = $middleware->handle($request, fn (Request $req): Response => Response::make('<html></html>'));
+
+        $this->assertSame(
+            "default-src 'self'; script-src 'self' https://cdn.example.com",
+            $response->header('Content-Security-Policy')
+        );
     }
 }
