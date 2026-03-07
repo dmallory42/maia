@@ -369,6 +369,8 @@ $app->addMiddleware(new ResponseCacheMiddleware(
 ));
 ```
 
+The CORS middleware is restrictive by default. Cross-origin access is only enabled for origins you list explicitly, or for all origins if you intentionally configure `['*']`.
+
 ## 8) 🧪 HTTP Testing
 
 `tests/UserControllerTest.php`:

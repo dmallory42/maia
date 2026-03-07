@@ -11,6 +11,16 @@ use PHPUnit\Framework\TestCase;
 
 class CorsMiddlewareTest extends TestCase
 {
+    public function testDefaultConfigurationRejectsCrossOriginRequests(): void
+    {
+        $middleware = new CorsMiddleware();
+        $request = new Request('GET', '/', [], ['Origin' => 'https://app.example.com'], null, []);
+
+        $response = $middleware->handle($request, fn (Request $req): Response => Response::json(['ok' => true]));
+
+        $this->assertSame(403, $response->status());
+    }
+
     public function testAddsCorsHeadersForAllowedOrigin(): void
     {
         $middleware = new CorsMiddleware(['https://app.example.com']);
@@ -30,6 +40,17 @@ class CorsMiddlewareTest extends TestCase
         $response = $middleware->handle($request, fn (Request $req): Response => Response::json(['ok' => true]));
 
         $this->assertSame(403, $response->status());
+    }
+
+    public function testWildcardOriginStillSupportedWhenExplicitlyConfigured(): void
+    {
+        $middleware = new CorsMiddleware(['*']);
+        $request = new Request('GET', '/', [], ['Origin' => 'https://app.example.com'], null, []);
+
+        $response = $middleware->handle($request, fn (Request $req): Response => Response::json(['ok' => true]));
+
+        $this->assertSame(200, $response->status());
+        $this->assertSame('*', $response->header('Access-Control-Allow-Origin'));
     }
 
     public function testHandlesPreflightOptionsRequest(): void
@@ -52,5 +73,16 @@ class CorsMiddlewareTest extends TestCase
         $this->assertSame(204, $response->status());
         $this->assertSame('https://app.example.com', $response->header('Access-Control-Allow-Origin'));
         $this->assertNotNull($response->header('Access-Control-Allow-Methods'));
+    }
+
+    public function testRequestsWithoutOriginPassThroughWithoutCorsHeaders(): void
+    {
+        $middleware = new CorsMiddleware();
+        $request = new Request('GET', '/', [], [], null, []);
+
+        $response = $middleware->handle($request, fn (Request $req): Response => Response::json(['ok' => true]));
+
+        $this->assertSame(200, $response->status());
+        $this->assertNull($response->header('Access-Control-Allow-Origin'));
     }
 }
