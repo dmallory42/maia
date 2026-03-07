@@ -529,25 +529,20 @@ class QueryBuilder
      */
     private function compileHavingClause(): array
     {
-        if ($this->havings === []) {
-            return ['', []];
-        }
+        return $this->compileConditionalClause(
+            $this->havings,
+            'HAVING',
+            static function (array $having): array {
+                if ($having['type'] === 'raw') {
+                    return [$having['sql'] ?? '', $having['params'] ?? []];
+                }
 
-        $clauses = [];
-        $params = [];
-
-        foreach ($this->havings as $having) {
-            if ($having['type'] === 'raw') {
-                $clauses[] = $having['sql'] ?? '';
-                $params = array_merge($params, $having['params'] ?? []);
-                continue;
+                return [
+                    sprintf('%s %s ?', $having['column'], $having['operator'] ?? '='),
+                    [$having['value'] ?? null],
+                ];
             }
-
-            $clauses[] = sprintf('%s %s ?', $having['column'], $having['operator'] ?? '=');
-            $params[] = $having['value'] ?? null;
-        }
-
-        return ['HAVING ' . implode(' AND ', $clauses), $params];
+        );
     }
 
     /**
@@ -556,32 +551,55 @@ class QueryBuilder
      */
     private function compileWhereClause(): array
     {
-        if ($this->wheres === []) {
+        return $this->compileConditionalClause(
+            $this->wheres,
+            'WHERE',
+            static function (array $where): array {
+                if ($where['type'] === 'in') {
+                    $values = $where['values'] ?? [];
+                    if ($values === []) {
+                        return ['1 = 0', []];
+                    }
+
+                    $placeholders = implode(', ', array_fill(0, count($values), '?'));
+
+                    return [
+                        sprintf('%s IN (%s)', $where['column'], $placeholders),
+                        $values,
+                    ];
+                }
+
+                return [
+                    sprintf('%s %s ?', $where['column'], $where['operator'] ?? '='),
+                    [$where['value'] ?? null],
+                ];
+            }
+        );
+    }
+
+    /**
+     * Compile a conditional clause list such as WHERE or HAVING into SQL and parameters.
+     * @param array<int, array<string, mixed>> $conditions Clause definitions to compile.
+     * @param string $keyword SQL clause keyword to prefix when conditions exist.
+     * @param callable $compiler Callback(condition) => [sql, params].
+     * @return array{0: string, 1: array<int, mixed>} A tuple of [clauseSql, params].
+     */
+    private function compileConditionalClause(array $conditions, string $keyword, callable $compiler): array
+    {
+        if ($conditions === []) {
             return ['', []];
         }
 
         $clauses = [];
         $params = [];
 
-        foreach ($this->wheres as $where) {
-            if ($where['type'] === 'in') {
-                $values = $where['values'] ?? [];
-                if ($values === []) {
-                    $clauses[] = '1 = 0';
-                    continue;
-                }
-
-                $placeholders = implode(', ', array_fill(0, count($values), '?'));
-                $clauses[] = sprintf('%s IN (%s)', $where['column'], $placeholders);
-                $params = array_merge($params, $values);
-                continue;
-            }
-
-            $clauses[] = sprintf('%s %s ?', $where['column'], $where['operator'] ?? '=');
-            $params[] = $where['value'] ?? null;
+        foreach ($conditions as $condition) {
+            [$sql, $conditionParams] = $compiler($condition);
+            $clauses[] = $sql;
+            $params = array_merge($params, $conditionParams);
         }
 
-        return ['WHERE ' . implode(' AND ', $clauses), $params];
+        return [$keyword . ' ' . implode(' AND ', $clauses), $params];
     }
 
     /**
