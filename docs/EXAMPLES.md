@@ -145,6 +145,8 @@ class UserController
 }
 ```
 
+Builtin scalar route params are validated before controller dispatch. For example, `/users/not-a-number` will not call `show(int $id)`; it returns `404` instead.
+
 ## 4) 🗃️ Model + Migration
 
 `app/Models/User.php`:
