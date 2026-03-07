@@ -9,7 +9,7 @@ namespace Maia\Auth;
  */
 class Validator
 {
-    /** @var callable(string, string, mixed): bool */
+    /** @var (callable(string, string, mixed): bool)|null */
     private $uniqueChecker;
 
     /**
@@ -20,7 +20,7 @@ class Validator
      */
     public function __construct(?callable $uniqueChecker = null)
     {
-        $this->uniqueChecker = $uniqueChecker ?? static fn (string $table, string $field, mixed $value): bool => true;
+        $this->uniqueChecker = $uniqueChecker;
     }
 
     /**
@@ -229,6 +229,13 @@ class Validator
     {
         if ($argument === null) {
             return null;
+        }
+
+        if ($this->uniqueChecker === null) {
+            return sprintf(
+                'The %s field cannot use the unique rule without a configured unique checker.',
+                $field
+            );
         }
 
         $isUnique = (bool) ($this->uniqueChecker)($argument, $field, $value);

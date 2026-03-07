@@ -37,7 +37,7 @@ abstract class FormRequest extends Request
     ) {
         parent::__construct($method, $path, $query, $headers, $body, $routeParams);
 
-        $this->validateResolved($validator ?? new Validator());
+        $this->validateResolved($validator);
     }
 
     /**
@@ -45,6 +45,15 @@ abstract class FormRequest extends Request
      * @return array An associative array of field names to validation rule strings or arrays.
      */
     abstract protected function rules(): array;
+
+    /**
+     * Provide an optional uniqueness checker for `unique:{table}` rules used by this request.
+     * @return callable|null Callback(table, field, value) => bool, or null when this request does not use unique rules.
+     */
+    protected function uniqueChecker(): ?callable
+    {
+        return null;
+    }
 
     /**
      * Retrieve the validated request data (only fields defined in rules).
@@ -57,15 +66,16 @@ abstract class FormRequest extends Request
 
     /**
      * Run validation against the request body and populate the validated data, or throw on failure.
-     * @param Validator $validator The validator instance to use.
+     * @param Validator|null $validator The validator instance to use, or null to build one from uniqueChecker().
      * @return void
      */
-    private function validateResolved(Validator $validator): void
+    private function validateResolved(?Validator $validator): void
     {
         $payload = $this->body();
         $data = is_array($payload) ? $payload : [];
 
-        $errors = $validator->validate($data, $this->rules());
+        $resolvedValidator = $validator ?? new Validator($this->uniqueChecker());
+        $errors = $resolvedValidator->validate($data, $this->rules());
         if ($errors !== []) {
             throw new ValidationException($errors);
         }

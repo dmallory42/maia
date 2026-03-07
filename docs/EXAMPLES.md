@@ -341,6 +341,8 @@ $errors = $validator->validate($data, [
 
 Available rules: `required`, `string`, `email`, `integer`, `boolean`, `min:{n}`, `max:{n}`, `unique:{table}`.
 
+`unique:{table}` requires a configured uniqueness checker. If none is configured, validation returns an explicit configuration error instead of silently passing.
+
 ## 7) 🛡️ Global Middleware
 
 Add global middleware in your bootstrap:

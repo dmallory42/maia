@@ -73,4 +73,19 @@ class ValidatorTest extends TestCase
         $this->assertSame(1, $calls);
         $this->assertArrayHasKey('email', $errors);
     }
+
+    public function testUniqueRuleReturnsConfigurationErrorWithoutChecker(): void
+    {
+        $validator = new Validator();
+
+        $errors = $validator->validate(
+            ['email' => 'mal@example.com'],
+            ['email' => 'unique:users']
+        );
+
+        $this->assertSame(
+            ['email' => ['The email field cannot use the unique rule without a configured unique checker.']],
+            $errors
+        );
+    }
 }

@@ -1,0 +1,2 @@
+- Made `unique:{table}` validation fail explicitly when no uniqueness checker is configured instead of silently passing.
+- Added a `FormRequest::uniqueChecker()` override so request classes can supply uniqueness checks without manually constructing a `Validator`.
