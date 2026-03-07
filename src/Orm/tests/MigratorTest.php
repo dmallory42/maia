@@ -6,6 +6,7 @@ namespace Maia\Orm\Tests;
 
 use Maia\Orm\Connection;
 use Maia\Orm\Migrator;
+use Maia\Orm\OrmException;
 use PHPUnit\Framework\TestCase;
 
 class MigratorTest extends TestCase
@@ -79,6 +80,18 @@ class MigratorTest extends TestCase
 
         $rows = $this->connection->query('SELECT migration FROM migrations');
         $this->assertCount(0, $rows);
+    }
+
+    public function testMigrateThrowsOrmExceptionWhenFileDoesNotReturnMigration(): void
+    {
+        $this->writeMigration('2026_01_01_000003_invalid.php', "<?php\n\nreturn 'not-a-migration';\n");
+
+        $migrator = new Migrator($this->connection, $this->migrationDir);
+
+        $this->expectException(OrmException::class);
+        $this->expectExceptionMessage('must return a Migration instance');
+
+        $migrator->migrate();
     }
 
     private function writeMigration(string $filename, string $content): void
