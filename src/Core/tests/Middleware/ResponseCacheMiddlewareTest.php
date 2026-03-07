@@ -8,16 +8,19 @@ use Maia\Core\Cache\FilesystemResponseCacheStore;
 use Maia\Core\Cache\ResponseCacheStore;
 use Maia\Core\Http\Request;
 use Maia\Core\Http\Response;
+use Maia\Core\Logging\Logger;
 use Maia\Core\Middleware\ResponseCacheMiddleware;
 use PHPUnit\Framework\TestCase;
 
 class ResponseCacheMiddlewareTest extends TestCase
 {
     private string $cacheDir;
+    private string $logPath;
 
     protected function setUp(): void
     {
         $this->cacheDir = sys_get_temp_dir() . '/maia-response-cache-' . bin2hex(random_bytes(6));
+        $this->logPath = sys_get_temp_dir() . '/maia-response-cache-log-' . bin2hex(random_bytes(6)) . '.log';
     }
 
     protected function tearDown(): void
@@ -34,6 +37,7 @@ class ResponseCacheMiddlewareTest extends TestCase
         }
 
         @rmdir($this->cacheDir);
+        @unlink($this->logPath);
     }
 
     public function testCachesSuccessfulResponsesUsingFilesystemStore(): void
@@ -109,5 +113,40 @@ class ResponseCacheMiddlewareTest extends TestCase
         $response = $middleware->handle($request, fn (): Response => Response::json(['ok' => true]));
 
         $this->assertSame('BYPASS', $response->header('X-Response-Cache'));
+    }
+
+    public function testFailedFilesystemWriteDoesNotCreateCacheHitAndLogsWhenLoggerProvided(): void
+    {
+        mkdir($this->cacheDir, 0777, true);
+
+        $request = new Request('GET', '/players', ['page' => '1'], [], null, []);
+        $cacheKey = 'players:/players?page=1';
+        $cachePath = $this->cacheDir . '/' . sha1($cacheKey) . '.cache';
+        mkdir($cachePath, 0777, true);
+
+        $store = new FilesystemResponseCacheStore($this->cacheDir, new Logger($this->logPath, 'warning'));
+        $middleware = new ResponseCacheMiddleware($store, 300, 'players');
+        $calls = 0;
+
+        $first = $middleware->handle($request, function () use (&$calls): Response {
+            $calls++;
+
+            return Response::json(['players' => ['Saka']]);
+        });
+
+        $second = $middleware->handle($request, function () use (&$calls): Response {
+            $calls++;
+
+            return Response::json(['players' => ['Palmer']]);
+        });
+
+        $logged = file_get_contents($this->logPath);
+
+        $this->assertSame(2, $calls);
+        $this->assertSame('MISS', $first->header('X-Response-Cache'));
+        $this->assertSame('MISS', $second->header('X-Response-Cache'));
+        $this->assertIsString($logged);
+        $this->assertStringContainsString('Filesystem response cache operation failed', $logged);
+        $this->assertStringContainsString('write cache entry', $logged);
     }
 }

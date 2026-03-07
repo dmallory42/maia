@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Maia\Core\Cache;
 
+use Maia\Core\Logging\Logger;
+
 /**
  * Filesystem-backed cache store for serialized HTTP responses.
  */
@@ -12,10 +14,13 @@ class FilesystemResponseCacheStore implements ResponseCacheStore
     /**
      * Use the given directory for storing cache files.
      * @param string $directory Filesystem directory where cache entries are stored.
+     * @param Logger|null $logger Optional logger used to record filesystem failures.
      * @return void
      */
-    public function __construct(private string $directory)
-    {
+    public function __construct(
+        private string $directory,
+        private ?Logger $logger = null
+    ) {
     }
 
     /**
@@ -29,7 +34,13 @@ class FilesystemResponseCacheStore implements ResponseCacheStore
         }
 
         if (!is_dir($this->directory)) {
-            return @mkdir($this->directory, 0777, true);
+            $created = $this->runFileOperation(
+                action: 'create cache directory',
+                operation: fn (): bool => mkdir($this->directory, 0777, true),
+                context: ['directory' => $this->directory]
+            );
+
+            return $created === true;
         }
 
         return is_writable($this->directory);
@@ -47,20 +58,24 @@ class FilesystemResponseCacheStore implements ResponseCacheStore
             return null;
         }
 
-        $contents = @file_get_contents($path);
+        $contents = $this->runFileOperation(
+            action: 'read cache entry',
+            operation: fn (): string|false => file_get_contents($path),
+            context: ['path' => $path]
+        );
         if ($contents === false) {
             return null;
         }
 
         $payload = json_decode($contents, true);
         if (!is_array($payload)) {
-            @unlink($path);
+            $this->deleteFile($path, 'delete invalid cache entry');
             return null;
         }
 
         $expiresAt = (int) ($payload['expires_at'] ?? 0);
         if ($expiresAt !== 0 && $expiresAt < time()) {
-            @unlink($path);
+            $this->deleteFile($path, 'delete expired cache entry');
             return null;
         }
 
@@ -91,7 +106,16 @@ class FilesystemResponseCacheStore implements ResponseCacheStore
             return;
         }
 
-        @file_put_contents($this->pathFor($key), $payload, LOCK_EX);
+        $path = $this->pathFor($key);
+        $written = $this->runFileOperation(
+            action: 'write cache entry',
+            operation: fn (): int|false => file_put_contents($path, $payload, LOCK_EX),
+            context: ['path' => $path]
+        );
+
+        if ($written === false) {
+            return;
+        }
     }
 
     /**
@@ -102,5 +126,71 @@ class FilesystemResponseCacheStore implements ResponseCacheStore
     private function pathFor(string $key): string
     {
         return rtrim($this->directory, '/\\') . '/' . sha1($key) . '.cache';
+    }
+
+    /**
+     * Execute a filesystem operation while capturing warnings for logging.
+     * @param string $action Human-readable operation description.
+     * @param callable $operation Operation to execute.
+     * @param array<string, mixed> $context Structured logging context.
+     * @return mixed Operation result, or false when a PHP warning occurred.
+     */
+    private function runFileOperation(string $action, callable $operation, array $context = []): mixed
+    {
+        $warning = null;
+        set_error_handler(static function (int $severity, string $message) use (&$warning): bool {
+            $warning = $message;
+
+            return true;
+        });
+
+        try {
+            $result = $operation();
+        } finally {
+            restore_error_handler();
+        }
+
+        if ($warning !== null) {
+            $this->logFailure($action, $warning, $context);
+
+            return false;
+        }
+
+        if ($result === false) {
+            $this->logFailure($action, 'Operation returned false.', $context);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Delete a cache file and log failures when they occur.
+     * @param string $path Cache file path.
+     * @param string $action Human-readable operation description.
+     * @return void
+     */
+    private function deleteFile(string $path, string $action): void
+    {
+        $this->runFileOperation(
+            action: $action,
+            operation: static fn (): bool => unlink($path),
+            context: ['path' => $path]
+        );
+    }
+
+    /**
+     * Record a filesystem cache failure when a logger is configured.
+     * @param string $action Human-readable operation description.
+     * @param string $reason Error message captured from PHP or the operation result.
+     * @param array<string, mixed> $context Structured logging context.
+     * @return void
+     */
+    private function logFailure(string $action, string $reason, array $context = []): void
+    {
+        $this->logger?->warning('Filesystem response cache operation failed', [
+            'action' => $action,
+            'reason' => $reason,
+            ...$context,
+        ]);
     }
 }
