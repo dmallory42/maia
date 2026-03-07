@@ -21,6 +21,21 @@ class CreateUserRequest extends FormRequest
     }
 }
 
+class UniqueEmailRequest extends FormRequest
+{
+    protected function rules(): array
+    {
+        return [
+            'email' => 'required|email|unique:users',
+        ];
+    }
+
+    protected function uniqueChecker(): ?callable
+    {
+        return static fn (string $table, string $field, mixed $value): bool => $value !== 'taken@example.com';
+    }
+}
+
 class FormRequestTest extends TestCase
 {
     public function testValidatedReturnsSanitizedData(): void
@@ -57,6 +72,37 @@ class FormRequestTest extends TestCase
             body: '{"name":"","email":"bad","age":10}',
             routeParams: [],
             validator: new Validator()
+        );
+    }
+
+    public function testUsesFormRequestUniqueCheckerWithoutManualValidatorConstruction(): void
+    {
+        $request = new UniqueEmailRequest(
+            method: 'POST',
+            path: '/users',
+            query: [],
+            headers: ['Content-Type' => 'application/json'],
+            body: '{"email":"free@example.com"}',
+            routeParams: []
+        );
+
+        $this->assertSame(
+            ['email' => 'free@example.com'],
+            $request->validated()
+        );
+    }
+
+    public function testThrowsValidationExceptionWhenFormRequestUniqueCheckerRejectsValue(): void
+    {
+        $this->expectException(ValidationException::class);
+
+        new UniqueEmailRequest(
+            method: 'POST',
+            path: '/users',
+            query: [],
+            headers: ['Content-Type' => 'application/json'],
+            body: '{"email":"taken@example.com"}',
+            routeParams: []
         );
     }
 }
