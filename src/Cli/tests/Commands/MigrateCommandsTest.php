@@ -15,9 +15,14 @@ class MigrateCommandsTest extends TestCase
 {
     private Connection $connection;
     private string $migrationDir;
+    private string $previousCwd;
 
     protected function setUp(): void
     {
+        $cwd = getcwd();
+        $this->assertIsString($cwd);
+        $this->previousCwd = $cwd;
+
         $this->connection = new Connection('sqlite::memory:');
         $this->migrationDir = sys_get_temp_dir() . '/maia_cli_migrations_' . uniqid('', true);
         mkdir($this->migrationDir);
@@ -28,6 +33,8 @@ class MigrateCommandsTest extends TestCase
 
     protected function tearDown(): void
     {
+        chdir($this->previousCwd);
+
         $files = glob($this->migrationDir . '/*.php');
         if ($files !== false) {
             foreach ($files as $file) {
@@ -93,6 +100,48 @@ class MigrateCommandsTest extends TestCase
         $states = array_column($payload['migrations'], 'ran', 'migration');
         $this->assertTrue($states['2026_01_01_000001_create_users.php']);
         $this->assertFalse($states['2026_01_01_000003_create_comments.php']);
+    }
+
+    public function testMigrationCommandsUseDefaultConnectionAndMigrationPaths(): void
+    {
+        $workspace = sys_get_temp_dir() . '/maia_cli_workspace_' . uniqid('', true);
+        mkdir($workspace);
+        mkdir($workspace . '/database');
+        mkdir($workspace . '/database/migrations', 0777, true);
+
+        file_put_contents(
+            $workspace . '/database/migrations/2026_01_01_000001_create_users.php',
+            $this->usersMigration()
+        );
+
+        chdir($workspace);
+
+        $migrate = new MigrateCommand();
+        $rollback = new MigrateRollbackCommand();
+        $status = new MigrateStatusCommand();
+
+        $this->assertSame(0, $migrate->execute([], new Output()));
+
+        $connection = new Connection('sqlite:' . $workspace . '/database/database.sqlite');
+        $tables = $connection->query("SELECT name FROM sqlite_master WHERE type='table'");
+        $this->assertContains('users', array_column($tables, 'name'));
+
+        $statusOutput = new Output(true);
+        $this->assertSame(0, $status->execute([], $statusOutput));
+        $payload = json_decode(trim($statusOutput->buffer()), true);
+        $this->assertIsArray($payload);
+        $this->assertTrue($payload['migrations'][0]['ran']);
+
+        $this->assertSame(0, $rollback->execute([], new Output()));
+
+        $tablesAfterRollback = $connection->query("SELECT name FROM sqlite_master WHERE type='table'");
+        $this->assertNotContains('users', array_column($tablesAfterRollback, 'name'));
+
+        unlink($workspace . '/database/database.sqlite');
+        unlink($workspace . '/database/migrations/2026_01_01_000001_create_users.php');
+        rmdir($workspace . '/database/migrations');
+        rmdir($workspace . '/database');
+        rmdir($workspace);
     }
 
     private function usersMigration(): string

@@ -1,0 +1,1 @@
+- Migration commands now share one default database and migrations-path resolution path, reducing duplication while keeping `migrate`, `migrate:rollback`, and `migrate:status` behavior aligned.

@@ -4,28 +4,14 @@ declare(strict_types=1);
 
 namespace Maia\Cli\Commands;
 
-use Maia\Cli\Command;
 use Maia\Cli\Output;
-use Maia\Orm\Connection;
 use Maia\Orm\Migrator;
 
 /**
  * CLI command that rolls back the most recent migration batch.
  */
-class MigrateRollbackCommand extends Command
+class MigrateRollbackCommand extends BaseMigrateCommand
 {
-    /**
-     * Configure the command with optional connection and migration directory overrides.
-     * @param Connection|null $connection Database connection to use; defaults to the local SQLite database.
-     * @param string|null $migrationDir Directory containing migration files; defaults to database/migrations.
-     * @return void
-     */
-    public function __construct(
-        private ?Connection $connection = null,
-        private ?string $migrationDir = null
-    ) {
-    }
-
     /**
      * Return the CLI command name.
      * @return string Command identifier.
@@ -62,23 +48,5 @@ class MigrateRollbackCommand extends Command
         }
 
         return 0;
-    }
-
-    /**
-     * Resolve the database connection used for migration bookkeeping.
-     * @return Connection Database connection.
-     */
-    private function connection(): Connection
-    {
-        return $this->connection ?? new Connection('sqlite:' . getcwd() . '/database/database.sqlite');
-    }
-
-    /**
-     * Resolve the migration directory to read rollback files from.
-     * @return string Absolute migration directory path.
-     */
-    private function migrationDirectory(): string
-    {
-        return $this->migrationDir ?? (getcwd() . '/database/migrations');
     }
 }
