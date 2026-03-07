@@ -39,6 +39,21 @@ class ModifyRequestMiddleware implements Middleware
     }
 }
 
+class ForwardHeaderMiddleware implements Middleware
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        $response = $next($request);
+        $traceId = $request->header('x-trace-id');
+
+        if (!is_string($traceId)) {
+            return $response;
+        }
+
+        return $response->withHeader('X-Trace-Id', $traceId);
+    }
+}
+
 class PipelineTest extends TestCase
 {
     public function testExecutesHandlerWithNoMiddleware(): void
@@ -92,6 +107,18 @@ class PipelineTest extends TestCase
         );
 
         $this->assertTrue($capturedRequest->attribute('modified'));
+    }
+
+    public function testMiddlewareCanRoundTripHeaderBetweenRequestAndResponse(): void
+    {
+        $pipeline = new Pipeline([new ForwardHeaderMiddleware()]);
+        $response = $pipeline->run(
+            new Request('GET', '/', [], ['X-TRACE-ID' => 'trace-123'], null, []),
+            fn (Request $req) => Response::json(['ok' => true])
+        );
+
+        $this->assertSame('trace-123', $response->header('x-trace-id'));
+        $this->assertSame('trace-123', $response->headers()['X-Trace-Id']);
     }
 
     public function testMiddlewareExecutesInOrder(): void

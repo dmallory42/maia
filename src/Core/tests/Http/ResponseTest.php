@@ -60,4 +60,17 @@ class ResponseTest extends TestCase
         $this->assertSame('cached-body', $response->body());
         $this->assertSame('cached', $response->header('x-test'));
     }
+
+    public function testHeadersReturnCanonicalNamesWhileLookupsRemainCaseInsensitive(): void
+    {
+        $response = Response::make('', 200, ['content-type' => 'application/json'])
+            ->withHeader('x-trace-id', 'trace-123');
+
+        $this->assertSame('application/json', $response->header('Content-Type'));
+        $this->assertSame('trace-123', $response->header('X-TRACE-ID'));
+        $this->assertSame([
+            'Content-Type' => 'application/json',
+            'X-Trace-Id' => 'trace-123',
+        ], $response->headers());
+    }
 }
