@@ -1,0 +1,2 @@
+- Restricted `JwtService` to supported HMAC signing algorithms and rejected unsupported values at construction time.
+- Added coverage for supported and rejected algorithm values, including the `Auth::jwt()` helper.
