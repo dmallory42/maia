@@ -11,16 +11,16 @@ It includes:
 
 👉 See [docs/EXAMPLES.md](docs/EXAMPLES.md) for full usage patterns — bootstrap, controllers, models, validation, relationships, testing, and more.
 
+For framework development and contribution workflows, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+Recent additions include query-builder `upsert()`, `join()` / `leftJoin()`, `groupBy()` / `having()`, SQLite pragma helpers via `Connection::sqlite()`, and generic response caching middleware in `maia/core`.
+
 ## 📋 Requirements
 
 - PHP `^8.2`
 - Composer
 
-## 🚀 Getting Started
-
-```bash
-composer install
-```
+## 🚀 Install Maia
 
 To use Maia in an application:
 
@@ -65,33 +65,7 @@ vendor/bin/maia migrate
 vendor/bin/maia up --port 8000
 ```
 
-🎉 That's it! 
-
-## 🧪 Quality & Testing
-
-```bash
-vendor/bin/phpunit                # run full test suite
-```
-
-| Command | What it does |
-|---------|-------------|
-| `composer test:threshold` | Enforces minimum 95% test pass rate |
-| `composer docs:coverage` | Checks docblock coverage (minimum 95%) |
-| `composer lint` | PSR-12 style checks |
-
-### 🪝 Pre-commit hook
-
-Enable the repo hook to enforce the test gate on every commit:
-
-```bash
-git config core.hooksPath .githooks
-```
-
-Override the threshold if you want stricter checks:
-
-```bash
-MAIA_TEST_THRESHOLD=100 git commit -m "..."
-```
+🎉 That's it!
 
 ## 🔧 CLI
 
@@ -117,19 +91,6 @@ php bin/maia --help
 | `describe` | Inspect a command's details |
 
 All commands support `--json` for machine-readable output where relevant.
-
-## 📁 Repository Layout
-
-```text
-bin/                # framework CLI entry point
-src/Core/           # core framework module
-src/Orm/            # ORM module
-src/Auth/           # auth/security module
-src/Cli/            # CLI module
-docs/plans/         # original design and implementation plan
-docs/EXAMPLES.md    # practical app usage examples
-tests/Integration/  # full-stack integration tests
-```
 
 ## 📜 License
 
