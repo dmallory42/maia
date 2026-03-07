@@ -1,0 +1,2 @@
+- Rejected invalid builtin route parameters with `404` instead of silently coercing them into incorrect controller arguments.
+- Added controller dispatch coverage for valid and invalid typed route segments.

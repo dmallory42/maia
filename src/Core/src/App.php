@@ -209,7 +209,7 @@ class App
 
         $name = $parameter->getName();
         if (array_key_exists($name, $routeParams)) {
-            return $this->castRouteParameter($routeParams[$name], $type);
+            return $this->castRouteParameter($name, $routeParams[$name], $type);
         }
 
         if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
@@ -232,23 +232,48 @@ class App
 
     /**
      * Cast route parameter and return mixed.
+     * @param string $name Input value.
      * @param string $value Input value.
      * @param \ReflectionType|null $type Input value.
      * @return mixed Output value.
      */
-    private function castRouteParameter(string $value, \ReflectionType|null $type): mixed
+    private function castRouteParameter(string $name, string $value, \ReflectionType|null $type): mixed
     {
         if (!$type instanceof ReflectionNamedType || !$type->isBuiltin()) {
             return $value;
         }
 
         return match ($type->getName()) {
-            'int' => (int) $value,
-            'float' => (float) $value,
-            'bool' => filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
+            'int' => $this->validateRouteParameter(
+                $name,
+                filter_var($value, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE)
+            ),
+            'float' => $this->validateRouteParameter(
+                $name,
+                filter_var($value, FILTER_VALIDATE_FLOAT, FILTER_NULL_ON_FAILURE)
+            ),
+            'bool' => $this->validateRouteParameter(
+                $name,
+                filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)
+            ),
             'string' => $value,
             default => $value,
         };
+    }
+
+    /**
+     * Validate route parameter and return mixed.
+     * @param string $name Input value.
+     * @param mixed $value Input value.
+     * @return mixed Output value.
+     */
+    private function validateRouteParameter(string $name, mixed $value): mixed
+    {
+        if ($value !== null) {
+            return $value;
+        }
+
+        throw new NotFoundException(sprintf('Route parameter [%s] is invalid.', $name));
     }
 
     /**
