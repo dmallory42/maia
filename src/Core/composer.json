@@ -2,6 +2,7 @@
     "name": "maia/core",
     "description": "Maia framework core: router, DI container, middleware, request/response",
     "type": "library",
+    "license": "GPL-3.0-or-later",
     "require": {
         "php": "^8.2"
     },

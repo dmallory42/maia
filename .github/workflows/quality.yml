@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  quality:
+  lint-and-docs:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,8 +23,53 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
+      - name: Validate composer metadata
+        run: composer validate --strict
+
       - name: Documentation coverage
         run: composer docs:coverage
 
       - name: Lint (PSR-12)
         run: composer lint
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.2', '8.3', '8.4']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run test suite
+        run: composer test:threshold
+
+  scaffold-smoke:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run scaffold smoke test
+        run: bash tools/smoke-new-app.sh

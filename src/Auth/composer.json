@@ -2,6 +2,7 @@
     "name": "maia/auth",
     "description": "Maia framework auth package",
     "type": "library",
+    "license": "GPL-3.0-or-later",
     "require": {
         "php": "^8.2",
         "maia/core": "self.version",

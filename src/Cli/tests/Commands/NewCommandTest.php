@@ -61,6 +61,18 @@ class NewCommandTest extends TestCase
         $this->assertFileExists($base . '/CLAUDE.md');
         $this->assertFileExists($base . '/AGENTS.md');
         $this->assertFileExists($base . '/maia.json');
+
+        $publicIndex = file_get_contents($base . '/public/index.php');
+        $routes = file_get_contents($base . '/routes/api.php');
+        $appConfig = file_get_contents($base . '/config/app.php');
+
+        $this->assertIsString($publicIndex);
+        $this->assertIsString($routes);
+        $this->assertIsString($appConfig);
+        $this->assertStringContainsString("require __DIR__ . '/../routes/api.php';", $publicIndex);
+        $this->assertStringContainsString('return static function (App $app): void {', $routes);
+        $this->assertStringContainsString("use Maia\\Core\\Config\\Env;", $appConfig);
+        $this->assertStringContainsString("Env::get('APP_ENV', 'local')", $appConfig);
     }
 
     private function deleteDirectory(string $path): void

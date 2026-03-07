@@ -248,10 +248,12 @@ class NewCommand extends Command
         return <<<PHP
 <?php
 
+use Maia\Core\Config\Env;
+
 return [
     'name' => '{$projectName}',
-    'env' => env('APP_ENV', 'local'),
-    'debug' => env('APP_DEBUG', 'true') === 'true',
+    'env' => Env::get('APP_ENV', 'local'),
+    'debug' => Env::get('APP_DEBUG', 'true') === 'true',
     'factories' => [],
     'singletons' => [],
 ];
@@ -267,10 +269,12 @@ PHP;
         return <<<'PHP'
 <?php
 
+use Maia\Core\Config\Env;
+
 return [
-    'dsn' => env('DB_DSN', 'sqlite:' . __DIR__ . '/../database/database.sqlite'),
-    'username' => env('DB_USERNAME'),
-    'password' => env('DB_PASSWORD'),
+    'dsn' => Env::get('DB_DSN', 'sqlite:' . __DIR__ . '/../database/database.sqlite'),
+    'username' => Env::get('DB_USERNAME'),
+    'password' => Env::get('DB_PASSWORD'),
 ];
 PHP;
     }
@@ -284,9 +288,11 @@ PHP;
         return <<<'PHP'
 <?php
 
+use Maia\Core\Config\Env;
+
 return [
-    'jwt_secret' => env('JWT_SECRET', 'change-me-please-change-me-please!'),
-    'api_keys' => explode(',', env('API_KEYS', '')),
+    'jwt_secret' => Env::get('JWT_SECRET', 'change-me-please-change-me-please!'),
+    'api_keys' => explode(',', Env::get('API_KEYS', '')),
 ];
 PHP;
     }
@@ -300,8 +306,10 @@ PHP;
         return <<<'PHP'
 <?php
 
+use Maia\Core\Config\Env;
+
 return [
-    'allowed_origins' => explode(',', env('CORS_ALLOWED_ORIGINS', '*')),
+    'allowed_origins' => explode(',', Env::get('CORS_ALLOWED_ORIGINS', '*')),
     'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     'allowed_headers' => ['Content-Type', 'Authorization', 'X-API-Key'],
 ];
@@ -317,9 +325,11 @@ PHP;
         return <<<'PHP'
 <?php
 
+use Maia\Core\Config\Env;
+
 return [
     'path' => __DIR__ . '/../storage/logs/app.log',
-    'level' => env('LOG_LEVEL', 'info'),
+    'level' => Env::get('LOG_LEVEL', 'info'),
 ];
 PHP;
     }
@@ -348,9 +358,15 @@ PHP;
         return <<<'PHP'
 <?php
 
-// Register controllers here.
-// Example:
-// $app->registerController(App\Controllers\UserController::class);
+declare(strict_types=1);
+
+use Maia\Core\App;
+
+return static function (App $app): void {
+    // Register controllers here.
+    // Example:
+    // $app->registerController(App\Controllers\UserController::class);
+};
 PHP;
     }
 

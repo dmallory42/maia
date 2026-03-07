@@ -5,14 +5,10 @@
     "bin": [
         "bin/maia"
     ],
-    "license": "MIT",
+    "license": "GPL-3.0-or-later",
     "minimum-stability": "stable",
     "require": {
         "php": "^8.2",
-        "maia/core": "self.version",
-        "maia/orm": "self.version",
-        "maia/auth": "self.version",
-        "maia/cli": "self.version",
         "firebase/php-jwt": "^7.0"
     },
     "require-dev": {
@@ -27,12 +23,6 @@
         "docs:coverage:strict": "php tools/check-doc-coverage.php --min=100",
         "test:threshold": "php tools/check-test-threshold.php --min=95"
     },
-    "repositories": [
-        {"type": "path", "url": "src/Core"},
-        {"type": "path", "url": "src/Orm"},
-        {"type": "path", "url": "src/Auth"},
-        {"type": "path", "url": "src/Cli"}
-    ],
     "autoload": {
         "psr-4": {
             "Maia\\Core\\": "src/Core/src/",

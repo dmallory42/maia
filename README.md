@@ -1,13 +1,13 @@
 # ✨ Maia Framework
 
-Maia is an opinionated, API-first PHP framework built as a mono-repo with four packages:
+Maia is an opinionated, API-first PHP framework distributed as a single Composer package: `maia/framework`.
 
-| Package | What's inside |
-|---------|---------------|
-| 📦 `maia/core` | App kernel, DI container, HTTP layer, routing, middleware, exceptions, logging, testing helpers |
-| 📦 `maia/orm` | PDO connection wrapper, query builder, models, relationships, schema builder, migrator |
-| 📦 `maia/auth` | JWT auth, API key auth, CORS, rate limiting, security headers, validation |
-| 📦 `maia/cli` | Command framework and scaffolding/inspection/migration commands |
+It includes:
+
+- App kernel, dependency injection, routing, middleware, exceptions, logging, and HTTP testing helpers
+- SQLite-friendly ORM primitives including query building, models, relationships, schema building, and migrations
+- Auth and security helpers for JWT, API keys, CORS, rate limiting, validation, and security headers
+- A CLI for scaffolding, migration management, and route/app inspection
 
 👉 See [docs/EXAMPLES.md](docs/EXAMPLES.md) for full usage patterns — bootstrap, controllers, models, validation, relationships, testing, and more.
 
@@ -22,6 +22,12 @@ Recent additions include query-builder `upsert()`, `join()` / `leftJoin()`, `gro
 
 ```bash
 composer install
+```
+
+To use Maia in an application:
+
+```bash
+composer require maia/framework:^0.1
 ```
 
 ### Start a new app from scratch
@@ -118,11 +124,15 @@ All commands support `--json` for machine-readable output where relevant.
 
 ```text
 bin/                # framework CLI entry point
-src/Core/           # core package
-src/Orm/            # ORM package
-src/Auth/           # auth/security package
-src/Cli/            # CLI package
+src/Core/           # core framework module
+src/Orm/            # ORM module
+src/Auth/           # auth/security module
+src/Cli/            # CLI module
 docs/plans/         # original design and implementation plan
 docs/EXAMPLES.md    # practical app usage examples
 tests/Integration/  # full-stack integration tests
 ```
+
+## 📜 License
+
+Maia is licensed under the GNU GPL v3 or later. See [LICENSE](LICENSE).

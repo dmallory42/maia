@@ -2,6 +2,7 @@
     "name": "maia/orm",
     "description": "Maia framework ORM package",
     "type": "library",
+    "license": "GPL-3.0-or-later",
     "require": {
         "php": "^8.2",
         "maia/core": "self.version"
