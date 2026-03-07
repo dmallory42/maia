@@ -23,22 +23,27 @@ class RateLimit implements Middleware
      * Configure rate limiting with a maximum request count and time window.
      * @param int $maxRequests The maximum number of requests allowed per window.
      * @param int $windowSeconds The duration of the rate-limit window in seconds.
+     * @param array $trustedProxies Remote IPs whose forwarded-for header should be trusted.
+     * @param string $forwardedForHeader Header name containing the original client IP chain.
      * @return void
      */
     public function __construct(
         private int $maxRequests,
-        private int $windowSeconds
+        private int $windowSeconds,
+        private array $trustedProxies = [],
+        private string $forwardedForHeader = 'X-Forwarded-For'
     ) {
     }
 
     /**
      * Create a rate limiter that allows a fixed number of requests per minute.
      * @param int $maxRequests The maximum number of requests allowed per 60-second window.
+     * @param array $trustedProxies Remote IPs whose forwarded-for header should be trusted.
      * @return self A new RateLimit instance with a 60-second window.
      */
-    public static function perMinute(int $maxRequests): self
+    public static function perMinute(int $maxRequests, array $trustedProxies = []): self
     {
-        return new self($maxRequests, 60);
+        return new self($maxRequests, 60, $trustedProxies);
     }
 
     /**
@@ -55,11 +60,16 @@ class RateLimit implements Middleware
      * @param Request $request The incoming HTTP request.
      * @param Closure $next The next middleware or route handler in the pipeline.
      * @return Response A 429 response with Retry-After if the limit is exceeded,
-     *     otherwise the downstream response with rate-limit headers.
+     *     the downstream response with rate-limit headers, or the unmodified downstream
+     *     response when no stable client identity is available.
      */
     public function handle(Request $request, Closure $next): Response
     {
         $key = $this->resolveClientKey($request);
+        if ($key === null) {
+            return $next($request);
+        }
+
         $now = time();
 
         $current = self::$store[$key] ?? [
@@ -99,13 +109,51 @@ class RateLimit implements Middleware
      * @param Request $request The incoming HTTP request.
      * @return string The identifier used to track this client's request count.
      */
-    private function resolveClientKey(Request $request): string
+    private function resolveClientKey(Request $request): ?string
     {
-        $forwardedFor = $request->header('X-Forwarded-For');
-        if (is_string($forwardedFor) && $forwardedFor !== '') {
-            return $forwardedFor;
+        $remoteAddress = $request->remoteAddress();
+        if ($remoteAddress !== null && $this->isTrustedProxy($remoteAddress)) {
+            $forwardedAddress = $this->forwardedClientAddress($request);
+            if ($forwardedAddress !== null) {
+                return 'ip:' . $forwardedAddress;
+            }
         }
 
-        return 'global';
+        if ($remoteAddress !== null && filter_var($remoteAddress, FILTER_VALIDATE_IP) !== false) {
+            return 'ip:' . $remoteAddress;
+        }
+
+        return null;
+    }
+
+    /**
+     * Determine whether the immediate peer is a proxy whose forwarded headers should be trusted.
+     * @param string $remoteAddress The server-reported remote IP address.
+     * @return bool True when forwarded headers from this peer should be honored.
+     */
+    private function isTrustedProxy(string $remoteAddress): bool
+    {
+        return in_array($remoteAddress, $this->trustedProxies, true);
+    }
+
+    /**
+     * Parse the left-most client IP from the configured forwarded-for header.
+     * @param Request $request The incoming HTTP request.
+     * @return string|null Client IP from the forwarded header, or null when missing/invalid.
+     */
+    private function forwardedClientAddress(Request $request): ?string
+    {
+        $forwardedFor = $request->header($this->forwardedForHeader);
+        if (!is_string($forwardedFor) || trim($forwardedFor) === '') {
+            return null;
+        }
+
+        $parts = array_map('trim', explode(',', $forwardedFor));
+        $candidate = $parts[0] ?? '';
+        if ($candidate === '' || filter_var($candidate, FILTER_VALIDATE_IP) === false) {
+            return null;
+        }
+
+        return $candidate;
     }
 }

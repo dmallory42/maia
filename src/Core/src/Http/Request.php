@@ -73,7 +73,10 @@ class Request
             query: $_GET,
             headers: self::readHeaders(),
             body: $body === false ? null : $body,
-            routeParams: []
+            routeParams: [],
+            attributes: [
+                'remote_addr' => $_SERVER['REMOTE_ADDR'] ?? null,
+            ]
         );
     }
 
@@ -214,6 +217,17 @@ class Request
     public function user(): mixed
     {
         return $this->attribute('user');
+    }
+
+    /**
+     * Return the immediate peer IP address reported by the web server, if available.
+     * @return string|null Remote address from the server runtime, or null when unavailable.
+     */
+    public function remoteAddress(): ?string
+    {
+        $value = $this->attribute('remote_addr');
+
+        return is_string($value) && $value !== '' ? $value : null;
     }
 
     /**

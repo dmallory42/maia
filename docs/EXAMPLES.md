@@ -352,8 +352,12 @@ $app->addMiddleware(new Maia\Auth\CorsMiddleware(['https://app.example.com']));
 // API key auth for service-to-service requests.
 $app->addMiddleware(new Maia\Auth\ApiKeyMiddleware(['local-dev-key']));
 
-// Rate limiting to reduce abuse.
-$app->addMiddleware(Maia\Auth\RateLimit::perMinute(60));
+// Rate limiting to reduce abuse. Trust forwarded client IPs only from known proxies.
+$app->addMiddleware(new Maia\Auth\RateLimit(
+    maxRequests: 60,
+    windowSeconds: 60,
+    trustedProxies: ['127.0.0.1']
+));
 ```
 
 Response caching can be wired the same way:
@@ -370,6 +374,7 @@ $app->addMiddleware(new ResponseCacheMiddleware(
 ```
 
 The CORS middleware is restrictive by default. Cross-origin access is only enabled for origins you list explicitly, or for all origins if you intentionally configure `['*']`.
+The rate limiter identifies clients by `REMOTE_ADDR` by default and only trusts `X-Forwarded-For` when the immediate peer IP is listed in `trustedProxies`.
 
 ## 8) 🧪 HTTP Testing
 

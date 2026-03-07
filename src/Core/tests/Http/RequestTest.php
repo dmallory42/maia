@@ -106,6 +106,13 @@ class RequestTest extends TestCase
         ], $request->queryParams());
     }
 
+    public function testRemoteAddressReturnsCapturedServerAddress(): void
+    {
+        $request = new Request('GET', '/', [], [], null, [], ['remote_addr' => '127.0.0.1']);
+
+        $this->assertSame('127.0.0.1', $request->remoteAddress());
+    }
+
     public function testFallbackHeaderCaptureIncludesContentTypeAndLength(): void
     {
         $method = new ReflectionMethod(Request::class, 'readHeadersFromServer');
