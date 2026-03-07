@@ -1,1 +1,0 @@
-- Added a repository pull request template that prompts for problem statement, implementation summary, rationale, and verification details.

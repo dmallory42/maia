@@ -1,2 +1,0 @@
-- Made CORS restrictive by default so cross-origin requests are denied until an allowlist is configured.
-- Updated scaffolding and middleware tests to surface the new `CORS_ALLOWED_ORIGINS` configuration flow.

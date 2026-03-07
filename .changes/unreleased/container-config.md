@@ -1,2 +1,0 @@
-- Applied `app.factories` and `app.singletons` bindings during application bootstrap so scaffolded container configuration is honored at runtime.
-- Documented the supported config shape and added regression coverage for configured factory and singleton bindings.

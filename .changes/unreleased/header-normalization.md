@@ -1,1 +1,0 @@
-- Aligned request and response header normalization to use lowercase internal storage with case-insensitive lookups, while preserving canonical header names at the response boundary.

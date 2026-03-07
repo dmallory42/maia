@@ -1,2 +1,0 @@
-- Added a required changelog-fragment workflow for pull requests under `.changes/unreleased/`.
-- Documented how unreleased changelog fragments feed into the next release notes and `CHANGELOG.md` update.

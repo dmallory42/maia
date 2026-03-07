@@ -1,1 +1,0 @@
-- CLI `create:*` commands now share their scaffolding flow through `BaseCreateCommand`, reducing duplication while preserving the generated file output.

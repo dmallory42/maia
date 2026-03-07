@@ -1,1 +1,0 @@
-- Normalized relative SQLite DSNs from scaffolded environment configuration against the project root so generated apps boot correctly under the PHP built-in server.

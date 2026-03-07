@@ -1,1 +1,0 @@
-- `Validator` now supports registering custom rules with `extend()`, so applications can add domain-specific validation without wrapping or forking the validator.
