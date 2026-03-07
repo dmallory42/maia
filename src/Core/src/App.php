@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Maia\Core;
 
+use Closure;
 use Maia\Core\Config\Config;
 use Maia\Core\Config\Env;
 use Maia\Core\Container\Container;
@@ -73,6 +74,7 @@ class App
         $container->instance(Config::class, $config);
         $container->instance(Logger::class, $logger);
         $container->instance(Router::class, $router);
+        self::configureContainerBindings($container, $config);
 
         $exceptionHandler = new ExceptionHandler($debug);
 
@@ -207,7 +209,7 @@ class App
 
         $name = $parameter->getName();
         if (array_key_exists($name, $routeParams)) {
-            return $this->castRouteParameter($routeParams[$name], $type);
+            return $this->castRouteParameter($name, $routeParams[$name], $type);
         }
 
         if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
@@ -230,23 +232,48 @@ class App
 
     /**
      * Cast route parameter and return mixed.
+     * @param string $name Input value.
      * @param string $value Input value.
      * @param \ReflectionType|null $type Input value.
      * @return mixed Output value.
      */
-    private function castRouteParameter(string $value, \ReflectionType|null $type): mixed
+    private function castRouteParameter(string $name, string $value, \ReflectionType|null $type): mixed
     {
         if (!$type instanceof ReflectionNamedType || !$type->isBuiltin()) {
             return $value;
         }
 
         return match ($type->getName()) {
-            'int' => (int) $value,
-            'float' => (float) $value,
-            'bool' => filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false,
+            'int' => $this->validateRouteParameter(
+                $name,
+                filter_var($value, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE)
+            ),
+            'float' => $this->validateRouteParameter(
+                $name,
+                filter_var($value, FILTER_VALIDATE_FLOAT, FILTER_NULL_ON_FAILURE)
+            ),
+            'bool' => $this->validateRouteParameter(
+                $name,
+                filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE)
+            ),
             'string' => $value,
             default => $value,
         };
+    }
+
+    /**
+     * Validate route parameter and return mixed.
+     * @param string $name Input value.
+     * @param mixed $value Input value.
+     * @return mixed Output value.
+     */
+    private function validateRouteParameter(string $name, mixed $value): mixed
+    {
+        if ($value !== null) {
+            return $value;
+        }
+
+        throw new NotFoundException(sprintf('Route parameter [%s] is invalid.', $name));
     }
 
     /**
@@ -366,6 +393,40 @@ class App
         }
 
         return Logger::null();
+    }
+
+    /**
+     * Apply container bindings from config and return void.
+     * @param Container $container Input value.
+     * @param Config $config Input value.
+     * @return void Output value.
+     */
+    private static function configureContainerBindings(Container $container, Config $config): void
+    {
+        $factories = $config->get('app.factories', []);
+        if (is_array($factories)) {
+            foreach ($factories as $class => $factory) {
+                if (is_string($class) && $factory instanceof Closure) {
+                    $container->factory($class, $factory);
+                }
+            }
+        }
+
+        $singletons = $config->get('app.singletons', []);
+        if (!is_array($singletons)) {
+            return;
+        }
+
+        foreach ($singletons as $class => $factory) {
+            if (is_int($class) && is_string($factory)) {
+                $container->singleton($factory);
+                continue;
+            }
+
+            if (is_string($class) && $factory instanceof Closure) {
+                $container->singleton($class, $factory);
+            }
+        }
     }
 
     /**
