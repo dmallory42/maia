@@ -1,4 +1,4 @@
-# ✨ Maia Framework
+# ✨ Maia
 
 Maia is an opinionated, API-first PHP framework distributed as a single Composer package: `maia/framework`.
 
@@ -10,8 +10,6 @@ It includes:
 - A CLI for scaffolding, migration management, and route/app inspection
 
 👉 See [docs/EXAMPLES.md](docs/EXAMPLES.md) for full usage patterns — bootstrap, controllers, models, validation, relationships, testing, and more.
-
-Recent additions include query-builder `upsert()`, `join()` / `leftJoin()`, `groupBy()` / `having()`, SQLite pragma helpers via `Connection::sqlite()`, and generic response caching middleware in `maia/core`.
 
 ## 📋 Requirements
 
@@ -67,7 +65,7 @@ vendor/bin/maia migrate
 vendor/bin/maia up --port 8000
 ```
 
-🎉 You've got a running API.
+🎉 That's it! 
 
 ## 🧪 Quality & Testing
 
