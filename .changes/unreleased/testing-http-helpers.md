@@ -1,0 +1,2 @@
+- Added `put()`, `patch()`, and `delete()` helpers to the testing harness so JSON request tests cover the full set of common mutation verbs.
+- Expanded test harness coverage for the new helpers and request method propagation.

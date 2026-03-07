@@ -96,10 +96,55 @@ abstract class TestCase extends PHPUnitTestCase
      */
     public function post(string $path, array $data = []): TestResponse
     {
+        return $this->sendJsonRequest('POST', $path, $data);
+    }
+
+    /**
+     * Put and return TestResponse.
+     * @param string $path Input value.
+     * @param array $data Input value.
+     * @return TestResponse Output value.
+     */
+    public function put(string $path, array $data = []): TestResponse
+    {
+        return $this->sendJsonRequest('PUT', $path, $data);
+    }
+
+    /**
+     * Patch and return TestResponse.
+     * @param string $path Input value.
+     * @param array $data Input value.
+     * @return TestResponse Output value.
+     */
+    public function patch(string $path, array $data = []): TestResponse
+    {
+        return $this->sendJsonRequest('PATCH', $path, $data);
+    }
+
+    /**
+     * Delete and return TestResponse.
+     * @param string $path Input value.
+     * @param array $data Input value.
+     * @return TestResponse Output value.
+     */
+    public function delete(string $path, array $data = []): TestResponse
+    {
+        return $this->sendJsonRequest('DELETE', $path, $data);
+    }
+
+    /**
+     * Send json request and return TestResponse.
+     * @param string $method Input value.
+     * @param string $path Input value.
+     * @param array $data Input value.
+     * @return TestResponse Output value.
+     */
+    private function sendJsonRequest(string $method, string $path, array $data = []): TestResponse
+    {
         $headers = $this->headers;
         $headers['Content-Type'] = 'application/json';
 
-        $request = new Request('POST', $path, [], $headers, json_encode($data) ?: '{}', []);
+        $request = new Request($method, $path, [], $headers, json_encode($data) ?: '{}', []);
 
         return $this->send($request);
     }
