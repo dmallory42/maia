@@ -15,6 +15,7 @@ vendor/bin/phpunit
 
 Every merged PR should already have contributed a changelog fragment under `.changes/unreleased/`.
 Use those fragments as the source material for the next release notes and for the new release entry in `CHANGELOG.md`.
+Contributors can create a new fragment with `composer changelog:new -- short-description`.
 
 ## Scaffold smoke test
 

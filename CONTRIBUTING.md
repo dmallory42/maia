@@ -31,6 +31,18 @@ If you want a stricter commit threshold:
 MAIA_TEST_THRESHOLD=100 git commit -m "..."
 ```
 
+## Changelog entries
+
+Every pull request must add a fragment under `.changes/unreleased/`.
+
+Create one with:
+
+```bash
+composer changelog:new -- short-description
+```
+
+Then replace the starter bullet with a short user-facing note describing the change.
+
 ## Comments and docblocks
 
 - Prefer comments that explain intent, constraints, edge cases, or tradeoffs.
