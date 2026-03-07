@@ -9,15 +9,15 @@ use Maia\Cli\Output;
 use Maia\Core\Routing\Router;
 
 /**
- * RoutesCommand defines a framework component for this package.
+ * Lists all registered HTTP routes discovered from the project's controllers.
  */
 class RoutesCommand extends Command
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string|null $projectRoot Input value.
-     * @param array $controllers Input value.
-     * @return void Output value.
+     * Set up the routes command with optional project root and controller list.
+     * @param string|null $projectRoot Absolute path to the project; defaults to cwd.
+     * @param array $controllers Pre-registered controller class names to scan for routes.
+     * @return void
      */
     public function __construct(
         private ?string $projectRoot = null,
@@ -26,8 +26,8 @@ class RoutesCommand extends Command
     }
 
     /**
-     * Name and return string.
-     * @return string Output value.
+     * Return the command name.
+     * @return string The command identifier.
      */
     public function name(): string
     {
@@ -35,8 +35,8 @@ class RoutesCommand extends Command
     }
 
     /**
-     * Description and return string.
-     * @return string Output value.
+     * Return the command description.
+     * @return string Short summary for help output.
      */
     public function description(): string
     {
@@ -44,10 +44,10 @@ class RoutesCommand extends Command
     }
 
     /**
-     * Execute and return int.
-     * @param array $args Input value.
-     * @param Output $output Input value.
-     * @return int Output value.
+     * Collect all routes and display them as text lines or JSON.
+     * @param array $args CLI arguments (unused).
+     * @param Output $output Writer for the route listing.
+     * @return int Exit code (always 0).
      */
     public function execute(array $args, Output $output): int
     {
@@ -73,8 +73,8 @@ class RoutesCommand extends Command
     }
 
     /**
-     * Collect routes and return array.
-     * @return array Output value.
+     * Register controllers with a Router and return the collected route definitions.
+     * @return array List of route arrays with method, path, controller, action, and middleware keys.
      */
     public function collectRoutes(): array
     {
@@ -100,8 +100,8 @@ class RoutesCommand extends Command
     }
 
     /**
-     * Resolved controllers and return array.
-     * @return array Output value.
+     * Return the controller list, auto-discovering from the project if none were provided.
+     * @return array Fully-qualified controller class names.
      */
     private function resolvedControllers(): array
     {
@@ -129,9 +129,9 @@ class RoutesCommand extends Command
     }
 
     /**
-     * Discover classes in path and return array.
-     * @param string $path Input value.
-     * @return array Output value.
+     * Find all declared classes whose source file resides under the given directory.
+     * @param string $path Absolute path to the controllers directory.
+     * @return array Fully-qualified class names found in the directory.
      */
     private function discoverClassesInPath(string $path): array
     {

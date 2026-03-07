@@ -8,17 +8,17 @@ use Maia\Orm\Schema\Schema;
 use RuntimeException;
 
 /**
- * Migrator defines a framework component for this package.
+ * Applies and rolls back migration files while tracking execution history in the migrations table.
  */
 class Migrator
 {
     private Schema $schema;
 
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param Connection $connection Input value.
-     * @param string $migrationDir Input value.
-     * @return void Output value.
+     * Configure the migrator with a database connection and migration directory.
+     * @param Connection $connection Database connection used for schema changes and migration bookkeeping.
+     * @param string $migrationDir Directory containing migration PHP files.
+     * @return void
      */
     public function __construct(
         private Connection $connection,
@@ -29,8 +29,8 @@ class Migrator
     }
 
     /**
-     * Migrate and return int.
-     * @return int Output value.
+     * Run all pending migration files in order and record them in the repository table.
+     * @return int Number of migration files executed.
      */
     public function migrate(): int
     {
@@ -68,8 +68,8 @@ class Migrator
     }
 
     /**
-     * Rollback and return int.
-     * @return int Output value.
+     * Roll back the most recently executed migration batch.
+     * @return int Number of migration files rolled back.
      */
     public function rollback(): int
     {
@@ -105,8 +105,8 @@ class Migrator
     }
 
     /**
-     * Ensure repository and return void.
-     * @return void Output value.
+     * Ensure the migrations bookkeeping table exists.
+     * @return void
      */
     private function ensureRepository(): void
     {
@@ -121,8 +121,8 @@ class Migrator
     }
 
     /**
-     * Migration files and return array.
-     * @return array Output value.
+     * Return the sorted list of migration PHP files in the migration directory.
+     * @return array Migration file paths.
      */
     private function migrationFiles(): array
     {
@@ -141,9 +141,9 @@ class Migrator
     }
 
     /**
-     * Load migration and return Migration.
-     * @param string $file Input value.
-     * @return Migration Output value.
+     * Require a migration file and assert that it returns a Migration instance.
+     * @param string $file Absolute migration file path.
+     * @return Migration Loaded migration instance.
      */
     private function loadMigration(string $file): Migration
     {
@@ -157,8 +157,8 @@ class Migrator
     }
 
     /**
-     * Next batch number and return int.
-     * @return int Output value.
+     * Determine the next migration batch number.
+     * @return int Next batch number.
      */
     private function nextBatchNumber(): int
     {

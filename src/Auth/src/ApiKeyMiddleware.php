@@ -10,7 +10,7 @@ use Maia\Core\Http\Response;
 use Maia\Core\Middleware\Middleware;
 
 /**
- * ApiKeyMiddleware defines a framework component for this package.
+ * Middleware that authenticates requests by matching a header value against allowed API keys.
  */
 class ApiKeyMiddleware implements Middleware
 {
@@ -18,10 +18,10 @@ class ApiKeyMiddleware implements Middleware
     private array $keys;
 
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string|array $keys Input value.
-     * @param string $header Input value.
-     * @return void Output value.
+     * Configure the middleware with one or more valid API keys and the header to read.
+     * @param string|array $keys A single API key or an array of accepted keys.
+     * @param string $header The HTTP header name to extract the API key from.
+     * @return void
      */
     public function __construct(string|array $keys, private string $header = 'X-API-Key')
     {
@@ -29,10 +29,10 @@ class ApiKeyMiddleware implements Middleware
     }
 
     /**
-     * Handle and return Response.
-     * @param Request $request Input value.
-     * @param Closure $next Input value.
-     * @return Response Output value.
+     * Reject the request with 401 if the API key header is missing or invalid.
+     * @param Request $request The incoming HTTP request.
+     * @param Closure $next The next middleware or route handler in the pipeline.
+     * @return Response A 401 response on failure, otherwise the downstream response.
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -49,9 +49,9 @@ class ApiKeyMiddleware implements Middleware
     }
 
     /**
-     * Is valid and return bool.
-     * @param string $provided Input value.
-     * @return bool Output value.
+     * Check whether the provided key matches any of the accepted keys using constant-time comparison.
+     * @param string $provided The API key value from the request header.
+     * @return bool True if the key matches an accepted key.
      */
     private function isValid(string $provided): bool
     {

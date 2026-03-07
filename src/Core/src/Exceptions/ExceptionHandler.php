@@ -8,23 +8,23 @@ use Maia\Core\Http\Response;
 use Throwable;
 
 /**
- * ExceptionHandler defines a framework component for this package.
+ * Converts framework and runtime exceptions into JSON HTTP responses.
  */
 class ExceptionHandler
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param bool $debug Input value.
-     * @return void Output value.
+     * Build the exception handler with debug-mode behavior control.
+     * @param bool $debug Whether unexpected exceptions should include debugging details.
+     * @return void
      */
     public function __construct(private bool $debug)
     {
     }
 
     /**
-     * Handle and return Response.
-     * @param Throwable $exception Input value.
-     * @return Response Output value.
+     * Convert an exception into a JSON response suitable for API clients.
+     * @param Throwable $exception The exception to render.
+     * @return Response JSON error response with the appropriate status code.
      */
     public function handle(Throwable $exception): Response
     {

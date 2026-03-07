@@ -8,7 +8,7 @@ use Attribute;
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 /**
- * MiddlewareAttribute defines a framework component for this package.
+ * Attribute that attaches middleware declarations to a controller class or action method.
  */
 class MiddlewareAttribute
 {
@@ -16,9 +16,9 @@ class MiddlewareAttribute
     public array $middleware;
 
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string... $middleware Input value.
-     * @return void Output value.
+     * Capture the middleware class names that should run for the annotated target.
+     * @param string... $middleware Middleware class names.
+     * @return void
      */
     public function __construct(string ...$middleware)
     {

@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace Maia\Core\Exceptions;
 
 /**
- * ValidationException defines a framework component for this package.
+ * HTTP 422 exception carrying field-level validation errors.
  */
 class ValidationException extends HttpException
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param array $errors Input value.
-     * @param string $message Input value.
-     * @param int $code Input value.
-     * @param \Throwable|null $previous Input value.
-     * @return void Output value.
+     * Build a validation exception with the collected field errors.
+     * @param array $errors Validation errors keyed by field name.
+     * @param string $message Error message exposed to the client.
+     * @param int $code Internal exception code.
+     * @param \Throwable|null $previous Previous exception in the chain.
+     * @return void
      */
     public function __construct(
         private array $errors,
@@ -27,8 +27,8 @@ class ValidationException extends HttpException
     }
 
     /**
-     * Errors and return array.
-     * @return array Output value.
+     * Return the validation errors carried by the exception.
+     * @return array Validation errors keyed by field name.
      */
     public function errors(): array
     {

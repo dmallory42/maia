@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace Maia\Core\Routing;
 
 /**
- * RouteMatch defines a framework component for this package.
+ * Value object representing a successfully matched route with its controller, method, and parameters.
  */
 class RouteMatch
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string $controller Input value.
-     * @param string $method Input value.
-     * @param array $params Input value.
-     * @param array $middleware Input value.
-     * @return void Output value.
+     * Capture the result of matching a request to a registered route.
+     * @param string $controller Fully qualified class name of the matched controller.
+     * @param string $method Name of the controller method to invoke.
+     * @param array $params Named parameters extracted from the URL path.
+     * @param array $middleware Middleware class names declared on the route.
+     * @return void
      */
     public function __construct(
         public string $controller,

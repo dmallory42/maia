@@ -7,7 +7,7 @@ namespace Maia\Cli\Commands;
 use Maia\Cli\Output;
 
 /**
- * CreateMigrationCommand defines a framework component for this package.
+ * CLI command that creates timestamped migration files.
  */
 class CreateMigrationCommand extends BaseCreateCommand
 {
@@ -15,10 +15,10 @@ class CreateMigrationCommand extends BaseCreateCommand
     private $clock;
 
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string|null $workspace Input value.
-     * @param callable|null $clock Input value.
-     * @return void Output value.
+     * Configure the command with an optional workspace and clock override.
+     * @param string|null $workspace Project root directory; defaults to cwd.
+     * @param callable|null $clock Callback that returns the migration timestamp string.
+     * @return void
      */
     public function __construct(?string $workspace = null, ?callable $clock = null)
     {
@@ -28,8 +28,8 @@ class CreateMigrationCommand extends BaseCreateCommand
     }
 
     /**
-     * Name and return string.
-     * @return string Output value.
+     * Return the CLI command name.
+     * @return string Command identifier.
      */
     public function name(): string
     {
@@ -37,8 +37,8 @@ class CreateMigrationCommand extends BaseCreateCommand
     }
 
     /**
-     * Description and return string.
-     * @return string Output value.
+     * Return the help description.
+     * @return string Short summary for CLI help.
      */
     public function description(): string
     {
@@ -46,10 +46,10 @@ class CreateMigrationCommand extends BaseCreateCommand
     }
 
     /**
-     * Execute and return int.
-     * @param array $args Input value.
-     * @param Output $output Input value.
-     * @return int Output value.
+     * Generate a timestamped migration scaffold in database/migrations.
+     * @param array $args CLI arguments containing the migration name.
+     * @param Output $output Output writer for status messages.
+     * @return int Exit code.
      */
     public function execute(array $args, Output $output): int
     {

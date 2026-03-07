@@ -23,6 +23,12 @@ Maia is an API-first PHP framework distributed as a single Composer package: `ma
 - Full PHPUnit: `vendor/bin/phpunit`
 - Smoke test: `bash tools/smoke-new-app.sh`
 
+## Comment Guidance
+
+- Write comments and docblocks that explain purpose, constraints, edge cases, or tradeoffs.
+- Avoid boilerplate comments that just mirror the code or repeat parameter names with no added meaning.
+- Prefer fewer high-signal comments over blanket documentation that adds noise.
+
 ## Release
 
 - CI must pass on PHP `8.2`, `8.3`, and `8.4`.

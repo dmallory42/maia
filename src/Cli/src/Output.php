@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace Maia\Cli;
 
 /**
- * Output defines a framework component for this package.
+ * Collects and optionally emits CLI output as plain text or JSON.
  */
 class Output
 {
     private string $buffer = '';
 
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param bool $json Input value.
-     * @param bool $emit Input value.
-     * @return void Output value.
+     * Configure the output mode and emission behavior.
+     * @param bool $json Whether commands should format output as JSON.
+     * @param bool $emit Whether to write output to STDOUT immediately in addition to buffering.
+     * @return void
      */
     public function __construct(
         private bool $json = false,
@@ -24,9 +24,9 @@ class Output
     }
 
     /**
-     * Line and return void.
-     * @param string $message Input value.
-     * @return void Output value.
+     * Write a single line of plain-text output.
+     * @param string $message The text to output.
+     * @return void
      */
     public function line(string $message): void
     {
@@ -34,9 +34,9 @@ class Output
     }
 
     /**
-     * Json and return void.
-     * @param array $payload Input value.
-     * @return void Output value.
+     * Write a JSON-encoded payload as a single line of output.
+     * @param array $payload Associative array to encode as JSON.
+     * @return void
      */
     public function json(array $payload): void
     {
@@ -49,9 +49,9 @@ class Output
     }
 
     /**
-     * Error and return void.
-     * @param string $message Input value.
-     * @return void Output value.
+     * Write an error message, formatted as JSON when in JSON mode.
+     * @param string $message The error description to display.
+     * @return void
      */
     public function error(string $message): void
     {
@@ -68,8 +68,8 @@ class Output
     }
 
     /**
-     * Buffer and return string.
-     * @return string Output value.
+     * Return all buffered output accumulated so far.
+     * @return string The complete output buffer contents.
      */
     public function buffer(): string
     {
@@ -77,8 +77,8 @@ class Output
     }
 
     /**
-     * Is json and return bool.
-     * @return bool Output value.
+     * Check whether this output instance is configured for JSON mode.
+     * @return bool True if JSON output was requested.
      */
     public function isJson(): bool
     {
@@ -86,9 +86,9 @@ class Output
     }
 
     /**
-     * Append and return void.
-     * @param string $message Input value.
-     * @return void Output value.
+     * Append a message to the buffer and optionally write it to STDOUT.
+     * @param string $message The text to append.
+     * @return void
      */
     private function append(string $message): void
     {

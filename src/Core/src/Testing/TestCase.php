@@ -12,7 +12,7 @@ use Maia\Orm\Model;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 /**
- * TestCase defines a framework component for this package.
+ * Base integration-test harness for Maia applications with helpers for HTTP requests, DI, and database assertions.
  */
 abstract class TestCase extends PHPUnitTestCase
 {
@@ -25,8 +25,8 @@ abstract class TestCase extends PHPUnitTestCase
     protected string $jwtSecret = 'test-secret-key-32-chars-minimum!!';
 
     /**
-     * Set up and return void.
-     * @return void Output value.
+     * Boot an in-memory application and SQLite connection before each test.
+     * @return void
      */
     protected function setUp(): void
     {
@@ -43,8 +43,8 @@ abstract class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * Controllers and return array.
-     * @return array Output value.
+     * Return the controller classes that should be registered for the test app.
+     * @return array Controller class names.
      */
     protected function controllers(): array
     {
@@ -52,9 +52,9 @@ abstract class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * With token and return static.
-     * @param string $token Input value.
-     * @return static Output value.
+     * Add a Bearer token to subsequent test requests.
+     * @param string $token JWT token value.
+     * @return static Test case for fluent chaining.
      */
     public function withToken(string $token): static
     {
@@ -64,10 +64,10 @@ abstract class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * With header and return static.
-     * @param string $name Input value.
-     * @param string $value Input value.
-     * @return static Output value.
+     * Add a header to subsequent test requests.
+     * @param string $name Header name.
+     * @param string $value Header value.
+     * @return static Test case for fluent chaining.
      */
     public function withHeader(string $name, string $value): static
     {
@@ -77,9 +77,9 @@ abstract class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * Get and return TestResponse.
-     * @param string $path Input value.
-     * @return TestResponse Output value.
+     * Send a GET request through the test application.
+     * @param string $path Request path.
+     * @return TestResponse Wrapped response with assertion helpers.
      */
     public function get(string $path): TestResponse
     {
@@ -89,10 +89,10 @@ abstract class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * Post and return TestResponse.
-     * @param string $path Input value.
-     * @param array $data Input value.
-     * @return TestResponse Output value.
+     * Send a JSON POST request through the test application.
+     * @param string $path Request path.
+     * @param array $data JSON payload to send.
+     * @return TestResponse Wrapped response with assertion helpers.
      */
     public function post(string $path, array $data = []): TestResponse
     {
@@ -150,9 +150,9 @@ abstract class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * Resolve and return object.
-     * @param string $class Input value.
-     * @return object Output value.
+     * Resolve a service from the application container.
+     * @param string $class Fully qualified class name to resolve.
+     * @return object Resolved service instance.
      */
     public function resolve(string $class): object
     {
@@ -160,10 +160,10 @@ abstract class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * Assert database has and return void.
-     * @param string $table Input value.
-     * @param array $criteria Input value.
-     * @return void Output value.
+     * Assert that exactly one database row matches the given criteria.
+     * @param string $table Table name.
+     * @param array $criteria Column-value pairs to match.
+     * @return void
      */
     public function assertDatabaseHas(string $table, array $criteria): void
     {
@@ -182,9 +182,9 @@ abstract class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * Generate jwt and return string.
-     * @param array $payload Input value.
-     * @return string Output value.
+     * Generate a JWT for test scenarios using the harness secret.
+     * @param array $payload JWT claims payload.
+     * @return string Encoded JWT string.
      */
     public function generateJwt(array $payload): string
     {
@@ -192,8 +192,8 @@ abstract class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * Db and return Connection.
-     * @return Connection Output value.
+     * Return the test database connection.
+     * @return Connection In-memory SQLite connection.
      */
     protected function db(): Connection
     {
@@ -201,9 +201,9 @@ abstract class TestCase extends PHPUnitTestCase
     }
 
     /**
-     * Send and return TestResponse.
-     * @param Request $request Input value.
-     * @return TestResponse Output value.
+     * Dispatch a prepared request through the application and wrap the response.
+     * @param Request $request Request to send.
+     * @return TestResponse Wrapped response with assertion helpers.
      */
     private function send(Request $request): TestResponse
     {

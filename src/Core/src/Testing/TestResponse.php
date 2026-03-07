@@ -8,15 +8,15 @@ use Maia\Core\Http\Response;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 /**
- * TestResponse defines a framework component for this package.
+ * Test helper wrapper around Response with common assertions and JSON decoding.
  */
 class TestResponse
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param Response $response Input value.
-     * @param PHPUnitTestCase $testCase Input value.
-     * @return void Output value.
+     * Pair a framework response with the PHPUnit test case that will assert on it.
+     * @param Response $response Response under test.
+     * @param PHPUnitTestCase $testCase Active PHPUnit test case.
+     * @return void
      */
     public function __construct(
         private Response $response,
@@ -25,8 +25,8 @@ class TestResponse
     }
 
     /**
-     * Response and return Response.
-     * @return Response Output value.
+     * Return the underlying framework response.
+     * @return Response Raw response object.
      */
     public function response(): Response
     {
@@ -34,9 +34,9 @@ class TestResponse
     }
 
     /**
-     * Assert status and return self.
-     * @param int $status Input value.
-     * @return self Output value.
+     * Assert that the response has the expected HTTP status code.
+     * @param int $status Expected HTTP status code.
+     * @return self Test response for fluent chaining.
      */
     public function assertStatus(int $status): self
     {
@@ -46,9 +46,9 @@ class TestResponse
     }
 
     /**
-     * Assert json structure and return self.
-     * @param array $structure Input value.
-     * @return self Output value.
+     * Assert that the decoded JSON payload contains the expected nested structure.
+     * @param array $structure Expected shape definition.
+     * @return self Test response for fluent chaining.
      */
     public function assertJsonStructure(array $structure): self
     {
@@ -59,8 +59,8 @@ class TestResponse
     }
 
     /**
-     * Json and return array.
-     * @return array Output value.
+     * Decode the response body as JSON.
+     * @return array Decoded JSON payload, or an empty array if decoding fails.
      */
     public function json(): array
     {
@@ -70,10 +70,10 @@ class TestResponse
     }
 
     /**
-     * Assert structure and return void.
-     * @param mixed $payload Input value.
-     * @param array $structure Input value.
-     * @return void Output value.
+     * Recursively assert that a payload matches the expected structure shape.
+     * @param mixed $payload Decoded JSON payload or nested fragment.
+     * @param array $structure Expected shape definition.
+     * @return void
      */
     private function assertStructure(mixed $payload, array $structure): void
     {

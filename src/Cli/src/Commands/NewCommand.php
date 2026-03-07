@@ -9,15 +9,15 @@ use Maia\Cli\Output;
 use RuntimeException;
 
 /**
- * NewCommand defines a framework component for this package.
+ * Scaffolds a new Maia project with directory structure, config files, and optional Composer install.
  */
 class NewCommand extends Command
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string|null $workspace Input value.
-     * @param bool $autoInstall Input value.
-     * @return void Output value.
+     * Configure the new-project scaffolder.
+     * @param string|null $workspace Parent directory for the new project; defaults to cwd.
+     * @param bool $autoInstall Whether to run composer install after scaffolding.
+     * @return void
      */
     public function __construct(
         private ?string $workspace = null,
@@ -26,8 +26,8 @@ class NewCommand extends Command
     }
 
     /**
-     * Name and return string.
-     * @return string Output value.
+     * Return the command name.
+     * @return string The command identifier.
      */
     public function name(): string
     {
@@ -35,8 +35,8 @@ class NewCommand extends Command
     }
 
     /**
-     * Description and return string.
-     * @return string Output value.
+     * Return the command description.
+     * @return string Short summary for help output.
      */
     public function description(): string
     {
@@ -44,10 +44,10 @@ class NewCommand extends Command
     }
 
     /**
-     * Execute and return int.
-     * @param array $args Input value.
-     * @param Output $output Input value.
-     * @return int Output value.
+     * Scaffold the project directory, write all template files, and optionally run composer install.
+     * @param array $args CLI arguments; expects the project name as first positional arg.
+     * @param Output $output Writer for status messages and errors.
+     * @return int Exit code (0 on success, 1 on failure).
      */
     public function execute(array $args, Output $output): int
     {
@@ -78,9 +78,9 @@ class NewCommand extends Command
     }
 
     /**
-     * Extract project name and return string|null.
-     * @param array $args Input value.
-     * @return string|null Output value.
+     * Find the first non-flag argument to use as the project name.
+     * @param array $args CLI arguments to search.
+     * @return string|null The project name, or null if none was provided.
      */
     private function extractProjectName(array $args): ?string
     {
@@ -94,9 +94,9 @@ class NewCommand extends Command
     }
 
     /**
-     * Target path and return string.
-     * @param string $projectName Input value.
-     * @return string Output value.
+     * Build the absolute path where the new project will be created.
+     * @param string $projectName Directory name for the new project.
+     * @return string Absolute filesystem path for the project root.
      */
     private function targetPath(string $projectName): string
     {
@@ -106,9 +106,9 @@ class NewCommand extends Command
     }
 
     /**
-     * Create directories and return void.
-     * @param string $target Input value.
-     * @return void Output value.
+     * Create the standard Maia project directory structure.
+     * @param string $target Absolute path to the project root.
+     * @return void
      */
     private function createDirectories(string $target): void
     {
@@ -132,10 +132,10 @@ class NewCommand extends Command
     }
 
     /**
-     * Write files and return void.
-     * @param string $target Input value.
-     * @param string $projectName Input value.
-     * @return void Output value.
+     * Generate and write all scaffolded files (config, routes, composer.json, etc.) into the project.
+     * @param string $target Absolute path to the project root.
+     * @param string $projectName Name of the project, used in templates.
+     * @return void
      */
     private function writeFiles(string $target, string $projectName): void
     {
@@ -161,10 +161,10 @@ class NewCommand extends Command
     }
 
     /**
-     * Render template and return string.
-     * @param string $name Input value.
-     * @param array $vars Input value.
-     * @return string Output value.
+     * Load a template file and interpolate variables into it.
+     * @param string $name Template name (resolved from the Templates directory).
+     * @param array $vars Key-value pairs to substitute into the template.
+     * @return string The rendered template content.
      */
     private function renderTemplate(string $name, array $vars): string
     {
@@ -197,9 +197,9 @@ class NewCommand extends Command
     }
 
     /**
-     * Should run composer install and return bool.
-     * @param array $args Input value.
-     * @return bool Output value.
+     * Determine whether composer install should run after scaffolding.
+     * @param array $args CLI arguments; checks for --no-install flag.
+     * @return bool True if composer install should be executed.
      */
     private function shouldRunComposerInstall(array $args): bool
     {
@@ -211,8 +211,8 @@ class NewCommand extends Command
     }
 
     /**
-     * Composer available and return bool.
-     * @return bool Output value.
+     * Check whether the composer binary is available on the system PATH.
+     * @return bool True if composer can be found.
      */
     private function composerAvailable(): bool
     {
@@ -222,10 +222,10 @@ class NewCommand extends Command
     }
 
     /**
-     * Run composer install and return void.
-     * @param string $path Input value.
-     * @param Output $output Input value.
-     * @return void Output value.
+     * Execute composer install in the new project directory.
+     * @param string $path Absolute path to the project where composer.json resides.
+     * @param Output $output Writer for reporting install failures.
+     * @return void
      */
     private function runComposerInstall(string $path, Output $output): void
     {
@@ -239,9 +239,9 @@ class NewCommand extends Command
     }
 
     /**
-     * Config app and return string.
-     * @param string $projectName Input value.
-     * @return string Output value.
+     * Generate the config/app.php file content.
+     * @param string $projectName Application name to embed in the config.
+     * @return string PHP source for the app configuration file.
      */
     private function configApp(string $projectName): string
     {
@@ -261,8 +261,8 @@ PHP;
     }
 
     /**
-     * Config database and return string.
-     * @return string Output value.
+     * Generate the config/database.php file content.
+     * @return string PHP source for the database configuration file.
      */
     private function configDatabase(): string
     {
@@ -292,8 +292,8 @@ PHP;
     }
 
     /**
-     * Config auth and return string.
-     * @return string Output value.
+     * Generate the config/auth.php file content.
+     * @return string PHP source for the auth configuration file.
      */
     private function configAuth(): string
     {
@@ -310,8 +310,8 @@ PHP;
     }
 
     /**
-     * Config cors and return string.
-     * @return string Output value.
+     * Generate the config/cors.php file content.
+     * @return string PHP source for the CORS configuration file.
      */
     private function configCors(): string
     {
@@ -332,8 +332,8 @@ PHP;
     }
 
     /**
-     * Config logging and return string.
-     * @return string Output value.
+     * Generate the config/logging.php file content.
+     * @return string PHP source for the logging configuration file.
      */
     private function configLogging(): string
     {
@@ -350,8 +350,8 @@ PHP;
     }
 
     /**
-     * Config middleware and return string.
-     * @return string Output value.
+     * Generate the config/middleware.php file content.
+     * @return string PHP source for the middleware configuration file.
      */
     private function configMiddleware(): string
     {
@@ -365,8 +365,8 @@ PHP;
     }
 
     /**
-     * Routes api and return string.
-     * @return string Output value.
+     * Generate the routes/api.php file content with example controller registration.
+     * @return string PHP source for the API routes file.
      */
     private function routesApi(): string
     {
@@ -386,8 +386,8 @@ PHP;
     }
 
     /**
-     * Maia manifest and return string.
-     * @return string Output value.
+     * Generate the maia.json manifest describing the project layout.
+     * @return string JSON-encoded manifest content.
      */
     private function maiaManifest(): string
     {

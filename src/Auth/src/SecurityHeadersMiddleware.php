@@ -10,15 +10,15 @@ use Maia\Core\Http\Response;
 use Maia\Core\Middleware\Middleware;
 
 /**
- * SecurityHeadersMiddleware defines a framework component for this package.
+ * Middleware that adds security-related HTTP headers (nosniff, DENY framing, HSTS) to every response.
  */
 class SecurityHeadersMiddleware implements Middleware
 {
     /**
-     * Handle and return Response.
-     * @param Request $request Input value.
-     * @param Closure $next Input value.
-     * @return Response Output value.
+     * Pass the request downstream, then add security headers to the response.
+     * @param Request $request The incoming HTTP request.
+     * @param Closure $next The next middleware or route handler in the pipeline.
+     * @return Response The downstream response with X-Content-Type-Options, X-Frame-Options, and HSTS headers.
      */
     public function handle(Request $request, Closure $next): Response
     {

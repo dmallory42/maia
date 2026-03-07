@@ -11,24 +11,24 @@ use Maia\Core\Middleware\Middleware;
 use Throwable;
 
 /**
- * JwtMiddleware defines a framework component for this package.
+ * Middleware that authenticates requests by validating a Bearer JWT token.
  */
 class JwtMiddleware implements Middleware
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param JwtService $jwt Input value.
-     * @return void Output value.
+     * Build the middleware with the JWT service used for token verification.
+     * @param JwtService $jwt The service that decodes and validates JWT tokens.
+     * @return void
      */
     public function __construct(private JwtService $jwt)
     {
     }
 
     /**
-     * Handle and return Response.
-     * @param Request $request Input value.
-     * @param Closure $next Input value.
-     * @return Response Output value.
+     * Validate the Bearer token and attach the decoded user payload to the request.
+     * @param Request $request The incoming HTTP request.
+     * @param Closure $next The next middleware or route handler in the pipeline.
+     * @return Response A 401 response if the token is missing or invalid, otherwise the downstream response.
      */
     public function handle(Request $request, Closure $next): Response
     {

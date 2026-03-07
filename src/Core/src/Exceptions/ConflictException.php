@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Maia\Core\Exceptions;
 
 /**
- * ConflictException defines a framework component for this package.
+ * HTTP 409 exception for resource conflicts.
  */
 class ConflictException extends HttpException
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string $message Input value.
-     * @param int $code Input value.
-     * @param \Throwable|null $previous Input value.
-     * @return void Output value.
+     * Build a conflict exception with an optional message and previous exception.
+     * @param string $message Error message exposed to the client.
+     * @param int $code Internal exception code.
+     * @param \Throwable|null $previous Previous exception in the chain.
+     * @return void
      */
     public function __construct(string $message = 'Conflict', int $code = 0, ?\Throwable $previous = null)
     {

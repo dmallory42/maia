@@ -8,7 +8,7 @@ use Maia\Cli\Command;
 use Maia\Cli\Output;
 
 /**
- * UpCommand defines a framework component for this package.
+ * Starts PHP's built-in development server pointing at the project's public directory.
  */
 class UpCommand extends Command
 {
@@ -16,9 +16,10 @@ class UpCommand extends Command
     private $runner;
 
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param callable|null $runner Input value.
-     * @return void Output value.
+     * Set up the server command with an optional shell command runner for testing.
+     * @param callable|null $runner Callback that executes a shell command and returns its exit code;
+     *     defaults to passthru.
+     * @return void
      */
     public function __construct(?callable $runner = null)
     {
@@ -30,8 +31,8 @@ class UpCommand extends Command
     }
 
     /**
-     * Name and return string.
-     * @return string Output value.
+     * Return the command name.
+     * @return string The command identifier.
      */
     public function name(): string
     {
@@ -39,8 +40,8 @@ class UpCommand extends Command
     }
 
     /**
-     * Description and return string.
-     * @return string Output value.
+     * Return the command description.
+     * @return string Short summary for help output.
      */
     public function description(): string
     {
@@ -48,10 +49,10 @@ class UpCommand extends Command
     }
 
     /**
-     * Execute and return int.
-     * @param array $args Input value.
-     * @param Output $output Input value.
-     * @return int Output value.
+     * Build the server command and launch it, or print it in dry-run mode.
+     * @param array $args CLI arguments; supports --port and --dry-run flags.
+     * @param Output $output Writer for the constructed command string.
+     * @return int Exit code from the server process, or 0 for dry-run.
      */
     public function execute(array $args, Output $output): int
     {
@@ -68,9 +69,9 @@ class UpCommand extends Command
     }
 
     /**
-     * Resolve port and return int.
-     * @param array $args Input value.
-     * @return int Output value.
+     * Parse the --port flag from arguments, falling back to 8000.
+     * @param array $args CLI arguments to search for a port value.
+     * @return int The port number to listen on.
      */
     private function resolvePort(array $args): int
     {

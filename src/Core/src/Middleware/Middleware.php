@@ -9,15 +9,15 @@ use Maia\Core\Http\Request;
 use Maia\Core\Http\Response;
 
 /**
- * Middleware defines a framework component for this package.
+ * Contract for HTTP middleware that can inspect or transform a request/response pair.
  */
 interface Middleware
 {
     /**
-     * Handle and return Response.
-     * @param Request $request Input value.
-     * @param Closure $next Input value.
-     * @return Response Output value.
+     * Handle the request and either short-circuit or delegate to the next middleware.
+     * @param Request $request The incoming HTTP request.
+     * @param Closure $next The next middleware or final request handler.
+     * @return Response The resulting HTTP response.
      */
     public function handle(Request $request, Closure $next): Response;
 }

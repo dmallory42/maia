@@ -8,15 +8,15 @@ use Attribute;
 
 #[Attribute(Attribute::TARGET_PROPERTY)]
 /**
- * HasMany defines a framework component for this package.
+ * Attribute that marks a model property as a HasMany relationship.
  */
 class HasMany
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string $relatedClass Input value.
-     * @param string|null $foreignKey Input value.
-     * @return void Output value.
+     * Describe the related model class and optional foreign-key column.
+     * @param string $relatedClass Fully qualified related model class name.
+     * @param string|null $foreignKey Foreign-key column on the related model, or null to infer it.
+     * @return void
      */
     public function __construct(
         public string $relatedClass,

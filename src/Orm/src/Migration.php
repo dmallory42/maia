@@ -7,21 +7,21 @@ namespace Maia\Orm;
 use Maia\Orm\Schema\Schema;
 
 /**
- * Migration defines a framework component for this package.
+ * Base class for schema migrations with forward and rollback steps.
  */
 abstract class Migration
 {
     /**
-     * Up and return void.
-     * @param Schema $schema Input value.
-     * @return void Output value.
+     * Apply the schema changes for this migration.
+     * @param Schema $schema Schema builder used to create or alter tables.
+     * @return void
      */
     abstract public function up(Schema $schema): void;
 
     /**
-     * Down and return void.
-     * @param Schema $schema Input value.
-     * @return void Output value.
+     * Revert the schema changes introduced in up().
+     * @param Schema $schema Schema builder used to drop or revert tables.
+     * @return void
      */
     abstract public function down(Schema $schema): void;
 }

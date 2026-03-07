@@ -10,15 +10,15 @@ use Maia\Orm\Connection;
 use Maia\Orm\Migrator;
 
 /**
- * MigrateCommand defines a framework component for this package.
+ * Runs all pending database migrations in order.
  */
 class MigrateCommand extends Command
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param Connection|null $connection Input value.
-     * @param string|null $migrationDir Input value.
-     * @return void Output value.
+     * Set up the migrate command with optional database connection and migration directory.
+     * @param Connection|null $connection Database connection; defaults to a local SQLite file.
+     * @param string|null $migrationDir Path to the migrations directory; defaults to database/migrations.
+     * @return void
      */
     public function __construct(
         private ?Connection $connection = null,
@@ -27,8 +27,8 @@ class MigrateCommand extends Command
     }
 
     /**
-     * Name and return string.
-     * @return string Output value.
+     * Return the command name.
+     * @return string The command identifier.
      */
     public function name(): string
     {
@@ -36,8 +36,8 @@ class MigrateCommand extends Command
     }
 
     /**
-     * Description and return string.
-     * @return string Output value.
+     * Return the command description.
+     * @return string Short summary for help output.
      */
     public function description(): string
     {
@@ -45,10 +45,10 @@ class MigrateCommand extends Command
     }
 
     /**
-     * Execute and return int.
-     * @param array $args Input value.
-     * @param Output $output Input value.
-     * @return int Output value.
+     * Run all pending migrations and report how many were applied.
+     * @param array $args CLI arguments (unused).
+     * @param Output $output Writer for migration results.
+     * @return int Exit code (always 0).
      */
     public function execute(array $args, Output $output): int
     {
@@ -65,8 +65,8 @@ class MigrateCommand extends Command
     }
 
     /**
-     * Connection and return Connection.
-     * @return Connection Output value.
+     * Resolve the database connection, falling back to a local SQLite file.
+     * @return Connection The active database connection.
      */
     protected function connection(): Connection
     {
@@ -74,8 +74,8 @@ class MigrateCommand extends Command
     }
 
     /**
-     * Migration directory and return string.
-     * @return string Output value.
+     * Resolve the migrations directory path.
+     * @return string Absolute path to the directory containing migration files.
      */
     protected function migrationDirectory(): string
     {

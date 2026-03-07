@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Maia\Auth;
 
 /**
- * Validator defines a framework component for this package.
+ * Rule-based data validator supporting required, type, length, and uniqueness checks.
  */
 class Validator
 {
@@ -13,9 +13,10 @@ class Validator
     private $uniqueChecker;
 
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param callable|null $uniqueChecker Input value.
-     * @return void Output value.
+     * Initialize the validator with an optional callback for database uniqueness checks.
+     * @param callable|null $uniqueChecker Callback(table, field, value) that returns true when the value is unique;
+     *     defaults to an always-true no-op checker.
+     * @return void
      */
     public function __construct(?callable $uniqueChecker = null)
     {
@@ -23,10 +24,10 @@ class Validator
     }
 
     /**
-     * Validate and return array.
-     * @param array $data Input value.
-     * @param array $rules Input value.
-     * @return array Output value.
+     * Validate the given data against a set of rules and return any errors.
+     * @param array $data The key-value data to validate.
+     * @param array $rules Validation rules keyed by field name (pipe-delimited string or array).
+     * @return array An associative array of field => error messages; empty if validation passes.
      */
     public function validate(array $data, array $rules): array
     {
@@ -66,9 +67,9 @@ class Validator
     }
 
     /**
-     * Parse rules and return array.
-     * @param string|array $ruleSet Input value.
-     * @return array Output value.
+     * Parse a pipe-delimited rule string or array into structured rule definitions.
+     * @param string|array $ruleSet The rules as a pipe-delimited string (e.g. 'required|string|min:3') or array.
+     * @return array An array of ['name' => ..., 'argument' => ...] entries.
      */
     private function parseRules(string|array $ruleSet): array
     {
@@ -85,9 +86,9 @@ class Validator
     }
 
     /**
-     * Has value and return bool.
-     * @param mixed $value Input value.
-     * @return bool Output value.
+     * Check whether the value is present (not null and not an empty string).
+     * @param mixed $value The value to check.
+     * @return bool True if the value is non-null and non-empty.
      */
     private function hasValue(mixed $value): bool
     {
@@ -95,10 +96,10 @@ class Validator
     }
 
     /**
-     * Validate required and return string|null.
-     * @param string $field Input value.
-     * @param mixed $value Input value.
-     * @return string|null Output value.
+     * Assert that the field has a non-empty value.
+     * @param string $field The field name being validated.
+     * @param mixed $value The field value.
+     * @return string|null An error message if the field is missing, or null if valid.
      */
     private function validateRequired(string $field, mixed $value): ?string
     {
@@ -106,10 +107,10 @@ class Validator
     }
 
     /**
-     * Validate string and return string|null.
-     * @param string $field Input value.
-     * @param mixed $value Input value.
-     * @return string|null Output value.
+     * Assert that the field value is a string.
+     * @param string $field The field name being validated.
+     * @param mixed $value The field value.
+     * @return string|null An error message if the value is not a string, or null if valid.
      */
     private function validateString(string $field, mixed $value): ?string
     {
@@ -117,10 +118,10 @@ class Validator
     }
 
     /**
-     * Validate email and return string|null.
-     * @param string $field Input value.
-     * @param mixed $value Input value.
-     * @return string|null Output value.
+     * Assert that the field value is a valid email address.
+     * @param string $field The field name being validated.
+     * @param mixed $value The field value.
+     * @return string|null An error message if the value is not a valid email, or null if valid.
      */
     private function validateEmail(string $field, mixed $value): ?string
     {
@@ -132,10 +133,10 @@ class Validator
     }
 
     /**
-     * Validate integer and return string|null.
-     * @param string $field Input value.
-     * @param mixed $value Input value.
-     * @return string|null Output value.
+     * Assert that the field value is an integer or a numeric string representing one.
+     * @param string $field The field name being validated.
+     * @param mixed $value The field value.
+     * @return string|null An error message if the value is not integer-like, or null if valid.
      */
     private function validateInteger(string $field, mixed $value): ?string
     {
@@ -151,10 +152,10 @@ class Validator
     }
 
     /**
-     * Validate boolean and return string|null.
-     * @param string $field Input value.
-     * @param mixed $value Input value.
-     * @return string|null Output value.
+     * Assert that the field value is a boolean.
+     * @param string $field The field name being validated.
+     * @param mixed $value The field value.
+     * @return string|null An error message if the value is not a boolean, or null if valid.
      */
     private function validateBoolean(string $field, mixed $value): ?string
     {
@@ -166,11 +167,11 @@ class Validator
     }
 
     /**
-     * Validate min and return string|null.
-     * @param string $field Input value.
-     * @param mixed $value Input value.
-     * @param string|null $argument Input value.
-     * @return string|null Output value.
+     * Assert that a string meets a minimum length or a number meets a minimum value.
+     * @param string $field The field name being validated.
+     * @param mixed $value The field value (string length or numeric value is checked).
+     * @param string|null $argument The minimum threshold.
+     * @return string|null An error message if the value is below the minimum, or null if valid.
      */
     private function validateMin(string $field, mixed $value, ?string $argument): ?string
     {
@@ -192,11 +193,11 @@ class Validator
     }
 
     /**
-     * Validate max and return string|null.
-     * @param string $field Input value.
-     * @param mixed $value Input value.
-     * @param string|null $argument Input value.
-     * @return string|null Output value.
+     * Assert that a string does not exceed a maximum length or a number does not exceed a maximum value.
+     * @param string $field The field name being validated.
+     * @param mixed $value The field value (string length or numeric value is checked).
+     * @param string|null $argument The maximum threshold.
+     * @return string|null An error message if the value exceeds the maximum, or null if valid.
      */
     private function validateMax(string $field, mixed $value, ?string $argument): ?string
     {
@@ -218,11 +219,11 @@ class Validator
     }
 
     /**
-     * Validate unique and return string|null.
-     * @param string $field Input value.
-     * @param mixed $value Input value.
-     * @param string|null $argument Input value.
-     * @return string|null Output value.
+     * Assert that the field value is unique in the given database table.
+     * @param string $field The field name being validated (used as the column to check).
+     * @param mixed $value The value to check for uniqueness.
+     * @param string|null $argument The database table name to check against.
+     * @return string|null An error message if the value already exists, or null if unique.
      */
     private function validateUnique(string $field, mixed $value, ?string $argument): ?string
     {

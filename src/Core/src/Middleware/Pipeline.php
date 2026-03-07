@@ -9,24 +9,24 @@ use Maia\Core\Http\Request;
 use Maia\Core\Http\Response;
 
 /**
- * Pipeline defines a framework component for this package.
+ * Executes a list of middleware around a final request handler.
  */
 class Pipeline
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param array $middleware Input value.
-     * @return void Output value.
+     * Build the pipeline from an ordered list of middleware instances.
+     * @param array $middleware Middleware instances to run in order.
+     * @return void
      */
     public function __construct(private array $middleware)
     {
     }
 
     /**
-     * Run and return Response.
-     * @param Request $request Input value.
-     * @param Closure $handler Input value.
-     * @return Response Output value.
+     * Run the request through the middleware chain and final handler.
+     * @param Request $request The incoming HTTP request.
+     * @param Closure $handler The final handler invoked after all middleware.
+     * @return Response The response produced by the pipeline.
      */
     public function run(Request $request, Closure $handler): Response
     {

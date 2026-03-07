@@ -13,7 +13,7 @@ use ReflectionProperty;
 use RuntimeException;
 
 /**
- * Model defines a framework component for this package.
+ * Active-record base class providing CRUD operations, attribute access, and relationship loading.
  */
 abstract class Model
 {
@@ -26,9 +26,9 @@ abstract class Model
     protected array $relationCache = [];
 
     /**
-     * Set connection and return void.
-     * @param Connection $connection Input value.
-     * @return void Output value.
+     * Set the database connection used by all instances of this model.
+     * @param Connection $connection The database connection to use for queries.
+     * @return void
      */
     public static function setConnection(Connection $connection): void
     {
@@ -36,8 +36,8 @@ abstract class Model
     }
 
     /**
-     * Query and return QueryBuilder.
-     * @return QueryBuilder Output value.
+     * Start a new query builder scoped to this model's table.
+     * @return QueryBuilder A query builder bound to this model class.
      */
     public static function query(): QueryBuilder
     {
@@ -46,9 +46,9 @@ abstract class Model
     }
 
     /**
-     * Find and return static|null.
-     * @param int|string $id Input value.
-     * @return static|null Output value.
+     * Find a model by its primary key, or return null if not found.
+     * @param int|string $id The primary key value to look up.
+     * @return static|null The matching model instance or null.
      */
     public static function find(int|string $id): ?static
     {
@@ -58,9 +58,9 @@ abstract class Model
     }
 
     /**
-     * Create and return static.
-     * @param array $data Input value.
-     * @return static Output value.
+     * Insert a new row and return the hydrated model instance.
+     * @param array $data Column-value pairs to insert.
+     * @return static The newly created model.
      */
     public static function create(array $data): static
     {
@@ -77,8 +77,8 @@ abstract class Model
     }
 
     /**
-     * Save and return bool.
-     * @return bool Output value.
+     * Persist the model's current attributes to the database via UPDATE.
+     * @return bool True if at least one row was affected, false otherwise.
      */
     public function save(): bool
     {
@@ -106,9 +106,9 @@ abstract class Model
     }
 
     /**
-     * Hydrate and return static.
-     * @param array $row Input value.
-     * @return static Output value.
+     * Create a model instance from a database row without inserting it.
+     * @param array $row Associative array of column names to values.
+     * @return static The hydrated model with attributes and typed properties set.
      */
     public static function hydrate(array $row): static
     {
@@ -130,10 +130,10 @@ abstract class Model
     }
 
     /**
-     * Eager load and return void.
-     * @param array $models Input value.
-     * @param array $relations Input value.
-     * @return void Output value.
+     * Batch-load the specified relations for a collection of models to avoid N+1 queries.
+     * @param array $models List of model instances to load relations onto.
+     * @param array $relations Relation names to eager-load.
+     * @return void
      */
     public static function eagerLoad(array $models, array $relations): void
     {
@@ -143,8 +143,8 @@ abstract class Model
     }
 
     /**
-     * Table name and return string.
-     * @return string Output value.
+     * Return the database table name, using the #[Table] attribute or a lowercased plural convention.
+     * @return string The table name for this model.
      */
     public static function tableName(): string
     {
@@ -162,8 +162,8 @@ abstract class Model
     }
 
     /**
-     * Primary key and return string.
-     * @return string Output value.
+     * Return the primary key column name (defaults to "id").
+     * @return string The primary key column name.
      */
     public static function primaryKey(): string
     {
@@ -171,9 +171,9 @@ abstract class Model
     }
 
     /**
-     * __get and return mixed.
-     * @param string $name Input value.
-     * @return mixed Output value.
+     * Access an attribute or lazy-load a relation by property name.
+     * @param string $name The attribute or relation name.
+     * @return mixed The attribute value, loaded relation, or null if not found.
      */
     public function __get(string $name): mixed
     {
@@ -194,10 +194,10 @@ abstract class Model
     }
 
     /**
-     * __set and return void.
-     * @param string $name Input value.
-     * @param mixed $value Input value.
-     * @return void Output value.
+     * Set an attribute value dynamically.
+     * @param string $name The attribute name to assign.
+     * @param mixed $value The value to store.
+     * @return void
      */
     public function __set(string $name, mixed $value): void
     {
@@ -205,8 +205,8 @@ abstract class Model
     }
 
     /**
-     * Connection and return Connection.
-     * @return Connection Output value.
+     * Return the configured database connection for the model class.
+     * @return Connection The active database connection.
      */
     protected static function connection(): Connection
     {
@@ -218,8 +218,8 @@ abstract class Model
     }
 
     /**
-     * Extract persistable data and return array.
-     * @return array Output value.
+     * Collect scalar attributes and initialized public properties for persistence.
+     * @return array Column-value pairs safe to include in INSERT or UPDATE statements.
      */
     private function extractPersistableData(): array
     {
@@ -253,9 +253,9 @@ abstract class Model
     }
 
     /**
-     * Read value and return mixed.
-     * @param string $name Input value.
-     * @return mixed Output value.
+     * Read an attribute or initialized typed property value.
+     * @param string $name The attribute or property name to read.
+     * @return mixed The current value, or null if absent/uninitialized.
      */
     private function readValue(string $name): mixed
     {
@@ -277,10 +277,10 @@ abstract class Model
     }
 
     /**
-     * Load relation and return mixed.
-     * @param string $name Input value.
-     * @param array $relation Input value.
-     * @return mixed Output value.
+     * Load a relation on demand and cache the resolved value.
+     * @param string $name The relation property name.
+     * @param array $relation Relation metadata describing the type, related class, and key columns.
+     * @return mixed The loaded relation value (model, collection, or null).
      */
     private function loadRelation(string $name, array $relation): mixed
     {
@@ -302,10 +302,10 @@ abstract class Model
     }
 
     /**
-     * Eager load relation and return void.
-     * @param array $models Input value.
-     * @param string $relationName Input value.
-     * @return void Output value.
+     * Eager-load one named relation across a set of models.
+     * @param array $models The models that should receive the relation data.
+     * @param string $relationName The relation name to load.
+     * @return void
      */
     private static function eagerLoadRelation(array $models, string $relationName): void
     {
@@ -393,9 +393,9 @@ abstract class Model
     }
 
     /**
-     * Relation definition and return array|null.
-     * @param string $name Input value.
-     * @return array|null Output value.
+     * Resolve relationship metadata from HasMany/BelongsTo attributes on a property.
+     * @param string $name The property name to inspect.
+     * @return array|null Relation metadata, or null if the property is not a declared relation.
      */
     private static function relationDefinition(string $name): ?array
     {
@@ -433,10 +433,10 @@ abstract class Model
     }
 
     /**
-     * Set relation and return void.
-     * @param string $name Input value.
-     * @param mixed $value Input value.
-     * @return void Output value.
+     * Cache a loaded relation and mirror it onto the typed property when compatible.
+     * @param string $name The relation property name.
+     * @param mixed $value The loaded relation value to cache.
+     * @return void
      */
     private function setRelation(string $name, mixed $value): void
     {
@@ -481,9 +481,9 @@ abstract class Model
     }
 
     /**
-     * Property has relationship attribute and return bool.
-     * @param ReflectionProperty $property Input value.
-     * @return bool Output value.
+     * Check whether a property declares a relationship attribute.
+     * @param ReflectionProperty $property The property to inspect.
+     * @return bool True if the property is marked with HasMany or BelongsTo.
      */
     private static function propertyHasRelationshipAttribute(ReflectionProperty $property): bool
     {
@@ -492,10 +492,10 @@ abstract class Model
     }
 
     /**
-     * Cast value for property and return mixed.
-     * @param ReflectionProperty $property Input value.
-     * @param mixed $value Input value.
-     * @return mixed Output value.
+     * Cast a raw database value to match a property's builtin declared type.
+     * @param ReflectionProperty $property The typed property receiving the value.
+     * @param mixed $value The raw value from the database row.
+     * @return mixed The cast value, or the original value when no builtin cast applies.
      */
     private static function castValueForProperty(ReflectionProperty $property, mixed $value): mixed
     {
@@ -514,9 +514,9 @@ abstract class Model
     }
 
     /**
-     * Infer foreign key and return string.
-     * @param string $class Input value.
-     * @return string Output value.
+     * Infer a snake_cased foreign-key column name from a model class name.
+     * @param string $class Fully qualified model class name.
+     * @return string Foreign key column name such as "user_id".
      */
     private static function inferForeignKey(string $class): string
     {

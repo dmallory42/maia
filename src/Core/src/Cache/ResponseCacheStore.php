@@ -5,29 +5,29 @@ declare(strict_types=1);
 namespace Maia\Core\Cache;
 
 /**
- * ResponseCacheStore defines a framework component for this package.
+ * Storage interface for serialized HTTP responses used by response caching middleware.
  */
 interface ResponseCacheStore
 {
     /**
-     * Is available and return bool.
-     * @return bool Output value.
+     * Report whether the cache backend is ready for reads and writes.
+     * @return bool True when the store is usable.
      */
     public function isAvailable(): bool;
 
     /**
-     * Get and return string|null.
-     * @param string $key Input value.
-     * @return string|null Output value.
+     * Retrieve a cached payload by key.
+     * @param string $key Cache key.
+     * @return string|null Serialized cached response payload, or null if missing.
      */
     public function get(string $key): ?string;
 
     /**
-     * Set and return void.
-     * @param string $key Input value.
-     * @param int $ttlSeconds Input value.
-     * @param string $value Input value.
-     * @return void Output value.
+     * Store a serialized response payload with a TTL.
+     * @param string $key Cache key.
+     * @param int $ttlSeconds Time to live in seconds.
+     * @param string $value Serialized cached response payload.
+     * @return void
      */
     public function set(string $key, int $ttlSeconds, string $value): void;
 }

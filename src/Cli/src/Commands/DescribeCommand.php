@@ -8,15 +8,15 @@ use Maia\Cli\Command;
 use Maia\Cli\Output;
 
 /**
- * DescribeCommand defines a framework component for this package.
+ * Inspects a Maia project and outputs its structure (routes, models, middleware, config).
  */
 class DescribeCommand extends Command
 {
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param string|null $projectRoot Input value.
-     * @param array $controllers Input value.
-     * @return void Output value.
+     * Set up the describe command with optional project root and pre-loaded controllers.
+     * @param string|null $projectRoot Absolute path to the project; defaults to cwd.
+     * @param array $controllers Pre-registered controller class names to inspect for routes.
+     * @return void
      */
     public function __construct(
         private ?string $projectRoot = null,
@@ -25,8 +25,8 @@ class DescribeCommand extends Command
     }
 
     /**
-     * Name and return string.
-     * @return string Output value.
+     * Return the command name.
+     * @return string The command identifier.
      */
     public function name(): string
     {
@@ -34,8 +34,8 @@ class DescribeCommand extends Command
     }
 
     /**
-     * Description and return string.
-     * @return string Output value.
+     * Return the command description.
+     * @return string Short summary for help output.
      */
     public function description(): string
     {
@@ -43,10 +43,10 @@ class DescribeCommand extends Command
     }
 
     /**
-     * Execute and return int.
-     * @param array $args Input value.
-     * @param Output $output Input value.
-     * @return int Output value.
+     * Collect project metadata and output it as text or JSON.
+     * @param array $args CLI arguments (unused).
+     * @param Output $output Writer for the project manifest.
+     * @return int Exit code (always 0).
      */
     public function execute(array $args, Output $output): int
     {
@@ -74,8 +74,8 @@ class DescribeCommand extends Command
     }
 
     /**
-     * Route manifest and return array.
-     * @return array Output value.
+     * Collect all registered routes from the project's controllers.
+     * @return array List of route definition arrays.
      */
     private function routeManifest(): array
     {
@@ -85,9 +85,9 @@ class DescribeCommand extends Command
     }
 
     /**
-     * List php files and return array.
-     * @param string $directory Input value.
-     * @return array Output value.
+     * Return sorted basenames of all .php files in a directory.
+     * @param string $directory Absolute path to scan.
+     * @return array List of PHP file basenames, or empty if the directory does not exist.
      */
     private function listPhpFiles(string $directory): array
     {
@@ -107,9 +107,9 @@ class DescribeCommand extends Command
     }
 
     /**
-     * Read maia manifest and return array.
-     * @param string $path Input value.
-     * @return array Output value.
+     * Parse and return the contents of maia.json, or an empty array if missing.
+     * @param string $path Absolute path to the maia.json file.
+     * @return array Decoded manifest data.
      */
     private function readMaiaManifest(string $path): array
     {

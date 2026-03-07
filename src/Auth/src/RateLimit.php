@@ -10,7 +10,7 @@ use Maia\Core\Http\Response;
 use Maia\Core\Middleware\Middleware;
 
 /**
- * RateLimit defines a framework component for this package.
+ * Middleware that enforces per-client request rate limits using a sliding time window.
  */
 class RateLimit implements Middleware
 {
@@ -20,10 +20,10 @@ class RateLimit implements Middleware
     private static array $store = [];
 
     /**
-     * Create an instance with configured dependencies and defaults.
-     * @param int $maxRequests Input value.
-     * @param int $windowSeconds Input value.
-     * @return void Output value.
+     * Configure rate limiting with a maximum request count and time window.
+     * @param int $maxRequests The maximum number of requests allowed per window.
+     * @param int $windowSeconds The duration of the rate-limit window in seconds.
+     * @return void
      */
     public function __construct(
         private int $maxRequests,
@@ -32,9 +32,9 @@ class RateLimit implements Middleware
     }
 
     /**
-     * Per minute and return self.
-     * @param int $maxRequests Input value.
-     * @return self Output value.
+     * Create a rate limiter that allows a fixed number of requests per minute.
+     * @param int $maxRequests The maximum number of requests allowed per 60-second window.
+     * @return self A new RateLimit instance with a 60-second window.
      */
     public static function perMinute(int $maxRequests): self
     {
@@ -42,8 +42,8 @@ class RateLimit implements Middleware
     }
 
     /**
-     * Reset and return void.
-     * @return void Output value.
+     * Clear all stored rate-limit counters (useful for testing).
+     * @return void
      */
     public static function reset(): void
     {
@@ -51,10 +51,11 @@ class RateLimit implements Middleware
     }
 
     /**
-     * Handle and return Response.
-     * @param Request $request Input value.
-     * @param Closure $next Input value.
-     * @return Response Output value.
+     * Enforce the rate limit, returning 429 if the client exceeds the allowed count.
+     * @param Request $request The incoming HTTP request.
+     * @param Closure $next The next middleware or route handler in the pipeline.
+     * @return Response A 429 response with Retry-After if the limit is exceeded,
+     *     otherwise the downstream response with rate-limit headers.
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -94,9 +95,9 @@ class RateLimit implements Middleware
     }
 
     /**
-     * Resolve client key and return string.
-     * @param Request $request Input value.
-     * @return string Output value.
+     * Determine the rate-limit bucket key from the client's IP or a global fallback.
+     * @param Request $request The incoming HTTP request.
+     * @return string The identifier used to track this client's request count.
      */
     private function resolveClientKey(Request $request): string
     {
