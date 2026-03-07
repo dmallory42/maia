@@ -1,0 +1,1 @@
+- Filesystem response caching now handles read and write failures explicitly and logs them when a logger is configured instead of suppressing filesystem warnings.

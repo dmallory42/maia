@@ -366,10 +366,14 @@ Response caching can be wired the same way:
 
 ```php
 use Maia\Core\Cache\FilesystemResponseCacheStore;
+use Maia\Core\Logging\Logger;
 use Maia\Core\Middleware\ResponseCacheMiddleware;
 
 $app->addMiddleware(new ResponseCacheMiddleware(
-    new FilesystemResponseCacheStore(__DIR__ . '/../storage/cache/responses'),
+    new FilesystemResponseCacheStore(
+        __DIR__ . '/../storage/cache/responses',
+        new Logger(__DIR__ . '/../storage/logs/app.log')
+    ),
     ttlSeconds: 60,
     namespace: 'api'
 ));
@@ -377,6 +381,7 @@ $app->addMiddleware(new ResponseCacheMiddleware(
 
 The CORS middleware is restrictive by default. Cross-origin access is only enabled for origins you list explicitly, or for all origins if you intentionally configure `['*']`.
 The rate limiter identifies clients by `REMOTE_ADDR` by default and only trusts `X-Forwarded-For` when the immediate peer IP is listed in `trustedProxies`.
+When a logger is provided, filesystem response cache failures are recorded instead of being suppressed silently.
 
 ## 8) 🧪 HTTP Testing
 
