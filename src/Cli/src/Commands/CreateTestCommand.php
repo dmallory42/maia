@@ -37,15 +37,8 @@ class CreateTestCommand extends BaseCreateCommand
      */
     public function execute(array $args, Output $output): int
     {
-        $name = $this->requireName($args, $output, 'test name');
-        if ($name === null) {
-            return 1;
-        }
-
-        $class = $this->classBasename($name);
-        $path = 'tests/' . $class . '.php';
-
-        $content = <<<PHP
+        return $this->scaffoldFromName($args, $output, 'test name', function (string $class): array {
+            return ['tests/' . $class . '.php', <<<PHP
 <?php
 
 declare(strict_types=1);
@@ -61,11 +54,7 @@ class {$class} extends TestCase
         self::assertTrue(true);
     }
 }
-PHP;
-
-        $this->writeFile($path, $content);
-        $output->line('Created ' . $path);
-
-        return 0;
+PHP];
+        });
     }
 }

@@ -37,15 +37,8 @@ class CreateServiceCommand extends BaseCreateCommand
      */
     public function execute(array $args, Output $output): int
     {
-        $name = $this->requireName($args, $output, 'service name');
-        if ($name === null) {
-            return 1;
-        }
-
-        $class = $this->classBasename($name);
-        $path = 'app/Services/' . $class . '.php';
-
-        $content = <<<PHP
+        return $this->scaffoldFromName($args, $output, 'service name', function (string $class): array {
+            return ['app/Services/' . $class . '.php', <<<PHP
 <?php
 
 declare(strict_types=1);
@@ -55,11 +48,7 @@ namespace App\Services;
 class {$class}
 {
 }
-PHP;
-
-        $this->writeFile($path, $content);
-        $output->line('Created ' . $path);
-
-        return 0;
+PHP];
+        });
     }
 }

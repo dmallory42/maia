@@ -37,16 +37,10 @@ class CreateModelCommand extends BaseCreateCommand
      */
     public function execute(array $args, Output $output): int
     {
-        $name = $this->requireName($args, $output, 'model name');
-        if ($name === null) {
-            return 1;
-        }
+        return $this->scaffoldFromName($args, $output, 'model name', function (string $class): array {
+            $table = $this->snakeCase($class) . 's';
 
-        $class = $this->classBasename($name);
-        $table = $this->snakeCase($class) . 's';
-        $path = 'app/Models/' . $class . '.php';
-
-        $content = <<<PHP
+            return ['app/Models/' . $class . '.php', <<<PHP
 <?php
 
 declare(strict_types=1);
@@ -60,11 +54,7 @@ use Maia\Orm\Model;
 class {$class} extends Model
 {
 }
-PHP;
-
-        $this->writeFile($path, $content);
-        $output->line('Created ' . $path);
-
-        return 0;
+PHP];
+        });
     }
 }
