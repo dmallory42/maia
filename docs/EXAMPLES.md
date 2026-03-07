@@ -25,17 +25,24 @@ require __DIR__ . '/../vendor/autoload.php';
 use Maia\Core\App;
 use Maia\Core\Http\Request;
 use Maia\Orm\Connection;
+use Maia\Orm\Model;
 
 $app = App::create(__DIR__ . '/../config', __DIR__ . '/../.env');
-$app->container()->instance(
-    Connection::class,
-    Connection::sqlite(__DIR__ . '/../database/database.sqlite', [
+$database = require __DIR__ . '/../config/database.php';
+
+$connection = new Connection(
+    (string) $database['dsn'],
+    isset($database['username']) ? (string) $database['username'] : null,
+    isset($database['password']) ? (string) $database['password'] : null,
+    [
         'foreign_keys' => true,
         'busy_timeout' => 5000,
         'journal_mode' => 'WAL',
         'synchronous' => 'NORMAL',
-    ])
+    ]
 );
+$app->container()->instance(Connection::class, $connection);
+Model::setConnection($connection);
 
 // Route registration is explicit — keeps startup behavior predictable.
 $registerRoutes = require __DIR__ . '/../routes/api.php';
@@ -69,6 +76,30 @@ return static function (App $app): void {
 
     $app->registerController(UserController::class);
 };
+```
+
+`JwtService` accepts the HMAC algorithms `HS256`, `HS384`, and `HS512`. Unsupported algorithm values fail fast during construction.
+`config/app.php` can provide container bindings that `App::create()` applies automatically:
+
+```php
+<?php
+
+use App\Services\Clock;
+use Maia\Auth\Validator;
+use Maia\Core\Container\Container;
+use Maia\Core\Config\Env;
+
+return [
+    'name' => Env::get('APP_NAME', 'my-app'),
+    'env' => Env::get('APP_ENV', 'local'),
+    'debug' => Env::get('APP_DEBUG', 'true') === 'true',
+    'factories' => [
+        Clock::class => static fn (Container $container): Clock => new Clock(),
+    ],
+    'singletons' => [
+        Validator::class => static fn (Container $container): Validator => new Validator(),
+    ],
+];
 ```
 
 `JwtService` accepts the HMAC algorithms `HS256`, `HS384`, and `HS512`. Unsupported algorithm values fail fast during construction.
@@ -146,6 +177,8 @@ class UserController
     }
 }
 ```
+
+Builtin scalar route params are validated before controller dispatch. For example, `/users/not-a-number` will not call `show(int $id)`; it returns `404` instead.
 
 ## 4) 🗃️ Model + Migration
 

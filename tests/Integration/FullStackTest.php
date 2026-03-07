@@ -87,6 +87,38 @@ class FullStackTest extends TestCase
         $this->app->registerController(FullStackUserController::class);
     }
 
+    public function testDocumentedOrmBootstrapFlowCreatesUser(): void
+    {
+        $app = App::create();
+        $connection = new Connection('sqlite::memory:');
+        $connection->execute('CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL)');
+
+        $app->container()->instance(Connection::class, $connection);
+        FullStackUser::setConnection($connection);
+        $app->container()->instance(JwtService::class, $this->jwt);
+        $app->container()->instance(Validator::class, new Validator());
+        $app->registerController(FullStackUserController::class);
+
+        $token = $this->jwt->encode(['sub' => 123]);
+        $request = new Request(
+            'POST',
+            '/users',
+            [],
+            [
+                'Authorization' => 'Bearer ' . $token,
+                'Content-Type' => 'application/json',
+            ],
+            '{"email":"doc-flow@example.com"}',
+            []
+        );
+
+        $response = $app->handle($request);
+
+        $this->assertSame(201, $response->status());
+        $rows = $connection->query('SELECT email FROM users WHERE email = ?', ['doc-flow@example.com']);
+        $this->assertCount(1, $rows);
+    }
+
     public function testFullRequestLifecycleCreatesUser(): void
     {
         $token = $this->jwt->encode(['sub' => 123]);
