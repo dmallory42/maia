@@ -14,6 +14,6 @@ JWT_SECRET=change-me-please-change-me-please!
 API_KEYS=
 
 LOG_LEVEL=info
-CORS_ALLOWED_ORIGINS=*
+CORS_ALLOWED_ORIGINS=
 ENV;
 };

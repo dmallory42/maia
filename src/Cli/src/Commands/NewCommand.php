@@ -309,7 +309,10 @@ PHP;
 use Maia\Core\Config\Env;
 
 return [
-    'allowed_origins' => explode(',', Env::get('CORS_ALLOWED_ORIGINS', '*')),
+    'allowed_origins' => array_values(array_filter(array_map(
+        static fn (string $origin): string => trim($origin),
+        explode(',', Env::get('CORS_ALLOWED_ORIGINS', ''))
+    ))),
     'allowed_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     'allowed_headers' => ['Content-Type', 'Authorization', 'X-API-Key'],
 ];

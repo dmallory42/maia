@@ -22,10 +22,14 @@ class CorsMiddleware implements Middleware
      * @return void Output value.
      */
     public function __construct(
-        private array $allowedOrigins = ['*'],
+        private array $allowedOrigins = [],
         private array $allowedMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         private array $allowedHeaders = ['Content-Type', 'Authorization', 'X-API-Key']
     ) {
+        $this->allowedOrigins = array_values(array_filter(array_map(
+            static fn (mixed $origin): string => trim((string) $origin),
+            $this->allowedOrigins
+        )));
     }
 
     /**

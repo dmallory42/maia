@@ -65,14 +65,20 @@ class NewCommandTest extends TestCase
         $publicIndex = file_get_contents($base . '/public/index.php');
         $routes = file_get_contents($base . '/routes/api.php');
         $appConfig = file_get_contents($base . '/config/app.php');
+        $corsConfig = file_get_contents($base . '/config/cors.php');
+        $envExample = file_get_contents($base . '/.env.example');
 
         $this->assertIsString($publicIndex);
         $this->assertIsString($routes);
         $this->assertIsString($appConfig);
+        $this->assertIsString($corsConfig);
+        $this->assertIsString($envExample);
         $this->assertStringContainsString("require __DIR__ . '/../routes/api.php';", $publicIndex);
         $this->assertStringContainsString('return static function (App $app): void {', $routes);
         $this->assertStringContainsString("use Maia\\Core\\Config\\Env;", $appConfig);
         $this->assertStringContainsString("Env::get('APP_ENV', 'local')", $appConfig);
+        $this->assertStringContainsString("Env::get('CORS_ALLOWED_ORIGINS', '')", $corsConfig);
+        $this->assertStringContainsString("CORS_ALLOWED_ORIGINS=", $envExample);
     }
 
     private function deleteDirectory(string $path): void
