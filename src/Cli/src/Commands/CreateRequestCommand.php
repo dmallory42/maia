@@ -37,15 +37,8 @@ class CreateRequestCommand extends BaseCreateCommand
      */
     public function execute(array $args, Output $output): int
     {
-        $name = $this->requireName($args, $output, 'request name');
-        if ($name === null) {
-            return 1;
-        }
-
-        $class = $this->classBasename($name);
-        $path = 'app/Requests/' . $class . '.php';
-
-        $content = <<<PHP
+        return $this->scaffoldFromName($args, $output, 'request name', function (string $class): array {
+            return ['app/Requests/' . $class . '.php', <<<PHP
 <?php
 
 declare(strict_types=1);
@@ -61,11 +54,7 @@ class {$class} extends FormRequest
         return [];
     }
 }
-PHP;
-
-        $this->writeFile($path, $content);
-        $output->line('Created ' . $path);
-
-        return 0;
+PHP];
+        });
     }
 }

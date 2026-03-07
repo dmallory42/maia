@@ -37,16 +37,10 @@ class CreateControllerCommand extends BaseCreateCommand
      */
     public function execute(array $args, Output $output): int
     {
-        $name = $this->requireName($args, $output, 'controller name');
-        if ($name === null) {
-            return 1;
-        }
+        return $this->scaffoldFromName($args, $output, 'controller name', function (string $class): array {
+            $prefix = $this->snakeCase(str_replace('Controller', '', $class));
 
-        $class = $this->classBasename($name);
-        $prefix = $this->snakeCase(str_replace('Controller', '', $class));
-        $path = 'app/Controllers/' . $class . '.php';
-
-        $content = <<<PHP
+            return ['app/Controllers/' . $class . '.php', <<<PHP
 <?php
 
 declare(strict_types=1);
@@ -66,11 +60,7 @@ class {$class}
         return Response::json(['message' => '{$class} index']);
     }
 }
-PHP;
-
-        $this->writeFile($path, $content);
-        $output->line('Created ' . $path);
-
-        return 0;
+PHP];
+        });
     }
 }

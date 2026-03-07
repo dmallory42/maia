@@ -68,6 +68,30 @@ abstract class BaseCreateCommand extends Command
     }
 
     /**
+     * Resolve a required name, generate a scaffold, and write it to disk.
+     * @param array $args CLI arguments passed to the command.
+     * @param Output $output Output writer for status messages.
+     * @param string $label Human-readable label used in validation errors.
+     * @param callable $factory Callback that receives the class basename and raw name and returns [path, content].
+     * @return int Exit code.
+     */
+    protected function scaffoldFromName(array $args, Output $output, string $label, callable $factory): int
+    {
+        $name = $this->requireName($args, $output, $label);
+        if ($name === null) {
+            return 1;
+        }
+
+        $class = $this->classBasename($name);
+        [$path, $content] = $factory($class, $name);
+
+        $this->writeFile($path, $content);
+        $output->line('Created ' . $path);
+
+        return 0;
+    }
+
+    /**
      * Strip a trailing .php extension to produce a class name.
      * @param string $name Raw input that may include a .php suffix.
      * @return string The class name without a file extension.

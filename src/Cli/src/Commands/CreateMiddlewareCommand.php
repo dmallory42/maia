@@ -37,15 +37,8 @@ class CreateMiddlewareCommand extends BaseCreateCommand
      */
     public function execute(array $args, Output $output): int
     {
-        $name = $this->requireName($args, $output, 'middleware name');
-        if ($name === null) {
-            return 1;
-        }
-
-        $class = $this->classBasename($name);
-        $path = 'app/Middleware/' . $class . '.php';
-
-        $template = <<<'PHP'
+        return $this->scaffoldFromName($args, $output, 'middleware name', function (string $class): array {
+            $template = <<<'PHP'
 <?php
 
 declare(strict_types=1);
@@ -66,10 +59,10 @@ class {{class}} implements Middleware
 }
 PHP;
 
-        $content = str_replace('{{class}}', $class, $template);
-        $this->writeFile($path, $content);
-        $output->line('Created ' . $path);
-
-        return 0;
+            return [
+                'app/Middleware/' . $class . '.php',
+                str_replace('{{class}}', $class, $template),
+            ];
+        });
     }
 }

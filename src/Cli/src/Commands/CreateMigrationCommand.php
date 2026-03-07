@@ -53,17 +53,12 @@ class CreateMigrationCommand extends BaseCreateCommand
      */
     public function execute(array $args, Output $output): int
     {
-        $name = $this->requireName($args, $output, 'migration name');
-        if ($name === null) {
-            return 1;
-        }
+        return $this->scaffoldFromName($args, $output, 'migration name', function (string $class): array {
+            $slug = $this->snakeCase($class);
+            $timestamp = ($this->clock)();
+            $filename = $timestamp . '_' . $slug . '.php';
 
-        $slug = $this->snakeCase($this->classBasename($name));
-        $timestamp = ($this->clock)();
-        $filename = $timestamp . '_' . $slug . '.php';
-        $path = 'database/migrations/' . $filename;
-
-        $content = <<<'PHP'
+            return ['database/migrations/' . $filename, <<<'PHP'
 <?php
 
 declare(strict_types=1);
@@ -83,11 +78,7 @@ return new class extends Migration
         // Revert schema changes.
     }
 };
-PHP;
-
-        $this->writeFile($path, $content);
-        $output->line('Created ' . $path);
-
-        return 0;
+PHP];
+        });
     }
 }
