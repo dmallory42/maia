@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 $autoload = $GLOBALS['_composer_autoload_path'] ?? __DIR__ . '/../../../autoload.php';
 
-if (!is_string($autoload) || !file_exists($autoload)) {
+if (!file_exists($autoload)) {
     $autoload = __DIR__ . '/../vendor/autoload.php';
 }
 
