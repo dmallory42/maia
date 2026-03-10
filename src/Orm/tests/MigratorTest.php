@@ -82,6 +82,19 @@ class MigratorTest extends TestCase
         $this->assertCount(0, $rows);
     }
 
+    public function testRollbackThrowsWhenMigrationFileIsMissing(): void
+    {
+        $migrator = new Migrator($this->connection, $this->migrationDir);
+        $migrator->migrate();
+
+        unlink($this->migrationDir . '/2026_01_01_000002_create_posts.php');
+
+        $this->expectException(OrmException::class);
+        $this->expectExceptionMessage('is missing and cannot be rolled back');
+
+        $migrator->rollback();
+    }
+
     public function testMigrateThrowsOrmExceptionWhenFileDoesNotReturnMigration(): void
     {
         $this->writeMigration('2026_01_01_000003_invalid.php', "<?php\n\nreturn 'not-a-migration';\n");

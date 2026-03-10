@@ -90,7 +90,10 @@ class Migrator
             $name = (string) $row['migration'];
             $file = rtrim($this->migrationDir, '/') . '/' . $name;
             if (!file_exists($file)) {
-                continue;
+                throw new OrmException(sprintf(
+                    'Migration file [%s] is missing and cannot be rolled back.',
+                    $file
+                ));
             }
 
             $migration = $this->loadMigration($file);

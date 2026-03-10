@@ -94,15 +94,6 @@ class Connection
     }
 
     /**
-     * Return the underlying PDO instance.
-     * @return PDO The raw PDO connection.
-     */
-    public function pdo(): PDO
-    {
-        return $this->pdo;
-    }
-
-    /**
      * Apply PRAGMA statements to a SQLite connection; no-op for other drivers.
      * @param array<string, bool|int|float|string|null> $pragmas Map of PRAGMA names to their desired values.
      * @return void

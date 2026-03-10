@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Maia\Core\Testing;
 
-use Maia\Auth\JwtService;
 use Maia\Core\App;
 use Maia\Core\Http\Request;
 use Maia\Orm\Connection;
@@ -21,8 +20,6 @@ abstract class TestCase extends PHPUnitTestCase
 
     /** @var array<string, string> */
     private array $headers = [];
-
-    protected string $jwtSecret = 'test-secret-key-32-chars-minimum!!';
 
     /**
      * Boot an in-memory application and SQLite connection before each test.
@@ -179,16 +176,6 @@ abstract class TestCase extends PHPUnitTestCase
         $rows = $this->connection->query($sql, $params);
 
         $this->assertSame(1, (int) ($rows[0]['aggregate'] ?? 0));
-    }
-
-    /**
-     * Generate a JWT for test scenarios using the harness secret.
-     * @param array $payload JWT claims payload.
-     * @return string Encoded JWT string.
-     */
-    public function generateJwt(array $payload): string
-    {
-        return (new JwtService($this->jwtSecret))->encode($payload);
     }
 
     /**
