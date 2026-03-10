@@ -25,15 +25,6 @@ class TestResponse
     }
 
     /**
-     * Return the underlying framework response.
-     * @return Response Raw response object.
-     */
-    public function response(): Response
-    {
-        return $this->response;
-    }
-
-    /**
      * Assert that the response has the expected HTTP status code.
      * @param int $status Expected HTTP status code.
      * @return self Test response for fluent chaining.
