@@ -17,11 +17,18 @@ Maia is an API-first PHP framework distributed as a single Composer package: `ma
 ## Development
 
 - Install dependencies: `composer install`
+- Create a repo-local worktree: `composer worktree:new -- <branch> [base]`
 - Lint: `composer lint`
 - Docs coverage: `composer docs:coverage`
 - Tests: `composer test:threshold`
 - Full PHPUnit: `vendor/bin/phpunit`
 - Smoke test: `bash tools/smoke-new-app.sh`
+
+## Worktrees
+
+- Prefer creating temporary worktrees under `.worktrees/` inside the repo.
+- Use `composer worktree:new -- <branch> [base]` so the path is derived automatically from the branch name.
+- Example: `composer worktree:new -- chore/example-fix`
 
 ## Comment Guidance
 
