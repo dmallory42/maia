@@ -17,12 +17,12 @@ if ($branch === null) {
     exit(1);
 }
 
-if (preg_match('/^[A-Za-z0-9._\/-]+$/', $branch) !== 1) {
+if (!isValidRef($branch)) {
     fwrite(STDERR, "Invalid branch name.\n");
     exit(1);
 }
 
-if (preg_match('/^[A-Za-z0-9._\/-]+$/', $base) !== 1) {
+if (!isValidRef($base)) {
     fwrite(STDERR, "Invalid base ref.\n");
     exit(1);
 }
@@ -39,7 +39,7 @@ if ($slug === '') {
 }
 
 if (file_exists($path)) {
-    fwrite(STDERR, "Worktree path already exists: .worktrees/{$slug}\n");
+    fwrite(STDERR, "Worktree path already exists: .worktrees/{$slug} (derived from '{$branch}')\n");
     exit(1);
 }
 
@@ -80,39 +80,3 @@ if (!$result['success']) {
 fwrite(STDOUT, "Created worktree: .worktrees/{$slug}\n");
 fwrite(STDOUT, "Branch: {$branch}\n");
 fwrite(STDOUT, "Path: {$path}\n");
-
-/**
- * Run a git command in the repository root.
- * @param string $cwd Repository root path.
- * @param array<int, string> $parts Git command arguments.
- * @return array{success: bool, output: string}
- */
-function runGit(string $cwd, array $parts): array
-{
-    $command = 'git';
-    foreach ($parts as $part) {
-        $command .= ' ' . escapeshellarg($part);
-    }
-
-    $descriptorSpec = [
-        1 => ['pipe', 'w'],
-        2 => ['pipe', 'w'],
-    ];
-
-    $process = proc_open($command, $descriptorSpec, $pipes, $cwd);
-    if (!is_resource($process)) {
-        return ['success' => false, 'output' => "Unable to start git command.\n"];
-    }
-
-    $stdout = stream_get_contents($pipes[1]);
-    $stderr = stream_get_contents($pipes[2]);
-    fclose($pipes[1]);
-    fclose($pipes[2]);
-
-    $exitCode = proc_close($process);
-
-    return [
-        'success' => $exitCode === 0,
-        'output' => (string) $stdout . (string) $stderr,
-    ];
-}
