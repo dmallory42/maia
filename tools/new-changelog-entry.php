@@ -32,8 +32,8 @@ $root = dirname(__DIR__);
 $directory = $root . '/.changes/unreleased';
 $path = $directory . '/' . $slug . '.md';
 
-if (!is_dir($directory)) {
-    fwrite(STDERR, "Missing changelog directory: {$directory}\n");
+if (!is_dir($directory) && !mkdir($directory, 0777, true) && !is_dir($directory)) {
+    fwrite(STDERR, "Unable to create changelog directory: {$directory}\n");
     exit(1);
 }
 

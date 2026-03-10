@@ -1,0 +1,1 @@
+- Added `composer worktree:new -- <branch> [base]` to create repo-local worktrees under `.worktrees/`, and documented that workflow for future development.

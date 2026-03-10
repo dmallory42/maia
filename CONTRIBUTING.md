@@ -43,6 +43,16 @@ composer changelog:new -- short-description
 
 Then replace the starter bullet with a short user-facing note describing the change.
 
+## Worktrees
+
+Prefer repo-local worktrees under `.worktrees/` for feature work:
+
+```bash
+composer worktree:new -- chore/example-fix
+```
+
+The first argument is the branch name. The command creates `.worktrees/<derived-name>` automatically and checks out the branch there, creating it from `main` by default.
+
 ## Comments and docblocks
 
 - Prefer comments that explain intent, constraints, edge cases, or tradeoffs.

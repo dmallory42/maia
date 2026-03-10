@@ -8,11 +8,18 @@
 ## Primary Commands
 
 - Install dependencies: `composer install`
+- Create a repo-local worktree: `composer worktree:new -- <branch> [base]`
 - Lint: `composer lint`
 - Documentation coverage: `composer docs:coverage`
 - Test threshold: `composer test:threshold`
 - Full test suite: `vendor/bin/phpunit`
 - Scaffold smoke test: `bash tools/smoke-new-app.sh`
+
+## Worktrees
+
+- Prefer repo-local worktrees under `.worktrees/` instead of sibling directories beside the repo.
+- Create them with `composer worktree:new -- <branch> [base]`.
+- Use the real branch name as the first argument, for example `composer worktree:new -- audit/issue-18-security-headers-csp`.
 
 ## Release Checks
 
