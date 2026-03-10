@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.1
+
+Patch release with two fixes since v0.2.0.
+
+- Fixed `bin/maia` autoload path when the framework is installed as a Composer dependency (`vendor/bin/maia` now resolves the autoloader correctly).
+- Added `composer worktree:new -- <branch> [base]` to create repo-local worktrees under `.worktrees/`.
+
 ## v0.2.0
 
 Quality and correctness release focused on safer defaults, clearer failure modes, and lower-maintenance framework internals.
