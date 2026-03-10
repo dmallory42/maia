@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/utils.php';
+
 $args = array_values(array_filter(
     array_slice($argv, 1),
     static fn (string $arg): bool => $arg !== '' && !str_starts_with($arg, '-')
@@ -41,28 +43,33 @@ if (file_exists($path)) {
     exit(1);
 }
 
-if (!is_dir($worktreesDir) && !mkdir($worktreesDir, 0777, true) && !is_dir($worktreesDir)) {
+if (!ensureDirectory($worktreesDir)) {
     fwrite(STDERR, "Unable to create .worktrees directory.\n");
     exit(1);
 }
 
 $branchExists = runGit(
     $root,
-    ['show-ref', '--verify', '--quiet', 'refs/heads/' . $branch],
-    false
+    ['show-ref', '--verify', '--quiet', 'refs/heads/' . $branch]
 );
 
 if (!$branchExists['success']) {
-    $fetchBase = runGit($root, ['fetch', 'origin', $base]);
-    if (!$fetchBase['success']) {
-        fwrite(STDERR, $fetchBase['output']);
-        exit(1);
+    $hasLocalBase = runGit($root, ['show-ref', '--verify', '--quiet', 'refs/heads/' . $base]);
+    $hasRemoteBase = runGit($root, ['show-ref', '--verify', '--quiet', 'refs/remotes/origin/' . $base]);
+
+    if (!$hasLocalBase['success'] && !$hasRemoteBase['success']) {
+        fwrite(STDOUT, "Fetching {$base} from origin...\n");
+        $fetchBase = runGit($root, ['fetch', 'origin', $base]);
+        if (!$fetchBase['success']) {
+            fwrite(STDERR, $fetchBase['output']);
+            exit(1);
+        }
     }
 }
 
 $command = $branchExists['success']
-    ? ['worktree', 'add', $path, $branch]
-    : ['worktree', 'add', '-b', $branch, $path, $base];
+    ? ['worktree', 'add', '--', $path, $branch]
+    : ['worktree', 'add', '-b', $branch, '--', $path, $base];
 
 $result = runGit($root, $command);
 if (!$result['success']) {
@@ -78,10 +85,9 @@ fwrite(STDOUT, "Path: {$path}\n");
  * Run a git command in the repository root.
  * @param string $cwd Repository root path.
  * @param array<int, string> $parts Git command arguments.
- * @param bool $requireSuccess Whether to treat non-zero exit codes as failures.
  * @return array{success: bool, output: string}
  */
-function runGit(string $cwd, array $parts, bool $requireSuccess = true): array
+function runGit(string $cwd, array $parts): array
 {
     $command = 'git';
     foreach ($parts as $part) {
@@ -104,14 +110,9 @@ function runGit(string $cwd, array $parts, bool $requireSuccess = true): array
     fclose($pipes[2]);
 
     $exitCode = proc_close($process);
-    $success = $exitCode === 0;
-
-    if (!$success && !$requireSuccess) {
-        return ['success' => false, 'output' => (string) $stdout . (string) $stderr];
-    }
 
     return [
-        'success' => $success,
+        'success' => $exitCode === 0,
         'output' => (string) $stdout . (string) $stderr,
     ];
 }

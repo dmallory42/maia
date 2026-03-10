@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/utils.php';
+
 $slug = null;
 
 foreach (array_slice($argv, 1) as $arg) {
@@ -32,7 +34,7 @@ $root = dirname(__DIR__);
 $directory = $root . '/.changes/unreleased';
 $path = $directory . '/' . $slug . '.md';
 
-if (!is_dir($directory) && !mkdir($directory, 0777, true) && !is_dir($directory)) {
+if (!ensureDirectory($directory)) {
     fwrite(STDERR, "Unable to create changelog directory: {$directory}\n");
     exit(1);
 }
